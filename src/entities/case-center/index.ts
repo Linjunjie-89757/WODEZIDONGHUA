@@ -12,6 +12,7 @@ export {
   toSaveCaseDirectoryPayload
 } from './lib/directoryPayload';
 export { countCaseDirectories } from './lib/caseDirectory';
+export { default as CaseDrawerForm } from './ui/CaseDrawerForm.vue';
 export type {
   CaseCenterSummary,
   CaseDirectoryFormValues,

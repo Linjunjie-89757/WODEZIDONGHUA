@@ -14,6 +14,8 @@ const viewports = [
     width: 1440,
     height: 960,
     screenshotPath: `output/playwright/case-center-module-desktop-${stamp}.png`,
+    createDrawerScreenshotPath: `output/playwright/case-center-create-drawer-desktop-${stamp}.png`,
+    editDrawerScreenshotPath: `output/playwright/case-center-edit-drawer-desktop-${stamp}.png`,
     aiScreenshotPath: `output/playwright/case-center-ai-desktop-${stamp}.png`
   },
   {
@@ -21,6 +23,8 @@ const viewports = [
     width: 390,
     height: 844,
     screenshotPath: `output/playwright/case-center-module-mobile-${stamp}.png`,
+    createDrawerScreenshotPath: `output/playwright/case-center-create-drawer-mobile-${stamp}.png`,
+    editDrawerScreenshotPath: `output/playwright/case-center-edit-drawer-mobile-${stamp}.png`,
     aiScreenshotPath: `output/playwright/case-center-ai-mobile-${stamp}.png`
   }
 ];
@@ -41,8 +45,39 @@ async function login(page) {
   await page.getByRole('button', { name: '用例管理' }).waitFor({ timeout: 15000 });
   await page.getByText('用例分类').waitFor({ timeout: 15000 });
   await page.getByPlaceholder('搜索用例编号、名称...').waitFor({ timeout: 15000 });
-  await page.getByRole('columnheader', { name: '编号' }).waitFor({ timeout: 15000 });
+  await page.getByRole('columnheader', { name: '用例编号' }).waitFor({ timeout: 15000 });
+  await page.getByRole('columnheader', { name: '用例名称' }).waitFor({ timeout: 15000 });
+  await page.getByRole('columnheader', { name: '验证方式' }).waitFor({ timeout: 15000 });
+  await page.getByRole('columnheader', { name: '用例路径' }).waitFor({ timeout: 15000 });
   await page.getByRole('columnheader', { name: '操作' }).waitFor({ timeout: 15000 });
+}
+
+async function verifyCaseDrawer(page, viewport) {
+  await page.getByRole('button', { name: '新增用例' }).click();
+  await page.getByRole('dialog').getByText('新增用例').waitFor({ timeout: 15000 });
+  await page.getByText('用例模块').waitFor({ timeout: 15000 });
+  await page.getByText('全部目录').waitFor({ timeout: 15000 });
+  await page.screenshot({ path: viewport.createDrawerScreenshotPath, fullPage: true });
+  await page.keyboard.press('Escape').catch(() => undefined);
+  await page.locator('.case-drawer-form__footer').getByRole('button', { name: '取消' }).click();
+
+  const editButtons = page.getByRole('button', { name: '编辑' });
+  const editCount = await editButtons.count();
+  let editDrawerCovered = false;
+
+  if (editCount > 0) {
+    await editButtons.first().click();
+    await page.getByRole('dialog').getByText('编辑用例').waitFor({ timeout: 15000 });
+    await page.getByText('用例模块').waitFor({ timeout: 15000 });
+    await page.screenshot({ path: viewport.editDrawerScreenshotPath, fullPage: true });
+    await page.locator('.case-drawer-form__footer').getByRole('button', { name: '取消' }).click();
+    editDrawerCovered = true;
+  }
+
+  return {
+    editDrawerCovered,
+    editButtonCount: editCount
+  };
 }
 
 async function verifyAiTabs(page) {
@@ -85,6 +120,7 @@ try {
 
     await login(page);
     await page.screenshot({ path: viewport.screenshotPath, fullPage: true });
+    const drawerCoverage = await verifyCaseDrawer(page, viewport);
     await verifyAiTabs(page);
     await page.screenshot({ path: viewport.aiScreenshotPath, fullPage: true });
 
@@ -100,7 +136,12 @@ try {
       width: viewport.width,
       height: viewport.height,
       screenshotPath: viewport.screenshotPath,
+      createDrawerScreenshotPath: viewport.createDrawerScreenshotPath,
+      editDrawerScreenshotPath: drawerCoverage.editDrawerCovered
+        ? viewport.editDrawerScreenshotPath
+        : null,
       aiScreenshotPath: viewport.aiScreenshotPath,
+      drawerCoverage,
       hasHorizontalOverflow:
         layout.scrollWidth > layout.clientWidth || layout.bodyScrollWidth > layout.bodyClientWidth,
       layout,
@@ -115,30 +156,34 @@ try {
     (result) => result.hasHorizontalOverflow || result.pageErrors.length > 0
   );
 
-  console.log(JSON.stringify(
-    {
-      status: failed ? 'fail' : 'pass',
-      baseUrl,
-      results
-    },
-    null,
-    2
-  ));
+  console.log(
+    JSON.stringify(
+      {
+        status: failed ? 'fail' : 'pass',
+        baseUrl,
+        results
+      },
+      null,
+      2
+    )
+  );
 
   if (failed) {
     process.exitCode = 1;
   }
 } catch (error) {
-  console.log(JSON.stringify(
-    {
-      status: 'fail',
-      baseUrl,
-      error: error instanceof Error ? error.message : String(error),
-      results
-    },
-    null,
-    2
-  ));
+  console.log(
+    JSON.stringify(
+      {
+        status: 'fail',
+        baseUrl,
+        error: error instanceof Error ? error.message : String(error),
+        results
+      },
+      null,
+      2
+    )
+  );
   process.exitCode = 1;
 } finally {
   await browser.close();
