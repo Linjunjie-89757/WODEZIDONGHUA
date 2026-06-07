@@ -407,12 +407,19 @@ export type ApiScenarioStepType =
   | 'API'
   | 'API_CASE'
   | 'CUSTOM_REQUEST'
+  | 'API_SCENARIO'
+  | 'IF_CONTROLLER'
+  | 'LOOP_CONTROLLER'
+  | 'ONCE_ONLY_CONTROLLER'
+  | 'CONSTANT_TIMER'
+  | 'SCRIPT'
   | 'GROUP'
   | string;
 
 export interface ApiScenarioStep {
   id?: string;
   name: string;
+  stepName?: string | null;
   stepType: ApiScenarioStepType;
   enabled?: boolean;
   resource?: string | null;
@@ -426,6 +433,7 @@ export interface ApiScenarioStep {
   assertions?: ApiAssertionConfig[];
   preProcessors?: ApiProcessorConfig[];
   postProcessors?: ApiProcessorConfig[];
+  delayMs?: number | null;
   children?: ApiScenarioStep[];
 }
 

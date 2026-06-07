@@ -12,6 +12,9 @@
         <AppButton type="text" data-testid="api-scenario-add-custom-step" @click="addStep('CUSTOM_REQUEST')">
           {{ t.apiAutomation.scenarioAddCustomStep }}
         </AppButton>
+        <AppButton type="text" data-testid="api-scenario-add-wait-step" @click="addStep('CONSTANT_TIMER')">
+          {{ t.apiAutomation.scenarioAddWaitStep }}
+        </AppButton>
         <AppButton type="text" data-testid="api-scenario-add-group-step" @click="addStep('GROUP')">
           {{ t.apiAutomation.scenarioAddGroupStep }}
         </AppButton>
@@ -39,13 +42,14 @@
           <a-option value="API">{{ t.apiAutomation.scenarioStepDefinition }}</a-option>
           <a-option value="API_CASE">{{ t.apiAutomation.scenarioStepCase }}</a-option>
           <a-option value="CUSTOM_REQUEST">{{ t.apiAutomation.scenarioStepCustom }}</a-option>
+          <a-option value="CONSTANT_TIMER">{{ t.apiAutomation.scenarioStepWait }}</a-option>
           <a-option value="GROUP">{{ t.apiAutomation.scenarioStepGroup }}</a-option>
         </a-select>
         <a-input
           :model-value="step.name"
           data-testid="api-scenario-step-name-input"
           :placeholder="t.apiAutomation.scenarioStepNamePlaceholder"
-          @update:model-value="(value) => patchStep(index, { name: value })"
+          @update:model-value="(value) => patchStep(index, { name: value, stepName: value })"
         />
         <div class="api-scenario-step-editor__actions">
           <AppButton
@@ -116,6 +120,17 @@
             </a-option>
           </a-select>
         </a-grid-item>
+        <a-grid-item v-if="step.stepType === 'CONSTANT_TIMER'">
+          <a-input-number
+            :model-value="step.delayMs || 1000"
+            data-testid="api-scenario-wait-delay-input"
+            :min="1"
+            :max="60000"
+            :step="10"
+            :placeholder="t.apiAutomation.scenarioWaitDelayPlaceholder"
+            @update:model-value="(value) => patchWaitDelay(index, value)"
+          />
+        </a-grid-item>
       </a-grid>
 
       <section v-if="isGroupStep(step)" class="api-scenario-step-editor__children">
@@ -154,6 +169,7 @@ import {
   createGroupStep,
   createReferenceCaseStep,
   createReferenceDefinitionStep,
+  createWaitStep,
   type ApiDefinitionCaseItem,
   type ApiDefinitionItem,
   type ApiScenarioStep,
@@ -228,6 +244,7 @@ function changeStepType(index: number, type: ApiScenarioStepType) {
     ...template,
     id: current.id,
     name: type === 'GROUP' ? t.apiAutomation.scenarioStepGroup : current.name || template.name,
+    stepName: type === 'GROUP' ? t.apiAutomation.scenarioStepGroup : current.stepName || current.name || template.name,
     children: type === 'GROUP' ? current.children || [] : []
   };
 
@@ -279,6 +296,17 @@ function patchCustomMethod(index: number, method: string) {
   });
 }
 
+function patchWaitDelay(index: number, delayMs: number | string | null | undefined) {
+  const value = Number(delayMs ?? 1000);
+  patchStep(index, {
+    delayMs: Number.isFinite(value) ? Math.max(1, Math.min(60000, Math.round(value))) : 1000,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    children: []
+  });
+}
+
 function createStep(type: ApiScenarioStepType) {
   if (type === 'API') {
     return createReferenceDefinitionStep();
@@ -290,6 +318,10 @@ function createStep(type: ApiScenarioStepType) {
 
   if (type === 'GROUP') {
     return createGroupStep();
+  }
+
+  if (type === 'CONSTANT_TIMER') {
+    return createWaitStep();
   }
 
   return createCustomRequestStep();

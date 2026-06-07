@@ -27,6 +27,21 @@ export function createCustomRequestStep(): ApiScenarioStep {
   };
 }
 
+export function createWaitStep(): ApiScenarioStep {
+  return {
+    id: stepId('wait'),
+    name: 'Constant Timer',
+    stepName: 'Constant Timer',
+    stepType: 'CONSTANT_TIMER',
+    enabled: true,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    delayMs: 1000,
+    children: []
+  };
+}
+
 export function createReferenceDefinitionStep(): ApiScenarioStep {
   return {
     id: stepId('definition'),
@@ -98,7 +113,8 @@ export function normalizeScenarioSteps(steps: ApiScenarioStep[]): ApiScenarioSte
     const base: ApiScenarioStep = {
       ...step,
       id: step.id || stepId(String(step.stepType || 'step').toLowerCase()),
-      name: step.name || fallbackStepName(step),
+      name: step.name || step.stepName || fallbackStepName(step),
+      stepName: step.stepName || step.name || fallbackStepName(step),
       enabled: step.enabled !== false,
       children: normalizeScenarioSteps(step.children || [])
     };
@@ -151,17 +167,37 @@ export function normalizeScenarioSteps(steps: ApiScenarioStep[]): ApiScenarioSte
       };
     }
 
+    if (base.stepType === 'CONSTANT_TIMER') {
+      return {
+        ...base,
+        stepType: 'CONSTANT_TIMER',
+        resource: null,
+        resourceId: null,
+        resourceType: null,
+        definitionId: null,
+        definitionName: null,
+        caseId: null,
+        caseName: null,
+        requestConfig: null,
+        assertions: [],
+        preProcessors: [],
+        postProcessors: [],
+        delayMs: normalizeWaitDelay(base.delayMs),
+        children: []
+      };
+    }
+
     return {
       ...base,
-      stepType: 'GROUP',
+      stepType: 'CUSTOM_REQUEST',
       resource: null,
       resourceId: null,
-      resourceType: null,
+      resourceType: 'CUSTOM',
       definitionId: null,
       definitionName: null,
       caseId: null,
       caseName: null,
-      requestConfig: null
+      requestConfig: createDefaultRequestConfig()
     };
   });
 }
@@ -171,10 +207,47 @@ function fallbackStepName(step: ApiScenarioStep) {
     API: 'API Definition Step',
     API_CASE: 'API Case Step',
     CUSTOM_REQUEST: 'Custom Request',
-    GROUP: 'Step Group'
+    GROUP: 'Step Group',
+    CONSTANT_TIMER: 'Constant Timer'
   };
 
   return names[step.stepType] || 'Scenario Step';
+}
+
+function normalizeWaitDelay(delayMs?: number | string | null) {
+  const value = Number(delayMs ?? 1000);
+
+  if (!Number.isFinite(value)) {
+    return 1000;
+  }
+
+  return Math.max(1, Math.min(60000, Math.round(value)));
+}
+
+type ApiScenarioStepPayload = Omit<ApiScenarioStep, 'name' | 'children'> & {
+  stepName: string;
+  children: ApiScenarioStepPayload[];
+};
+
+function toSaveScenarioStepPayload(step: ApiScenarioStep): ApiScenarioStepPayload {
+  const normalized = normalizeScenarioSteps([step])[0];
+  const payload: ApiScenarioStepPayload = {
+    ...normalized,
+    stepName: normalized.name || normalized.stepName || fallbackStepName(normalized),
+    children: (normalized.children || []).map(toSaveScenarioStepPayload)
+  };
+  delete (payload as Partial<ApiScenarioStep>).name;
+
+  if (payload.stepType === 'GROUP') {
+    payload.stepType = 'CUSTOM_REQUEST';
+  }
+
+  if (payload.stepType === 'CONSTANT_TIMER') {
+    payload.children = [];
+    payload.delayMs = normalizeWaitDelay(payload.delayMs);
+  }
+
+  return payload;
 }
 
 export function toSaveScenarioPayload(
@@ -191,6 +264,6 @@ export function toSaveScenarioPayload(
     variableSetId: form.variableSetId || null,
     variables: [],
     assertions: [],
-    steps: normalizeScenarioSteps(form.steps)
+    steps: form.steps.map(toSaveScenarioStepPayload)
   };
 }

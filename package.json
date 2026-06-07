@@ -9,6 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.ts --fix",
+    "smoke:api-wait": "node scripts/smoke-api-scenario-wait.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

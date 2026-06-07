@@ -117,6 +117,7 @@
             v-for="step in result.stepResults"
             :key="`${step.stepOrder}-${step.stepName}`"
             class="api-run-result-panel__item"
+            data-testid="api-run-result-step-row"
           >
             <AppStatusBadge
               :label="step.success ? t.apiAutomation.processorPassed : t.apiAutomation.processorFailed"
