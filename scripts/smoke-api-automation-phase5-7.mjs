@@ -290,11 +290,23 @@ async function runCaseIfAvailable() {
   await row.getByTestId('api-case-run').click();
   await runResponsePromise;
   await row.locator('.api-case-management__row-main').click();
-  const runResult = page.getByTestId('api-case-run-result');
+  const caseDrawer = page.locator('.arco-drawer:visible').last();
+  await caseDrawer.getByTestId('api-case-drawer-view-tabs').waitFor({ timeout: 25000 });
+  await caseDrawer.getByTestId('api-case-drawer-detail-tab').waitFor({ timeout: 25000 });
+  const runResult = caseDrawer.getByTestId('api-case-run-result');
   await runResult.waitFor({ timeout: 25000 });
   await runResult.getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
   await runResult.getByTestId('api-run-result-status').waitFor({ timeout: 25000 });
   await runResult.getByTestId('api-run-result-response-body').waitFor({ timeout: 25000 });
+  await caseDrawer.getByTestId('api-case-drawer-run-history-tab').click();
+  await caseDrawer.getByTestId('api-case-run-history').waitFor({ timeout: 25000 });
+  await caseDrawer.getByTestId('api-case-run-history-row').first().waitFor({ timeout: 25000 });
+  await caseDrawer.getByTestId('api-case-run-history-detail-entry').first().click();
+  await caseDrawer.getByTestId('api-case-run-history-detail').waitFor({ timeout: 25000 });
+  await caseDrawer.getByTestId('api-case-run-history-detail').getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
+  await caseDrawer.getByTestId('api-case-run-history-back').click();
+  await caseDrawer.getByTestId('api-case-drawer-change-history-tab').click();
+  await caseDrawer.getByTestId('api-case-change-history').waitFor({ timeout: 25000 });
   await closeVisibleDrawer();
 }
 

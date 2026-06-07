@@ -181,6 +181,7 @@ async function assertRequestEditorPhase3H() {
   await clickVisibleModalPrimaryButton();
   await page.getByTestId('api-definition-cases-editor').getByText(caseName).waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-list-density-shell').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-list-pagination').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-detail-entry').first().waitFor({ timeout: 15000 });
   await clickRequestContentTab(1);
   await page.getByTestId('api-definition-response-shell').waitFor({ timeout: 15000 });

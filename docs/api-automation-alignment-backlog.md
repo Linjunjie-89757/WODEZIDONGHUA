@@ -19,6 +19,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3K: scenario editor visual detail alignment is complete.
 - Phase 3L: overall closure audit is complete.
 - Phase 3M: shared response result panel old-project shell alignment is complete.
+- Phase 3N: case drawer and case management old-project experience alignment is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -33,7 +34,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
   - scenario editor has list/editor tabs, step tree, right property panel, run result, and history shells.
 - The remaining gap is mostly old-project component parity:
   - response panels now use a shared old-project-like shell, but exact per-context old project tabs such as console/actual request are still not implemented;
-  - case management still needs the old `ApiCaseDrawer`-like detail/run-history/change-history drawer experience;
+  - case management now has an old-project-like detail/run-history/change-history drawer, but exact drawer request-editor parity is still deferred;
   - scenario list/module rail still has a larger empty-card feel than the old table/tree workbench;
   - dialogs and drawers still need consistent old-project sizing, title bars, footers, and control density;
   - mobile and narrow viewport behavior is smoke-checked for overflow only, not visually tuned.
@@ -100,7 +101,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 | API definition workbench | Structure is aligned: rail, list, editor tab, command row, request content tabs, response shell. | `ms-like-layout`, `ms-like-sidebar`, `ms-like-main`, `ms-like-tab-strip`, `ms-like-request-row`. | Visual | Phase 3M for response shell, Phase 3O for top IA/list rail polish. |
 | Request parameters | Advanced parameter table, batch add, enable/disable, clear empty rows are implemented. | `ms-like-param-table-grid`, drag handle cells, stable 44px-ish row density. | Interaction | Later optional phase for drag handle shell or real drag sorting. |
 | Response panel | Shared `ApiRunResultPanel` now uses a response shell with header, compact metrics, content panel, tabs, empty state, response, assertions, processors, steps, and raw result. | `ms-like-response-shell` with header, metrics, response tabs, content panel, and richer empty state. | Visual | Phase 3M complete; later optional context tabs only if contract supports them. |
-| Cases tab | Existing case management widget is embedded and denser than before. | Old project uses table density plus `ApiCaseDrawer` with detail/run history/change history tabs and response shell. | Visual + Interaction | Phase 3N. |
+| Cases tab | Existing case management widget is embedded with dense list shell, pagination summary, detail/run-history/change-history drawer tabs, run history list/detail, and shared response shell reuse. | Old project uses table density plus `ApiCaseDrawer` with detail/run history/change history tabs and response shell. | Visual + Interaction | Phase 3N complete; later exact request-editor drawer parity is deferred. |
 | Scenario list/module rail | Scenario workbench shell exists; right property panel and step editor are refined. | `scenario-editor-tab-strip`, `ms-scenario-table`, `scenario-module-pane`, `scenario-property-card`. | Visual | Phase 3O. |
 | Scenario steps | Step tree is compact with order marker, type rail, hover actions, nested indentation. | `scenario-step-tree`, `scenario-step-node`, hover-only actions, inline edit affordances. | Visual + Interaction | Phase 3O, then optional selected-step inspector phase. |
 | Scenario run/history | Latest run result and history shells are in workbench tabs. | Old project has richer response shells for scenario step/system/custom/script result panels. | Visual + Contract | Phase 3M for result shell; persistent history only after confirmed contract. |
@@ -119,6 +120,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
    - Align API case list/detail/run-history/change-history surfaces with old `ApiCaseDrawer`.
    - Scope: drawer shell, view tabs, history list/detail split, response shell reuse.
    - Only use confirmed existing case contracts.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3n.md`.
 
 3. Phase 3O: scenario rail/list/step inspector polish.
    - Align scenario module rail and scenario list table density.
