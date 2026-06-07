@@ -187,9 +187,14 @@
                           <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--header">
                             <span>{{ t.apiAutomation.enabled }}</span>
                             <span>{{ t.apiAutomation.fieldHeaderKey }}</span>
+                            <span>{{ t.apiAutomation.paramType }}</span>
                             <span>{{ t.apiAutomation.fieldHeaderValue }}</span>
+                            <span>{{ t.apiAutomation.lengthRange }}</span>
+                            <span>{{ t.apiAutomation.encode }}</span>
                             <span>{{ t.apiAutomation.fieldDescription }}</span>
-                            <span></span>
+                            <button type="button" class="api-automation-shell__batch-link" data-testid="api-definition-param-batch-add">
+                              {{ t.apiAutomation.batchAdd }}
+                            </button>
                           </div>
                           <div
                             v-for="(row, index) in definitionEditorForm.headers"
@@ -202,11 +207,52 @@
                               v-model="row.key"
                               data-testid="api-definition-inline-header-key-input"
                             />
+                            <div class="api-automation-shell__param-type-cell">
+                              <button
+                                type="button"
+                                :class="['api-automation-shell__required-toggle', { 'api-automation-shell__required-toggle--active': row.required }]"
+                                data-testid="api-definition-param-required-toggle"
+                                @click="row.required = !row.required"
+                              >
+                                *
+                              </button>
+                              <a-select
+                                v-model="row.paramType"
+                                data-testid="api-definition-param-type-select"
+                                size="small"
+                              >
+                                <a-option v-for="type in queryParamTypes" :key="type" :value="type">
+                                  {{ type }}
+                                </a-option>
+                              </a-select>
+                            </div>
                             <a-input
                               v-model="row.value"
                               data-testid="api-definition-inline-header-value-input"
                             />
-                            <a-input v-model="row.description" />
+                            <div class="api-automation-shell__length-cell">
+                              <a-input-number
+                                v-model="row.minLength"
+                                data-testid="api-definition-param-min-length-input"
+                                size="small"
+                                :min="0"
+                                :placeholder="t.apiAutomation.minLength"
+                              />
+                              <span>-</span>
+                              <a-input-number
+                                v-model="row.maxLength"
+                                data-testid="api-definition-param-max-length-input"
+                                size="small"
+                                :min="0"
+                                :placeholder="t.apiAutomation.maxLength"
+                              />
+                            </div>
+                            <a-switch
+                              v-model="row.encode"
+                              data-testid="api-definition-param-encode-toggle"
+                              size="small"
+                            />
+                            <a-input v-model="row.description" data-testid="api-definition-param-description-input" />
                             <AppButton type="text" status="danger" @click="removeKeyValueRow(definitionEditorForm.headers, index)">
                               {{ t.common.delete }}
                             </AppButton>
@@ -259,9 +305,42 @@
                             >
                               none
                             </button>
+                            <button
+                              type="button"
+                              :class="[
+                                'api-automation-shell__body-mode',
+                                { 'api-automation-shell__body-mode--active': definitionEditorForm.bodyType === 'RAW_JSON' }
+                              ]"
+                              data-testid="api-definition-body-mode-json"
+                              @click="definitionEditorForm.bodyType = 'RAW_JSON'"
+                            >
+                              json
+                            </button>
+                            <button
+                              type="button"
+                              :class="[
+                                'api-automation-shell__body-mode',
+                                { 'api-automation-shell__body-mode--active': definitionEditorForm.bodyType === 'RAW_XML' }
+                              ]"
+                              data-testid="api-definition-body-mode-xml"
+                              @click="definitionEditorForm.bodyType = 'RAW_XML'"
+                            >
+                              xml
+                            </button>
+                            <button
+                              type="button"
+                              :class="[
+                                'api-automation-shell__body-mode',
+                                { 'api-automation-shell__body-mode--active': definitionEditorForm.bodyType === 'RAW_TEXT' }
+                              ]"
+                              data-testid="api-definition-body-mode-text"
+                              @click="definitionEditorForm.bodyType = 'RAW_TEXT'"
+                            >
+                              text
+                            </button>
                           </div>
                           <a-textarea
-                            v-if="definitionEditorForm.bodyType === 'RAW'"
+                            v-if="rawBodyTypes.includes(definitionEditorForm.bodyType)"
                             v-model="definitionEditorForm.rawBody"
                             data-testid="api-definition-inline-body-input"
                             :auto-size="{ minRows: 8, maxRows: 14 }"
@@ -274,9 +353,13 @@
                             <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--body">
                               <span>{{ t.apiAutomation.enabled }}</span>
                               <span>{{ t.apiAutomation.fieldQueryKey }}</span>
+                              <span>{{ t.apiAutomation.paramType }}</span>
                               <span>{{ t.apiAutomation.fieldQueryValue }}</span>
+                              <span>{{ t.apiAutomation.lengthRange }}</span>
                               <span>{{ t.apiAutomation.fieldDescription }}</span>
-                              <span></span>
+                              <button type="button" class="api-automation-shell__batch-link" data-testid="api-definition-param-batch-add">
+                                {{ t.apiAutomation.batchAdd }}
+                              </button>
                             </div>
                             <div
                               v-for="(row, index) in definitionEditorForm.bodyFormItems"
@@ -285,9 +368,45 @@
                               data-testid="api-definition-body-form-row"
                             >
                               <a-switch v-model="row.enabled" size="small" />
-                              <a-input v-model="row.key" />
-                              <a-input v-model="row.value" />
-                              <a-input v-model="row.description" />
+                              <a-input v-model="row.key" data-testid="api-definition-body-form-key-input" />
+                              <div class="api-automation-shell__param-type-cell">
+                                <button
+                                  type="button"
+                                  :class="['api-automation-shell__required-toggle', { 'api-automation-shell__required-toggle--active': row.required }]"
+                                  data-testid="api-definition-param-required-toggle"
+                                  @click="row.required = !row.required"
+                                >
+                                  *
+                                </button>
+                                <a-select
+                                  v-model="row.paramType"
+                                  data-testid="api-definition-param-type-select"
+                                  size="small"
+                                >
+                                  <a-option v-for="type in bodyParamTypes" :key="type" :value="type">
+                                    {{ type }}
+                                  </a-option>
+                                </a-select>
+                              </div>
+                              <a-input v-model="row.value" data-testid="api-definition-body-form-value-input" />
+                              <div class="api-automation-shell__length-cell">
+                                <a-input-number
+                                  v-model="row.minLength"
+                                  data-testid="api-definition-param-min-length-input"
+                                  size="small"
+                                  :min="0"
+                                  :placeholder="t.apiAutomation.minLength"
+                                />
+                                <span>-</span>
+                                <a-input-number
+                                  v-model="row.maxLength"
+                                  data-testid="api-definition-param-max-length-input"
+                                  size="small"
+                                  :min="0"
+                                  :placeholder="t.apiAutomation.maxLength"
+                                />
+                              </div>
+                              <a-input v-model="row.description" data-testid="api-definition-param-description-input" />
                               <AppButton type="text" status="danger" @click="removeKeyValueRow(definitionEditorForm.bodyFormItems, index)">
                                 {{ t.common.delete }}
                               </AppButton>
@@ -313,9 +432,14 @@
                           <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--query">
                             <span>{{ t.apiAutomation.enabled }}</span>
                             <span>{{ t.apiAutomation.fieldQueryKey }}</span>
+                            <span>{{ t.apiAutomation.paramType }}</span>
                             <span>{{ t.apiAutomation.fieldQueryValue }}</span>
+                            <span>{{ t.apiAutomation.lengthRange }}</span>
+                            <span>{{ t.apiAutomation.encode }}</span>
                             <span>{{ t.apiAutomation.fieldDescription }}</span>
-                            <span></span>
+                            <button type="button" class="api-automation-shell__batch-link" data-testid="api-definition-param-batch-add">
+                              {{ t.apiAutomation.batchAdd }}
+                            </button>
                           </div>
                           <div
                             v-for="(row, index) in definitionEditorForm.queryParams"
@@ -328,11 +452,52 @@
                               v-model="row.key"
                               data-testid="api-definition-inline-query-key-input"
                             />
+                            <div class="api-automation-shell__param-type-cell">
+                              <button
+                                type="button"
+                                :class="['api-automation-shell__required-toggle', { 'api-automation-shell__required-toggle--active': row.required }]"
+                                data-testid="api-definition-param-required-toggle"
+                                @click="row.required = !row.required"
+                              >
+                                *
+                              </button>
+                              <a-select
+                                v-model="row.paramType"
+                                data-testid="api-definition-param-type-select"
+                                size="small"
+                              >
+                                <a-option v-for="type in queryParamTypes" :key="type" :value="type">
+                                  {{ type }}
+                                </a-option>
+                              </a-select>
+                            </div>
                             <a-input
                               v-model="row.value"
                               data-testid="api-definition-inline-query-value-input"
                             />
-                            <a-input v-model="row.description" />
+                            <div class="api-automation-shell__length-cell">
+                              <a-input-number
+                                v-model="row.minLength"
+                                data-testid="api-definition-param-min-length-input"
+                                size="small"
+                                :min="0"
+                                :placeholder="t.apiAutomation.minLength"
+                              />
+                              <span>-</span>
+                              <a-input-number
+                                v-model="row.maxLength"
+                                data-testid="api-definition-param-max-length-input"
+                                size="small"
+                                :min="0"
+                                :placeholder="t.apiAutomation.maxLength"
+                              />
+                            </div>
+                            <a-switch
+                              v-model="row.encode"
+                              data-testid="api-definition-param-encode-toggle"
+                              size="small"
+                            />
+                            <a-input v-model="row.description" data-testid="api-definition-param-description-input" />
                             <AppButton type="text" status="danger" @click="removeKeyValueRow(definitionEditorForm.queryParams, index)">
                               {{ t.common.delete }}
                             </AppButton>
@@ -585,6 +750,9 @@ const definitionEditorForm = ref<ApiDefinitionFormValues | null>(null);
 const emptyPreProcessors = ref<ApiProcessorConfig[]>([]);
 const emptyPostProcessors = ref<ApiProcessorConfig[]>([]);
 const requestMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'] as const;
+const queryParamTypes = ['string', 'integer', 'number', 'boolean', 'array'] as const;
+const bodyParamTypes = ['string', 'integer', 'number', 'boolean', 'array', 'json', 'file'] as const;
+const rawBodyTypes = ['RAW', 'RAW_JSON', 'RAW_XML', 'RAW_TEXT'] as const;
 const definitionDialogRef = ref<{
   openCreate: () => void;
   openEdit: () => void | Promise<void>;
@@ -655,7 +823,15 @@ function addKeyValueRow(rows: ApiKeyValue[]) {
     key: '',
     value: '',
     description: '',
-    enabled: true
+    enabled: true,
+    paramType: 'string',
+    required: false,
+    encode: false,
+    minLength: null,
+    maxLength: null,
+    fileName: '',
+    contentType: '',
+    fileBase64: ''
   });
 }
 
@@ -1076,9 +1252,13 @@ async function handleDebugDefinition() {
   display: grid;
   gap: 8px;
   align-items: center;
-  min-width: 0;
+  min-width: 860px;
   border-bottom: 1px solid var(--app-color-border);
   padding: 6px 8px;
+}
+
+.api-automation-shell__kv-editor {
+  overflow-x: auto;
 }
 
 .api-automation-shell__kv-table-header {
@@ -1102,12 +1282,71 @@ async function handleDebugDefinition() {
 }
 
 .api-automation-shell__kv-table-row--header,
-.api-automation-shell__kv-table-header--header,
+.api-automation-shell__kv-table-header--header {
+  grid-template-columns: 48px minmax(150px, 1fr) minmax(132px, 0.7fr) minmax(170px, 1fr) minmax(150px, 0.8fr) 64px minmax(150px, 0.9fr) 76px;
+}
+
 .api-automation-shell__kv-table-row--query,
-.api-automation-shell__kv-table-header--query,
+.api-automation-shell__kv-table-header--query {
+  grid-template-columns: 48px minmax(150px, 1fr) minmax(132px, 0.7fr) minmax(170px, 1fr) minmax(150px, 0.8fr) 64px minmax(150px, 0.9fr) 76px;
+}
+
 .api-automation-shell__kv-table-row--body,
 .api-automation-shell__kv-table-header--body {
-  grid-template-columns: 54px minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 0.8fr) 58px;
+  grid-template-columns: 48px minmax(150px, 1fr) minmax(132px, 0.7fr) minmax(170px, 1fr) minmax(150px, 0.8fr) minmax(150px, 0.9fr) 76px;
+}
+
+.api-automation-shell__param-type-cell,
+.api-automation-shell__length-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.api-automation-shell__param-type-cell :deep(.arco-select) {
+  min-width: 92px;
+}
+
+.api-automation-shell__length-cell :deep(.arco-input-number) {
+  width: 68px;
+}
+
+.api-automation-shell__length-cell span {
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+}
+
+.api-automation-shell__required-toggle {
+  display: inline-grid;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--app-color-border);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--app-color-text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.api-automation-shell__required-toggle--active {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.api-automation-shell__batch-link {
+  border: 0;
+  background: transparent;
+  color: rgb(var(--primary-6));
+  cursor: default;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+  text-align: left;
 }
 
 .api-automation-shell__body-mode-row {

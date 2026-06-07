@@ -70,7 +70,15 @@ function emptyKeyValue(): ApiKeyValue {
     key: '',
     value: '',
     description: '',
-    enabled: true
+    enabled: true,
+    paramType: 'string',
+    required: false,
+    encode: false,
+    minLength: null,
+    maxLength: null,
+    fileName: '',
+    contentType: '',
+    fileBase64: ''
   };
 }
 
@@ -79,7 +87,12 @@ function normalizeKeyValues(items: ApiKeyValue[] | undefined): ApiKeyValue[] {
     .map((item) => ({
       ...emptyKeyValue(),
       ...item,
-      enabled: item.enabled !== false
+      enabled: item.enabled !== false,
+      required: item.required === true,
+      encode: item.encode === true,
+      minLength: item.minLength ?? null,
+      maxLength: item.maxLength ?? null,
+      paramType: item.paramType || 'string'
     }))
     .filter((item) => item.key.trim());
 
@@ -91,7 +104,12 @@ function editorRows(items: ApiKeyValue[] | undefined): ApiKeyValue[] {
     .map((item) => ({
       ...emptyKeyValue(),
       ...item,
-      enabled: item.enabled !== false
+      enabled: item.enabled !== false,
+      required: item.required === true,
+      encode: item.encode === true,
+      minLength: item.minLength ?? null,
+      maxLength: item.maxLength ?? null,
+      paramType: item.paramType || 'string'
     }));
 
   return normalized.length ? normalized : [emptyKeyValue()];
@@ -106,10 +124,13 @@ export function createDefaultRequestConfig(): ApiRequestConfig {
     headers: [],
     cookies: [],
     body: {
-      type: 'RAW',
+      type: 'RAW_JSON',
       rawText: '',
       formItems: [],
-      contentType: 'application/json'
+      contentType: 'application/json',
+      jsonText: '',
+      xmlText: '',
+      plainText: ''
     },
     authConfig: createDefaultAuthConfig()
   };
@@ -147,7 +168,7 @@ export function createDefaultDefinitionForm(): ApiDefinitionFormValues {
     headerKey: '',
     headerValue: '',
     headers: [emptyKeyValue()],
-    bodyType: 'RAW',
+    bodyType: 'RAW_JSON',
     rawBody: '',
     bodyFormItems: [emptyKeyValue()],
     authConfig: createDefaultAuthConfig(),
@@ -174,8 +195,12 @@ export function createDefinitionEditForm(detail: ApiDefinitionDetail): ApiDefini
     headerKey: firstHeader?.key || '',
     headerValue: firstHeader?.value || '',
     headers: editorRows(detail.requestConfig.headers),
-    bodyType: detail.requestConfig.body?.type || 'RAW',
-    rawBody: detail.requestConfig.body?.rawText || '',
+    bodyType: detail.requestConfig.body?.type || 'RAW_JSON',
+    rawBody: detail.requestConfig.body?.jsonText
+      || detail.requestConfig.body?.xmlText
+      || detail.requestConfig.body?.plainText
+      || detail.requestConfig.body?.rawText
+      || '',
     bodyFormItems: editorRows(detail.requestConfig.body?.formItems),
     authConfig: normalizeAuthConfig(detail.requestConfig.authConfig),
     assertions: normalizeAssertions(detail.assertions),
@@ -197,15 +222,32 @@ export function toRequestConfig(form: ApiDefinitionFormValues): ApiRequestConfig
       ? normalizeKeyValues(form.headers)
       : enabledPair(form.headerKey, form.headerValue),
     body: {
-      type: form.bodyType || 'RAW',
+      type: form.bodyType || 'RAW_JSON',
       rawText: form.rawBody,
+      jsonText: form.bodyType === 'RAW_JSON' ? form.rawBody : '',
+      xmlText: form.bodyType === 'RAW_XML' ? form.rawBody : '',
+      plainText: form.bodyType === 'RAW_TEXT' ? form.rawBody : '',
       formItems: normalizeKeyValues(form.bodyFormItems),
-      contentType: form.bodyType === 'FORM_URLENCODED'
-        ? 'application/x-www-form-urlencoded'
-        : 'application/json'
+      contentType: contentTypeForBodyType(form.bodyType)
     },
     authConfig: normalizeAuthConfig(form.authConfig)
   };
+}
+
+function contentTypeForBodyType(bodyType: string) {
+  if (bodyType === 'FORM_URLENCODED') {
+    return 'application/x-www-form-urlencoded';
+  }
+
+  if (bodyType === 'RAW_XML') {
+    return 'application/xml';
+  }
+
+  if (bodyType === 'RAW_TEXT') {
+    return 'text/plain';
+  }
+
+  return 'application/json';
 }
 
 export function toSaveDefinitionPayload(

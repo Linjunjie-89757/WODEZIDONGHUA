@@ -26,38 +26,50 @@
     <div v-else-if="!cases.length" class="api-case-management__empty">
       {{ definitionId ? t.apiAutomation.caseEmpty : t.apiAutomation.caseSelectDefinition }}
     </div>
-    <div v-else class="api-case-management__list" data-testid="api-case-list">
-      <div class="api-case-management__list-head">
-        <span>{{ t.apiAutomation.caseName }}</span>
-        <span>{{ t.apiAutomation.casePriority }}</span>
-        <span>{{ t.apiAutomation.fieldStatus }}</span>
-        <span></span>
-      </div>
-      <article
-        v-for="item in cases"
-        :key="item.id"
-        class="api-case-management__row"
-        data-testid="api-case-row"
-        @click="selectCase(item.id)"
-      >
-        <button type="button" class="api-case-management__row-main" @click.stop="selectCase(item.id)">
-          <strong>{{ item.name }}</strong>
-        </button>
-        <small>{{ item.priority || '-' }}</small>
-        <small>{{ item.status || '-' }}</small>
-        <div class="api-case-management__row-actions" @click.stop>
-          <ApiCaseRunButton
-            :case-id="item.id"
-            :environment-id="environmentId"
-            :variable-set-id="variableSetId"
-            @success="setRunResult"
-          />
-          <AppButton type="text" data-testid="api-case-edit" @click="openEditDialog(item.id)">
-            {{ t.common.edit }}
-          </AppButton>
-          <ApiCaseDeleteButton :case-id="item.id" @success="loadCases" />
+    <div v-else class="api-case-management__density-shell" data-testid="api-case-list-density-shell">
+      <div class="api-case-management__list" data-testid="api-case-list">
+        <div class="api-case-management__list-head">
+          <span>ID</span>
+          <span>{{ t.apiAutomation.caseName }}</span>
+          <span>{{ t.apiAutomation.fieldMethod }}</span>
+          <span>{{ t.apiAutomation.casePriority }}</span>
+          <span>{{ t.apiAutomation.fieldStatus }}</span>
+          <span>{{ t.apiAutomation.fieldPath }}</span>
+          <span></span>
         </div>
-      </article>
+        <article
+          v-for="item in cases"
+          :key="item.id"
+          class="api-case-management__row"
+          data-testid="api-case-row"
+          @click="selectCase(item.id)"
+        >
+          <small>{{ item.id }}</small>
+          <button type="button" class="api-case-management__row-main" @click.stop="selectCase(item.id)">
+            <strong>{{ item.name }}</strong>
+            <small>{{ item.description || selectedDefinitionName || '-' }}</small>
+          </button>
+          <small>{{ item.method || '-' }}</small>
+          <small>{{ item.priority || '-' }}</small>
+          <small>{{ item.status || '-' }}</small>
+          <small class="api-case-management__path">{{ item.path || '-' }}</small>
+          <div class="api-case-management__row-actions" @click.stop>
+            <AppButton type="text" data-testid="api-case-detail-entry" @click="selectCase(item.id)">
+              {{ t.common.detail }}
+            </AppButton>
+            <ApiCaseRunButton
+              :case-id="item.id"
+              :environment-id="environmentId"
+              :variable-set-id="variableSetId"
+              @success="setRunResult"
+            />
+            <AppButton type="text" data-testid="api-case-edit" @click="openEditDialog(item.id)">
+              {{ t.common.edit }}
+            </AppButton>
+            <ApiCaseDeleteButton :case-id="item.id" @success="loadCases" />
+          </div>
+        </article>
+      </div>
     </div>
 
     <AppDrawer
@@ -244,10 +256,15 @@ watch(selectedCase, (value) => {
   color: var(--app-color-text-muted);
 }
 
+.api-case-management__density-shell {
+  min-width: 0;
+  overflow-x: auto;
+}
+
 .api-case-management__list {
   display: grid;
   gap: 0;
-  min-width: 0;
+  min-width: 760px;
   overflow: hidden;
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm);
@@ -256,8 +273,8 @@ watch(selectedCase, (value) => {
 .api-case-management__list-head,
 .api-case-management__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 100px 100px auto;
-  gap: var(--app-spacing-sm);
+  grid-template-columns: 56px minmax(180px, 1fr) 78px 88px 88px minmax(180px, 1fr) 190px;
+  gap: 8px;
   align-items: center;
   min-width: 0;
 }
@@ -280,6 +297,10 @@ watch(selectedCase, (value) => {
   border-top: 1px solid var(--app-color-border);
 }
 
+.api-case-management__row:hover {
+  background: #fbfdff;
+}
+
 .api-case-management__row-main {
   display: grid;
   gap: 4px;
@@ -297,12 +318,16 @@ watch(selectedCase, (value) => {
   white-space: nowrap;
 }
 
+.api-case-management__path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 720px) {
   .api-case-management__header,
-  .api-case-management__row,
-  .api-case-management__list-head {
-    display: grid;
-    grid-template-columns: 1fr;
+  .api-case-management__row {
+    align-items: start;
   }
 }
 </style>

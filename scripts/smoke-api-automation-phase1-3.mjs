@@ -9,6 +9,7 @@ const password = process.env.SMOKE_PASSWORD || 'superadmin123';
 const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
 const definitionName = `smoke-api-definition-${stamp}`;
 const editedDefinitionName = `${definitionName}-edited`;
+const caseName = `smoke-api-case-${stamp}`;
 const screenshotPath = `output/playwright/api-automation-phase3b-${stamp}.png`;
 const detailScreenshotPath = `output/playwright/api-automation-phase3f-editor-${stamp}.png`;
 const smokeRequestUrl = 'http://localhost:8080/api/auth/me';
@@ -68,7 +69,7 @@ function endpointReturned(path, method = 'GET') {
 }
 
 function inputByTestId(testId) {
-  return page.getByTestId(testId).locator('input, textarea').first();
+  return page.getByTestId(testId).locator('input:visible, textarea:visible').first();
 }
 
 async function assertRequestEditorShell() {
@@ -85,27 +86,39 @@ async function assertRequestEditorPhase3E() {
   await page.getByTestId('api-definition-headers-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-inline-header-key-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-header-row').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-param-batch-add').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-header-row').first().getByTestId('api-definition-param-type-select').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-header-row').first().getByTestId('api-definition-param-required-toggle').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-header-add-row').click();
   await page.getByTestId('api-definition-header-row').nth(1).waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-header-row').nth(1).locator('input').nth(1).fill('X-Smoke-Extra');
-  await page.getByTestId('api-definition-header-row').nth(1).locator('input').nth(2).fill('phase3f');
+  await page.getByTestId('api-definition-header-row').nth(1).getByTestId('api-definition-inline-header-key-input').locator('input').fill('X-Smoke-Extra');
+  await page.getByTestId('api-definition-header-row').nth(1).getByTestId('api-definition-inline-header-value-input').locator('input').fill('phase3g');
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求体' }).click();
   await page.getByTestId('api-definition-body-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-body-mode-raw').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-body-mode-json').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-body-mode-text').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-body-mode-json').click();
+  await page.getByTestId('api-definition-inline-body-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-body-mode-form').click();
   await page.getByTestId('api-definition-body-form-row').first().waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-body-form-row').first().locator('input').nth(1).fill('phase');
-  await page.getByTestId('api-definition-body-form-row').first().locator('input').nth(2).fill('3f');
+  await page.getByTestId('api-definition-body-form-row').first().getByTestId('api-definition-param-type-select').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-body-form-row').first().getByTestId('api-definition-param-required-toggle').click();
+  await page.getByTestId('api-definition-body-form-row').first().getByTestId('api-definition-body-form-key-input').locator('input').fill('phase');
+  await page.getByTestId('api-definition-body-form-row').first().getByTestId('api-definition-body-form-value-input').locator('input').fill('3g');
   await page.getByTestId('api-definition-body-mode-raw').click();
   await page.getByTestId('api-definition-inline-body-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: 'Params' }).click();
   await page.getByTestId('api-definition-params-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-inline-query-key-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-query-row').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-query-row').first().getByTestId('api-definition-param-encode-toggle').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-query-row').first().getByTestId('api-definition-param-min-length-input').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-query-row').first().getByTestId('api-definition-param-max-length-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-query-add-row').click();
   await page.getByTestId('api-definition-query-row').nth(1).waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-query-row').nth(1).locator('input').nth(1).fill('phase');
-  await page.getByTestId('api-definition-query-row').nth(1).locator('input').nth(2).fill('3f');
+  await page.getByTestId('api-definition-query-row').nth(1).getByTestId('api-definition-inline-query-key-input').locator('input').fill('phase');
+  await page.getByTestId('api-definition-query-row').nth(1).getByTestId('api-definition-inline-query-value-input').locator('input').fill('3g');
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: 'Auth' }).click();
   await page.getByTestId('api-definition-auth-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-auth-type').waitFor({ timeout: 15000 });
@@ -121,6 +134,13 @@ async function assertRequestEditorPhase3E() {
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '用例' }).click();
   await page.getByTestId('api-definition-cases-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-management').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-create').click();
+  await inputByTestId('api-case-name-input').fill(caseName);
+  await inputByTestId('api-case-path-input').fill(smokeRequestUrl);
+  await clickVisibleModalPrimaryButton();
+  await page.getByTestId('api-definition-cases-editor').getByText(caseName).waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-list-density-shell').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-detail-entry').first().waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求体' }).click();
   await page.getByTestId('api-definition-response-shell').waitFor({ timeout: 15000 });
 }
@@ -130,6 +150,7 @@ async function clickVisibleModalPrimaryButton() {
 }
 
 async function cleanupSmokeDefinitions() {
+  await cleanupSmokeCasesByApi();
   const rows = page.locator('[data-testid="api-definition-row"]').filter({ hasText: 'smoke-api-definition-' });
 
   while ((await rows.count()) > 0) {
@@ -144,6 +165,59 @@ async function cleanupSmokeDefinitions() {
       response.status() < 300
     );
     await row.waitFor({ state: 'detached', timeout: 15000 });
+  }
+}
+
+async function apiFetch(path, options = {}) {
+  return page.evaluate(
+    async ({ apiPath, requestOptions }) => {
+      const response = await fetch(`/api${apiPath}`, {
+        credentials: 'include',
+        ...requestOptions
+      });
+      const text = await response.text();
+      let body = null;
+
+      try {
+        body = text ? JSON.parse(text) : null;
+      } catch {
+        body = text;
+      }
+
+      if (!response.ok) {
+        throw new Error(`${requestOptions.method || 'GET'} ${apiPath} failed with ${response.status}: ${text}`);
+      }
+
+      return body;
+    },
+    { apiPath: path, requestOptions: options }
+  );
+}
+
+function pageItems(payload) {
+  if (Array.isArray(payload?.data?.items)) {
+    return payload.data.items;
+  }
+
+  if (Array.isArray(payload?.items)) {
+    return payload.items;
+  }
+
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+
+  return [];
+}
+
+async function cleanupSmokeCasesByApi() {
+  const payload = await apiFetch('/automation/api/cases');
+  const cases = pageItems(payload).filter((item) =>
+    String(item.name || '').startsWith('smoke-api-case-')
+  );
+
+  for (const item of cases) {
+    await apiFetch(`/automation/api/cases/${item.id}`, { method: 'DELETE' }).catch(() => undefined);
   }
 }
 
@@ -281,6 +355,10 @@ async function deleteDefinition() {
   await row.waitFor({ state: 'detached', timeout: 15000 });
 }
 
+async function deleteCreatedCase() {
+  await cleanupSmokeCasesByApi();
+}
+
 try {
   await login();
   await page.getByTestId('api-automation-shell').waitFor({ timeout: 15000 });
@@ -293,6 +371,7 @@ try {
   await createDefinition();
   await editDefinition();
   await debugDefinition();
+  await deleteCreatedCase();
   await deleteDefinition();
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);

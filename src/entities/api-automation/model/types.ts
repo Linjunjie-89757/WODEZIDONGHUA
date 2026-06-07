@@ -14,6 +14,11 @@ export interface ApiKeyValue {
   paramType?: string;
   required?: boolean;
   encode?: boolean;
+  minLength?: number | null;
+  maxLength?: number | null;
+  fileName?: string | null;
+  contentType?: string | null;
+  fileBase64?: string | null;
 }
 
 export interface ApiAuthCredential {
@@ -34,6 +39,9 @@ export interface ApiRequestBodyConfig {
   contentType?: string | null;
   fileName?: string | null;
   binaryBase64?: string | null;
+  jsonText?: string | null;
+  xmlText?: string | null;
+  plainText?: string | null;
 }
 
 export interface ApiRequestConfig {

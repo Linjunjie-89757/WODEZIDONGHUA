@@ -2,7 +2,7 @@
 
 Date: 2026-06-07
 
-This file tracks known follow-up work after API Automation page alignment Phase 3F, so later phases do not depend on chat history.
+This file tracks known follow-up work after API Automation page alignment Phase 3G, so later phases do not depend on chat history.
 
 ## Current State
 
@@ -12,6 +12,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3D: scenario property panel thickening, run result tab, and latest-run history tab are complete.
 - Phase 3E: API definition request editor tab thickening is complete.
 - Phase 3F: API definition request editor visual precision pass is complete.
+- Phase 3G: API definition advanced parameter table and embedded cases tab refinement is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -65,19 +66,15 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Request editor content tabs now have basic editable surfaces for headers, params, body, auth, pre, post, tests, and settings.
 - Existing definition edit dialog remains as the fallback full edit path.
 - Command-row save now performs inline update through the confirmed definition update contract.
-- Headers, params, and form body now support basic multi-row key/value editing.
-- Body tab supports basic `raw`, `x-www-form-urlencoded`, and `none` mode switching.
-- Cases tab now embeds the existing API case management widget inside the request editor.
+- Headers, params, and form body now support advanced table fields for type, required marker, length range, encoding, description, and enablement.
+- Body tab supports `none`, `x-www-form-urlencoded`, `json`, `xml`, and `text` shell modes.
+- Cases tab now embeds the existing API case management widget inside the request editor with a denser table-like shell.
 - Curl import is not implemented.
 - AI generation is not implemented.
-- Old-project advanced table columns are still deferred:
-  - param type;
-  - required marker;
-  - length range;
-  - encoding;
-  - batch add;
-  - table column settings.
-- Embedded cases reuse the existing case management widget and are not yet old-project exact.
+- Batch add is currently a visible shell affordance only; it does not open a drawer or parse bulk input.
+- Body binary/file upload behavior is not implemented.
+- Old-project table column settings are still deferred.
+- Embedded cases reuse the existing case management widget and are closer in density, but not yet old-project exact.
 
 ## Validation And Tooling Backlog
 
@@ -98,7 +95,10 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 3. Phase 3F: visual precision pass.
    - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3f.md`.
 
-4. Build optimization phase.
+4. Phase 3G: advanced parameter table and embedded cases tab refinement.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3g.md`.
+
+5. Build optimization phase.
    - Split vendor chunks or manual chunks.
    - Keep this separate from page alignment work.
 
