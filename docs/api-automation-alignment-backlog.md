@@ -2,7 +2,7 @@
 
 Date: 2026-06-07
 
-This file tracks known follow-up work after API Automation page alignment Phase 3H, so later phases do not depend on chat history.
+This file tracks known follow-up work after API Automation page alignment Phase 3I, so later phases do not depend on chat history.
 
 ## Current State
 
@@ -14,6 +14,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3F: API definition request editor visual precision pass is complete.
 - Phase 3G: API definition advanced parameter table and embedded cases tab refinement is complete.
 - Phase 3H: request editor batch add and parameter table interaction closure is complete.
+- Phase 3I: request parameter table component extraction is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -77,7 +78,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Body binary/file upload behavior is not implemented.
 - Old-project table column settings are still deferred.
 - Embedded cases reuse the existing case management widget and are closer in density, but not yet old-project exact.
-- Parameter table behavior is still local to `ApiAutomationShell.vue`; a later cleanup phase can extract a reusable request parameter table component.
+- Parameter table rendering is now centralized in `ApiRequestParamTable.vue`.
 
 ## Validation And Tooling Backlog
 
@@ -105,8 +106,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
    - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3h.md`.
 
 6. Phase 3I: request parameter table component extraction.
-   - Extract repeated headers/params/body-form table code without changing behavior.
-   - Keep smoke coverage from Phase 3H intact.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3i.md`.
 
 7. Build optimization phase.
    - Split vendor chunks or manual chunks.
