@@ -36,7 +36,7 @@
     </div>
 
     <div :class="['api-automation-shell__kv-table-header', tableHeaderClass]">
-      <span>{{ t.apiAutomation.enabled }}</span>
+      <span class="api-automation-shell__check-column">{{ t.apiAutomation.enabled }}</span>
       <span>{{ keyLabel }}</span>
       <span>{{ t.apiAutomation.paramType }}</span>
       <span>{{ valueLabel }}</span>
@@ -52,7 +52,9 @@
       :class="['api-automation-shell__kv-table-row', tableRowClass]"
       :data-testid="rowTestId"
     >
-      <a-switch v-model="row.enabled" size="small" />
+      <div class="api-automation-shell__check-column">
+        <a-switch v-model="row.enabled" size="small" />
+      </div>
       <a-input v-model="row.key" :data-testid="keyInputTestId" />
       <div class="api-automation-shell__param-type-cell">
         <button
@@ -150,24 +152,25 @@ defineEmits<{
 :global(.api-automation-shell__kv-table-header),
 :global(.api-automation-shell__kv-table-row) {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  min-width: 860px;
+  min-width: 920px;
   border-bottom: 1px solid var(--app-color-border);
-  padding: 6px 8px;
+  padding: 5px 8px;
 }
 
 :global(.api-automation-shell__kv-table-header) {
-  min-height: 32px;
+  min-height: 34px;
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm) var(--app-radius-sm) 0 0;
-  background: #f8fafc;
+  background: #f9fafb;
   color: var(--app-color-text-muted);
   font-size: 12px;
   font-weight: 600;
 }
 
 :global(.api-automation-shell__kv-table-row) {
+  min-height: 44px;
   border-right: 1px solid var(--app-color-border);
   border-left: 1px solid var(--app-color-border);
   background: #ffffff;
@@ -178,15 +181,25 @@ defineEmits<{
 }
 
 :global(.api-automation-shell__kv-table-row--header),
-:global(.api-automation-shell__kv-table-header--header),
+:global(.api-automation-shell__kv-table-header--header) {
+  grid-template-columns: 44px minmax(180px, 1fr) 118px minmax(220px, 1fr) 142px 58px minmax(180px, 0.9fr) 68px;
+}
+
 :global(.api-automation-shell__kv-table-row--query),
 :global(.api-automation-shell__kv-table-header--query) {
-  grid-template-columns: 48px minmax(150px, 1fr) minmax(132px, 0.7fr) minmax(170px, 1fr) minmax(150px, 0.8fr) 64px minmax(150px, 0.9fr) 76px;
+  grid-template-columns: 44px 220px 118px 220px 156px 58px minmax(180px, 1fr) 68px;
 }
 
 :global(.api-automation-shell__kv-table-row--body),
 :global(.api-automation-shell__kv-table-header--body) {
-  grid-template-columns: 48px minmax(150px, 1fr) minmax(132px, 0.7fr) minmax(170px, 1fr) minmax(150px, 0.8fr) minmax(150px, 0.9fr) 76px;
+  grid-template-columns: 44px 220px 118px 220px 156px minmax(180px, 1fr) 68px;
+}
+
+:global(.api-automation-shell__check-column) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
 }
 
 :global(.api-automation-shell__param-type-cell),
@@ -198,11 +211,11 @@ defineEmits<{
 }
 
 :global(.api-automation-shell__param-type-cell .arco-select) {
-  min-width: 92px;
+  min-width: 86px;
 }
 
 :global(.api-automation-shell__length-cell .arco-input-number) {
-  width: 68px;
+  width: 62px;
 }
 
 :global(.api-automation-shell__length-cell span) {
@@ -212,9 +225,9 @@ defineEmits<{
 
 :global(.api-automation-shell__required-toggle) {
   display: inline-grid;
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
   place-items: center;
   border: 1px solid var(--app-color-border);
   border-radius: 999px;
@@ -237,7 +250,8 @@ defineEmits<{
   color: rgb(var(--primary-6));
   cursor: pointer;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.2;
   padding: 0;
   text-align: left;
 }
@@ -245,12 +259,32 @@ defineEmits<{
 :global(.api-automation-shell__param-tools) {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
-  min-height: 28px;
+  min-height: 30px;
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm);
-  background: #fbfcfe;
-  padding: 4px 8px;
+  background: #f8fafc;
+  padding: 4px 10px;
+}
+
+:global(.api-automation-shell__kv-table-row .arco-input-wrapper),
+:global(.api-automation-shell__kv-table-row .arco-select-view-single),
+:global(.api-automation-shell__kv-table-row .arco-input-number) {
+  border-radius: var(--app-radius-sm);
+  background: transparent;
+  box-shadow: none;
+}
+
+:global(.api-automation-shell__kv-table-row .arco-input-wrapper:hover),
+:global(.api-automation-shell__kv-table-row .arco-select-view-single:hover),
+:global(.api-automation-shell__kv-table-row .arco-input-number:hover) {
+  background: #ffffff;
+}
+
+:global(.api-automation-shell__kv-table-row .arco-input-focus),
+:global(.api-automation-shell__kv-table-row .arco-select-view-focus),
+:global(.api-automation-shell__kv-table-row .arco-input-number-focus) {
+  background: #ffffff;
 }
 </style>

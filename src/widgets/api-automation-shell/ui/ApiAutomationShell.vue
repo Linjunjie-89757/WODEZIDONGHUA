@@ -540,15 +540,19 @@
     <a-drawer
       v-model:visible="batchAddVisible"
       :title="batchAddTitle"
-      :width="520"
+      :width="560"
       data-testid="api-definition-batch-add-drawer"
     >
       <div class="api-automation-shell__batch-drawer">
-        <p>{{ t.apiAutomation.batchAddHint }}</p>
+        <div class="api-automation-shell__batch-drawer-hint">
+          <strong>{{ t.apiAutomation.batchAdd }}</strong>
+          <p>{{ t.apiAutomation.batchAddHint }}</p>
+        </div>
         <a-textarea
           v-model="batchAddInput"
+          class="api-automation-shell__batch-textarea"
           data-testid="api-definition-batch-add-input"
-          :auto-size="{ minRows: 14, maxRows: 18 }"
+          :auto-size="{ minRows: 16, maxRows: 18 }"
           :placeholder="t.apiAutomation.batchAddPlaceholder"
         />
       </div>
@@ -1235,13 +1239,36 @@ async function handleDebugDefinition() {
 
 .api-automation-shell__batch-drawer {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
-.api-automation-shell__batch-drawer p {
+.api-automation-shell__batch-drawer-hint {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.api-automation-shell__batch-drawer-hint strong {
+  color: var(--app-color-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.api-automation-shell__batch-drawer-hint p {
   margin: 0;
   color: var(--app-color-text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.api-automation-shell__batch-textarea :deep(textarea) {
+  min-height: 360px;
+  border-radius: var(--app-radius-md);
   font-size: 13px;
+  line-height: 1.6;
 }
 
 .api-automation-shell__drawer-footer {

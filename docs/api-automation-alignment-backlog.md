@@ -2,7 +2,7 @@
 
 Date: 2026-06-07
 
-This file tracks known follow-up work after API Automation page alignment Phase 3I, so later phases do not depend on chat history.
+This file tracks known follow-up work after API Automation page alignment Phase 3J, so later phases do not depend on chat history.
 
 ## Current State
 
@@ -15,6 +15,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3G: API definition advanced parameter table and embedded cases tab refinement is complete.
 - Phase 3H: request editor batch add and parameter table interaction closure is complete.
 - Phase 3I: request parameter table component extraction is complete.
+- Phase 3J: request editor detail visual alignment is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -24,11 +25,10 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Current alignment is structural and workflow-level, not exact spacing/color/component parity.
 - Need a later visual precision phase for:
   - top information architecture;
-  - API definition request editor density;
   - scenario editor density;
-  - drawer and dialog sizing;
+  - dialog sizing outside the batch-add drawer;
   - toolbar button hierarchy;
-  - table/list row height;
+  - non-parameter table/list row height;
   - empty/loading/error states;
   - mobile and narrow viewport behavior.
 
@@ -79,6 +79,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Old-project table column settings are still deferred.
 - Embedded cases reuse the existing case management widget and are closer in density, but not yet old-project exact.
 - Parameter table rendering is now centralized in `ApiRequestParamTable.vue`.
+- Parameter table columns, row density, tool strip, and batch drawer are closer to the old project workbench style.
 
 ## Validation And Tooling Backlog
 
@@ -108,7 +109,10 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 6. Phase 3I: request parameter table component extraction.
    - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3i.md`.
 
-7. Build optimization phase.
+7. Phase 3J: request editor detail visual alignment.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3j.md`.
+
+8. Build optimization phase.
    - Split vendor chunks or manual chunks.
    - Keep this separate from page alignment work.
 
