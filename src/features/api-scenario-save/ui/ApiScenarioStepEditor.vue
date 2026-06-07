@@ -2,7 +2,7 @@
   <section class="api-scenario-step-editor" data-testid="api-scenario-step-editor">
     <header v-if="depth === 0" class="api-scenario-step-editor__toolbar">
       <h3>{{ t.apiAutomation.scenarioSteps }}</h3>
-      <div>
+      <div class="api-scenario-step-editor__toolbar-actions">
         <AppButton type="text" data-testid="api-scenario-add-definition-step" @click="addStep('API')">
           {{ t.apiAutomation.scenarioAddDefinitionStep }}
         </AppButton>
@@ -180,7 +180,7 @@
       <section v-if="isChildContainerStep(step)" class="api-scenario-step-editor__children">
         <header>
           <strong>{{ t.apiAutomation.scenarioNestedSteps }}</strong>
-          <div>
+          <div class="api-scenario-step-editor__child-actions">
             <AppButton type="text" data-testid="api-scenario-add-child-definition-step" @click="addChildStep(index, 'API')">
               {{ t.apiAutomation.scenarioAddDefinitionStep }}
             </AppButton>
@@ -450,7 +450,7 @@ function isChildContainerType(type: ApiScenarioStepType) {
 .api-scenario-step-editor__row,
 .api-scenario-step-editor__children {
   display: grid;
-  gap: var(--app-spacing-sm);
+  gap: 8px;
   min-width: 0;
 }
 
@@ -464,13 +464,20 @@ function isChildContainerType(type: ApiScenarioStepType) {
   min-width: 0;
 }
 
-.api-scenario-step-editor__toolbar > div,
+.api-scenario-step-editor__toolbar-actions,
 .api-scenario-step-editor__actions,
-.api-scenario-step-editor__children header > div {
+.api-scenario-step-editor__child-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--app-spacing-sm);
+  gap: 4px;
   justify-content: flex-end;
+}
+
+.api-scenario-step-editor__toolbar {
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #f8fafc;
+  padding: 7px 9px;
 }
 
 .api-scenario-step-editor__toolbar h3 {
@@ -484,18 +491,46 @@ function isChildContainerType(type: ApiScenarioStepType) {
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm);
   background: var(--app-color-surface);
-  padding: var(--app-spacing-sm);
+  padding: 8px;
 }
 
 .api-scenario-step-editor__head {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr) auto;
+  grid-template-columns: 150px minmax(160px, 1fr) auto;
+  align-items: center;
+}
+
+.api-scenario-step-editor__row[data-depth='1'] {
+  background: #fbfcfe;
+}
+
+.api-scenario-step-editor__row[data-depth='2'],
+.api-scenario-step-editor__row[data-depth='3'] {
+  background: #f8fafc;
 }
 
 .api-scenario-step-editor__children {
-  border-left: 2px solid var(--app-color-border);
-  margin-left: var(--app-spacing-sm);
-  padding-left: var(--app-spacing-sm);
+  border-left: 2px solid rgba(var(--primary-6), 0.28);
+  margin-left: 6px;
+  padding: 6px 0 0 10px;
+}
+
+.api-scenario-step-editor__children > header {
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+}
+
+.api-scenario-step-editor :deep(.arco-select-view-single),
+.api-scenario-step-editor :deep(.arco-input-wrapper),
+.api-scenario-step-editor :deep(.arco-input-number) {
+  min-height: 30px;
+}
+
+.api-scenario-step-editor__actions :deep(.arco-btn),
+.api-scenario-step-editor__toolbar-actions :deep(.arco-btn),
+.api-scenario-step-editor__child-actions :deep(.arco-btn) {
+  height: 28px;
+  padding: 0 6px;
 }
 
 .api-scenario-step-editor__empty {
@@ -507,6 +542,7 @@ function isChildContainerType(type: ApiScenarioStepType) {
   .api-scenario-step-editor__head,
   .api-scenario-step-editor__children header {
     display: grid;
+    grid-template-columns: 1fr;
   }
 }
 </style>

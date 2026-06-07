@@ -7,6 +7,7 @@
     :confirm-loading="saving || detailLoading"
     :before-ok="handleSubmit"
     width="860px"
+    class="api-scenario-dialog"
   >
     <a-spin :loading="detailLoading">
       <a-form :model="form" layout="vertical">
@@ -133,3 +134,13 @@ defineExpose({
   openEdit
 });
 </script>
+
+<style scoped>
+.api-scenario-dialog :deep(.arco-modal-body) {
+  padding-top: 14px;
+}
+
+.api-scenario-dialog :deep(.arco-form-item) {
+  margin-bottom: 12px;
+}
+</style>

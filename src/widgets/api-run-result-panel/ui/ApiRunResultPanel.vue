@@ -1,27 +1,21 @@
 <template>
   <section v-if="firstStep" class="api-run-result-panel" data-testid="api-run-result-panel">
-    <a-grid :cols="{ xs: 1, md: 3 }" :col-gap="12" :row-gap="12">
-      <a-grid-item>
-        <a-statistic
-          :title="t.apiAutomation.responseStatus"
-          :value="firstStep.response?.statusCode || 0"
-          data-testid="api-run-result-status"
-        />
-      </a-grid-item>
-      <a-grid-item>
-        <a-statistic
-          :title="t.apiAutomation.responseDuration"
-          :value="firstStep.durationMs"
-          suffix="ms"
-        />
-      </a-grid-item>
-      <a-grid-item>
-        <div class="api-run-result-panel__metric">
-          <span>{{ t.apiAutomation.lastRunResult }}</span>
-          <strong>{{ result?.result || '-' }}</strong>
-        </div>
-      </a-grid-item>
-    </a-grid>
+    <div class="api-run-result-panel__summary">
+      <a-statistic
+        :title="t.apiAutomation.responseStatus"
+        :value="firstStep.response?.statusCode || 0"
+        data-testid="api-run-result-status"
+      />
+      <a-statistic
+        :title="t.apiAutomation.responseDuration"
+        :value="firstStep.durationMs"
+        suffix="ms"
+      />
+      <div class="api-run-result-panel__metric">
+        <span>{{ t.apiAutomation.lastRunResult }}</span>
+        <strong>{{ result?.result || '-' }}</strong>
+      </div>
+    </div>
 
     <a-tabs>
       <a-tab-pane key="body" :title="t.apiAutomation.responseBody">
@@ -125,7 +119,9 @@
             />
             <div>
               <strong>{{ step.stepName || t.apiAutomation.runStepFallback }}</strong>
-              <p v-if="stepDisplayMessage(step, index)">{{ stepDisplayMessage(step, index) }}</p>
+              <p v-if="stepDisplayMessage(step, index)" class="api-run-result-panel__step-message">
+                {{ stepDisplayMessage(step, index) }}
+              </p>
               <p>{{ t.apiAutomation.responseDuration }}: {{ step.durationMs }}ms</p>
               <small v-if="step.errorMessage">{{ step.errorMessage }}</small>
             </div>
@@ -303,15 +299,41 @@ function normalizeLoopCount(loopCount?: number | string | null) {
 <style scoped>
 .api-run-result-panel {
   display: grid;
-  gap: var(--app-spacing-md);
+  gap: 10px;
   min-width: 0;
 }
 
+.api-run-result-panel__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-color-surface);
+}
+
+.api-run-result-panel__summary :deep(.arco-statistic),
 .api-run-result-panel__metric {
   display: grid;
-  gap: 8px;
-  min-height: 72px;
-  padding: 8px 0;
+  gap: 4px;
+  min-height: 58px;
+  border-right: 1px solid var(--app-color-border);
+  padding: 9px 12px;
+}
+
+.api-run-result-panel__metric {
+  border-right: 0;
+}
+
+.api-run-result-panel__summary :deep(.arco-statistic-title) {
+  margin-bottom: 0;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+}
+
+.api-run-result-panel__summary :deep(.arco-statistic-value) {
+  font-size: 22px;
+  line-height: 1.2;
 }
 
 .api-run-result-panel__metric span {
@@ -321,13 +343,13 @@ function normalizeLoopCount(loopCount?: number | string | null) {
 
 .api-run-result-panel__metric strong {
   color: var(--app-color-text);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.2;
 }
 
 .api-run-result-panel__pre {
-  max-height: 280px;
+  max-height: 260px;
   margin: 0;
   overflow: auto;
   border-radius: var(--app-radius-sm);
@@ -340,15 +362,22 @@ function normalizeLoopCount(loopCount?: number | string | null) {
 
 .api-run-result-panel__items {
   display: grid;
-  gap: var(--app-spacing-sm);
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
 }
 
 .api-run-result-panel__item,
 .api-run-result-panel__empty {
-  border: 1px solid var(--app-color-border);
-  border-radius: var(--app-radius-sm);
+  border-bottom: 1px solid var(--app-color-border);
   background: var(--app-color-surface);
-  padding: var(--app-spacing-sm);
+  padding: 8px 10px;
+}
+
+.api-run-result-panel__item:last-child,
+.api-run-result-panel__empty:last-child {
+  border-bottom: 0;
 }
 
 .api-run-result-panel__item {
@@ -368,8 +397,34 @@ function normalizeLoopCount(loopCount?: number | string | null) {
   margin-top: 4px;
 }
 
+.api-run-result-panel__step-message {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: var(--app-radius-sm);
+  background: rgba(var(--primary-6), 0.08);
+  color: rgb(var(--primary-7));
+  font-size: 12px;
+  padding: 1px 6px;
+}
+
 .api-run-result-panel__item small,
 .api-run-result-panel__empty {
   color: var(--app-color-text-muted);
+}
+
+@media (max-width: 720px) {
+  .api-run-result-panel__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .api-run-result-panel__summary :deep(.arco-statistic),
+  .api-run-result-panel__metric {
+    border-right: 0;
+    border-bottom: 1px solid var(--app-color-border);
+  }
+
+  .api-run-result-panel__metric {
+    border-bottom: 0;
+  }
 }
 </style>

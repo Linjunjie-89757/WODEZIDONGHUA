@@ -27,17 +27,25 @@
       {{ definitionId ? t.apiAutomation.caseEmpty : t.apiAutomation.caseSelectDefinition }}
     </div>
     <div v-else class="api-case-management__list" data-testid="api-case-list">
+      <div class="api-case-management__list-head">
+        <span>{{ t.apiAutomation.caseName }}</span>
+        <span>{{ t.apiAutomation.casePriority }}</span>
+        <span>{{ t.apiAutomation.fieldStatus }}</span>
+        <span></span>
+      </div>
       <article
         v-for="item in cases"
         :key="item.id"
         class="api-case-management__row"
         data-testid="api-case-row"
+        @click="selectCase(item.id)"
       >
-        <button type="button" class="api-case-management__row-main" @click="selectCase(item.id)">
+        <button type="button" class="api-case-management__row-main" @click.stop="selectCase(item.id)">
           <strong>{{ item.name }}</strong>
-          <small>{{ item.priority || '-' }} {{ t.apiAutomation.resultSeparator }} {{ item.status || '-' }}</small>
         </button>
-        <div class="api-case-management__row-actions">
+        <small>{{ item.priority || '-' }}</small>
+        <small>{{ item.status || '-' }}</small>
+        <div class="api-case-management__row-actions" @click.stop>
           <ApiCaseRunButton
             :case-id="item.id"
             :environment-id="environmentId"
@@ -181,7 +189,7 @@ watch(selectedCase, (value) => {
 .api-case-management__drawer,
 .api-case-management__history {
   display: grid;
-  gap: var(--app-spacing-md);
+  gap: 10px;
   min-width: 0;
 }
 
@@ -224,16 +232,38 @@ watch(selectedCase, (value) => {
 
 .api-case-management__list {
   display: grid;
-  gap: var(--app-spacing-sm);
+  gap: 0;
   min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.api-case-management__list-head,
+.api-case-management__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px 100px auto;
+  gap: var(--app-spacing-sm);
+  align-items: center;
+  min-width: 0;
+}
+
+.api-case-management__list-head {
+  background: #f8fafc;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
 }
 
 .api-case-management__row,
 .api-case-management__history article {
-  border: 1px solid var(--app-color-border);
-  border-radius: var(--app-radius-sm);
   background: var(--app-color-surface);
-  padding: var(--app-spacing-sm);
+  padding: 8px 10px;
+}
+
+.api-case-management__row {
+  border-top: 1px solid var(--app-color-border);
 }
 
 .api-case-management__row-main {
@@ -247,10 +277,18 @@ watch(selectedCase, (value) => {
   text-align: left;
 }
 
+.api-case-management__row-main strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 720px) {
   .api-case-management__header,
-  .api-case-management__row {
+  .api-case-management__row,
+  .api-case-management__list-head {
     display: grid;
+    grid-template-columns: 1fr;
   }
 }
 </style>

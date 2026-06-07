@@ -19,11 +19,9 @@
             <p>{{ definition.path }}</p>
           </div>
         </div>
-        <div class="api-definition-list__meta">
-          <span>{{ t.apiAutomation.updatedAt }}: {{ definition.updatedAt || '-' }}</span>
-          <span>{{ t.apiAutomation.lastRunResult }}: {{ definition.lastRunResult || '-' }}</span>
-        </div>
         <div class="api-definition-list__actions" @click.stop>
+          <span class="api-definition-list__meta">{{ definition.updatedAt || '-' }}</span>
+          <span class="api-definition-list__meta">{{ definition.lastRunResult || '-' }}</span>
           <AppButton type="text" data-testid="api-definition-edit" @click="$emit('edit', definition.id)">
             {{ t.apiAutomation.edit }}
           </AppButton>
@@ -62,22 +60,30 @@ defineEmits<{
 
 .api-definition-list__items {
   display: grid;
-  gap: var(--app-spacing-sm);
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
 }
 
 .api-definition-list__item {
   display: grid;
-  gap: 10px;
-  border: 1px solid var(--app-color-border);
-  border-radius: var(--app-radius-sm);
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--app-spacing-sm);
+  align-items: center;
+  border-bottom: 1px solid var(--app-color-border);
   background: var(--app-color-bg);
   cursor: pointer;
-  padding: var(--app-spacing-md);
+  padding: 9px 10px;
+}
+
+.api-definition-list__item:last-child {
+  border-bottom: 0;
 }
 
 .api-definition-list__item--active {
-  border-color: rgb(var(--primary-6));
-  box-shadow: 0 0 0 2px rgba(var(--primary-6), 0.12);
+  background: rgba(var(--primary-6), 0.06);
+  box-shadow: inset 3px 0 0 rgb(var(--primary-6));
 }
 
 .api-definition-list__main,
@@ -90,7 +96,7 @@ defineEmits<{
 }
 
 .api-definition-list__main {
-  align-items: flex-start;
+  align-items: center;
 }
 
 .api-definition-list__content {
@@ -103,8 +109,12 @@ defineEmits<{
 }
 
 .api-definition-list__content h3 {
-  font-size: 15px;
+  overflow: hidden;
+  color: var(--app-color-text);
+  font-size: 14px;
   font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .api-definition-list__content p,
@@ -113,17 +123,25 @@ defineEmits<{
 }
 
 .api-definition-list__content p {
-  margin-top: 4px;
+  margin-top: 2px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
 .api-definition-list__meta {
-  flex-wrap: wrap;
+  color: var(--app-color-text-muted);
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .api-definition-list__actions {
   justify-content: flex-end;
   flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .api-definition-list__item {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

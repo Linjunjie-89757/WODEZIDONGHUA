@@ -47,17 +47,25 @@
             {{ t.apiAutomation.scenarioEmpty }}
           </div>
           <div v-else class="api-scenario-management__list" data-testid="api-scenario-list">
+            <div class="api-scenario-management__list-head">
+              <span>{{ t.apiAutomation.scenarioName }}</span>
+              <span>{{ t.apiAutomation.fieldStatus }}</span>
+              <span>{{ t.apiAutomation.lastRunResult }}</span>
+              <span></span>
+            </div>
             <article
               v-for="scenario in scenarios"
               :key="scenario.id"
               class="api-scenario-management__row"
               data-testid="api-scenario-row"
+              @click="selectScenario(scenario.id)"
             >
-              <button type="button" class="api-scenario-management__row-main" @click="selectScenario(scenario.id)">
+              <button type="button" class="api-scenario-management__row-main" @click.stop="selectScenario(scenario.id)">
                 <strong>{{ scenario.name }}</strong>
-                <small>{{ scenario.status || '-' }} {{ t.apiAutomation.resultSeparator }} {{ scenario.lastRunResult || '-' }}</small>
               </button>
-              <div class="api-scenario-management__row-actions">
+              <small>{{ scenario.status || '-' }}</small>
+              <small>{{ scenario.lastRunResult || '-' }}</small>
+              <div class="api-scenario-management__row-actions" @click.stop>
                 <ApiScenarioRunButton
                   :scenario-id="scenario.id"
                   :environment-id="environmentId"
@@ -275,20 +283,49 @@ const ScenarioStepNode = defineComponent({
 
 .api-scenario-management__header p,
 .api-scenario-management__empty,
-.api-scenario-management__row-main small,
+.api-scenario-management__row small,
 .api-scenario-management__modules small,
 .api-scenario-management__step small {
   color: var(--app-color-text-muted);
 }
 
 .api-scenario-management__panel,
-.api-scenario-management__row,
 .api-scenario-management__modules article,
 .api-scenario-management__step {
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm);
   background: var(--app-color-surface);
   padding: var(--app-spacing-sm);
+}
+
+.api-scenario-management__list {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.api-scenario-management__list-head,
+.api-scenario-management__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 120px auto;
+  gap: var(--app-spacing-sm);
+  align-items: center;
+  min-width: 0;
+}
+
+.api-scenario-management__list-head {
+  background: #f8fafc;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+}
+
+.api-scenario-management__row {
+  border-top: 1px solid var(--app-color-border);
+  background: var(--app-color-surface);
+  padding: 8px 10px;
 }
 
 .api-scenario-management__row-main {
@@ -300,6 +337,12 @@ const ScenarioStepNode = defineComponent({
   color: inherit;
   cursor: pointer;
   text-align: left;
+}
+
+.api-scenario-management__row-main strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .api-scenario-management__step {
@@ -315,8 +358,10 @@ const ScenarioStepNode = defineComponent({
 
 @media (max-width: 720px) {
   .api-scenario-management__header,
-  .api-scenario-management__row {
+  .api-scenario-management__row,
+  .api-scenario-management__list-head {
     display: grid;
+    grid-template-columns: 1fr;
   }
 }
 </style>

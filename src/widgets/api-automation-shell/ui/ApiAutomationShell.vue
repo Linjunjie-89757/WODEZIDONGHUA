@@ -10,20 +10,12 @@
       </AppButton>
     </template>
 
-    <a-grid :cols="{ xs: 1, sm: 4 }" :col-gap="12" :row-gap="12">
-      <a-grid-item>
-        <a-statistic :title="t.apiAutomation.definitionTotal" :value="summary.definitionTotal" />
-      </a-grid-item>
-      <a-grid-item>
-        <a-statistic :title="t.apiAutomation.moduleTotal" :value="summary.moduleTotal" />
-      </a-grid-item>
-      <a-grid-item>
-        <a-statistic :title="t.apiAutomation.environmentTotal" :value="summary.environmentTotal" />
-      </a-grid-item>
-      <a-grid-item>
-        <a-statistic :title="t.apiAutomation.variableSetTotal" :value="summary.variableSetTotal" />
-      </a-grid-item>
-    </a-grid>
+    <div class="api-automation-shell__summary">
+      <a-statistic :title="t.apiAutomation.definitionTotal" :value="summary.definitionTotal" />
+      <a-statistic :title="t.apiAutomation.moduleTotal" :value="summary.moduleTotal" />
+      <a-statistic :title="t.apiAutomation.environmentTotal" :value="summary.environmentTotal" />
+      <a-statistic :title="t.apiAutomation.variableSetTotal" :value="summary.variableSetTotal" />
+    </div>
 
     <AppLoadingState v-if="loading" />
     <a-alert v-else-if="errorMessage" type="error" show-icon>
@@ -31,7 +23,7 @@
       <AppButton type="text" @click="loadReadonly">{{ t.common.retry }}</AppButton>
     </a-alert>
     <div v-else class="api-automation-shell__grid">
-      <AppCard class="api-automation-shell__side">
+      <AppCard class="api-automation-shell__side api-automation-shell__card">
         <section class="api-automation-shell__panel">
           <h3 class="api-automation-shell__panel-title">{{ t.apiAutomation.modulesSection }}</h3>
           <ApiDefinitionModuleTree :modules="definitionModules" />
@@ -39,7 +31,7 @@
       </AppCard>
 
       <div class="api-automation-shell__main">
-        <AppCard>
+        <AppCard class="api-automation-shell__card api-automation-shell__context">
           <section class="api-automation-shell__panel">
             <header class="api-automation-shell__panel-header">
               <h3 class="api-automation-shell__panel-title">{{ t.apiAutomation.runContextSection }}</h3>
@@ -73,7 +65,7 @@
           </section>
         </AppCard>
 
-        <AppCard>
+        <AppCard class="api-automation-shell__card">
           <section class="api-automation-shell__panel">
             <header class="api-automation-shell__panel-header">
               <h3 class="api-automation-shell__panel-title">{{ t.apiAutomation.definitionsSection }}</h3>
@@ -91,7 +83,7 @@
           </section>
         </AppCard>
 
-        <AppCard>
+        <AppCard class="api-automation-shell__card">
           <section class="api-automation-shell__panel">
             <ApiDefinitionDebugPanel
               :definition-id="selectedDefinitionId"
@@ -104,7 +96,7 @@
           </section>
         </AppCard>
 
-        <AppCard>
+        <AppCard class="api-automation-shell__card">
           <ApiCaseManagement
             :definition-id="selectedDefinitionId"
             :selected-definition-name="selectedDefinition?.name || ''"
@@ -113,7 +105,7 @@
           />
         </AppCard>
 
-        <AppCard>
+        <AppCard class="api-automation-shell__card">
           <ApiScenarioManagement
             :definitions="definitions"
             :environment-id="selectedEnvironmentId"
@@ -189,9 +181,38 @@ async function openEditDialog(id: number) {
 <style scoped>
 .api-automation-shell__grid {
   display: grid;
-  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
-  gap: var(--app-spacing-md);
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 10px;
   min-width: 0;
+}
+
+.api-automation-shell__summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-color-surface);
+}
+
+.api-automation-shell__summary :deep(.arco-statistic) {
+  min-width: 0;
+  padding: 10px 14px;
+  border-right: 1px solid var(--app-color-border);
+}
+
+.api-automation-shell__summary :deep(.arco-statistic:last-child) {
+  border-right: 0;
+}
+
+.api-automation-shell__summary :deep(.arco-statistic-title) {
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.api-automation-shell__summary :deep(.arco-statistic-value) {
+  font-size: 22px;
+  line-height: 1.2;
 }
 
 .api-automation-shell__side,
@@ -201,12 +222,24 @@ async function openEditDialog(id: number) {
 
 .api-automation-shell__main {
   display: grid;
-  gap: var(--app-spacing-md);
+  gap: 10px;
+}
+
+.api-automation-shell__card {
+  border-radius: var(--app-radius-md);
+}
+
+.api-automation-shell__card :deep(.arco-card-body) {
+  padding: 12px 14px;
+}
+
+.api-automation-shell__context :deep(.arco-select-view-single) {
+  min-height: 32px;
 }
 
 .api-automation-shell__panel {
   display: grid;
-  gap: var(--app-spacing-md);
+  gap: 10px;
   min-width: 0;
 }
 
@@ -229,6 +262,16 @@ async function openEditDialog(id: number) {
 @media (max-width: 1024px) {
   .api-automation-shell__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .api-automation-shell__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .api-automation-shell__summary :deep(.arco-statistic:nth-child(2)) {
+    border-right: 0;
   }
 }
 </style>
