@@ -155,8 +155,12 @@ const responseHeaders = computed(() =>
   JSON.stringify(firstStep.value?.response?.headers || {}, null, 2)
 );
 const assertionResults = computed(() => firstStep.value?.assertionResults || []);
-const processorResults = computed(() => firstStep.value?.processorResults || []);
-const extractionResults = computed(() => firstStep.value?.extractionResults || []);
+const processorResults = computed(() =>
+  (props.result.stepResults || []).flatMap((step) => step.processorResults || [])
+);
+const extractionResults = computed(() =>
+  (props.result.stepResults || []).flatMap((step) => step.extractionResults || [])
+);
 const rawResult = computed(() => JSON.stringify(props.result, null, 2));
 
 function assertionResultTypeLabel(type: string) {

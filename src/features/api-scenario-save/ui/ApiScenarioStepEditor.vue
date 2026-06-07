@@ -15,6 +15,9 @@
         <AppButton type="text" data-testid="api-scenario-add-wait-step" @click="addStep('CONSTANT_TIMER')">
           {{ t.apiAutomation.scenarioAddWaitStep }}
         </AppButton>
+        <AppButton type="text" data-testid="api-scenario-add-script-step" @click="addStep('SCRIPT')">
+          {{ t.apiAutomation.scenarioAddScriptStep }}
+        </AppButton>
         <AppButton type="text" data-testid="api-scenario-add-group-step" @click="addStep('GROUP')">
           {{ t.apiAutomation.scenarioAddGroupStep }}
         </AppButton>
@@ -43,6 +46,7 @@
           <a-option value="API_CASE">{{ t.apiAutomation.scenarioStepCase }}</a-option>
           <a-option value="CUSTOM_REQUEST">{{ t.apiAutomation.scenarioStepCustom }}</a-option>
           <a-option value="CONSTANT_TIMER">{{ t.apiAutomation.scenarioStepWait }}</a-option>
+          <a-option value="SCRIPT">{{ t.apiAutomation.scenarioStepScript }}</a-option>
           <a-option value="GROUP">{{ t.apiAutomation.scenarioStepGroup }}</a-option>
         </a-select>
         <a-input
@@ -131,6 +135,15 @@
             @update:model-value="(value) => patchWaitDelay(index, value)"
           />
         </a-grid-item>
+        <a-grid-item v-if="step.stepType === 'SCRIPT'" :span="2">
+          <a-textarea
+            :model-value="step.script || ''"
+            data-testid="api-scenario-script-input"
+            :auto-size="{ minRows: 5, maxRows: 10 }"
+            :placeholder="t.apiAutomation.scenarioScriptPlaceholder"
+            @update:model-value="(value) => patchScript(index, value)"
+          />
+        </a-grid-item>
       </a-grid>
 
       <section v-if="isGroupStep(step)" class="api-scenario-step-editor__children">
@@ -169,6 +182,7 @@ import {
   createGroupStep,
   createReferenceCaseStep,
   createReferenceDefinitionStep,
+  createScriptStep,
   createWaitStep,
   type ApiDefinitionCaseItem,
   type ApiDefinitionItem,
@@ -307,6 +321,16 @@ function patchWaitDelay(index: number, delayMs: number | string | null | undefin
   });
 }
 
+function patchScript(index: number, script: string) {
+  patchStep(index, {
+    script,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    children: []
+  });
+}
+
 function createStep(type: ApiScenarioStepType) {
   if (type === 'API') {
     return createReferenceDefinitionStep();
@@ -322,6 +346,10 @@ function createStep(type: ApiScenarioStepType) {
 
   if (type === 'CONSTANT_TIMER') {
     return createWaitStep();
+  }
+
+  if (type === 'SCRIPT') {
+    return createScriptStep();
   }
 
   return createCustomRequestStep();

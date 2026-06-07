@@ -10,6 +10,7 @@ export {
   createGroupStep,
   createReferenceCaseStep,
   createReferenceDefinitionStep,
+  createScriptStep,
   createWaitStep,
   createScenarioEditForm,
   normalizeScenarioSteps,

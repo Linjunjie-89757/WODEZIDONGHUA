@@ -42,6 +42,24 @@ export function createWaitStep(): ApiScenarioStep {
   };
 }
 
+export function createScriptStep(): ApiScenarioStep {
+  return {
+    id: stepId('script'),
+    name: 'Script',
+    stepName: 'Script',
+    stepType: 'SCRIPT',
+    enabled: true,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    script: 'log("Script executed");',
+    assertions: [],
+    preProcessors: [],
+    postProcessors: [],
+    children: []
+  };
+}
+
 export function createReferenceDefinitionStep(): ApiScenarioStep {
   return {
     id: stepId('definition'),
@@ -187,6 +205,25 @@ export function normalizeScenarioSteps(steps: ApiScenarioStep[]): ApiScenarioSte
       };
     }
 
+    if (base.stepType === 'SCRIPT') {
+      return {
+        ...base,
+        stepType: 'SCRIPT',
+        resource: null,
+        resourceId: null,
+        resourceType: null,
+        definitionId: null,
+        definitionName: null,
+        caseId: null,
+        caseName: null,
+        requestConfig: null,
+        script: base.script || '',
+        preProcessors: [],
+        postProcessors: [],
+        children: []
+      };
+    }
+
     return {
       ...base,
       stepType: 'CUSTOM_REQUEST',
@@ -208,7 +245,8 @@ function fallbackStepName(step: ApiScenarioStep) {
     API_CASE: 'API Case Step',
     CUSTOM_REQUEST: 'Custom Request',
     GROUP: 'Step Group',
-    CONSTANT_TIMER: 'Constant Timer'
+    CONSTANT_TIMER: 'Constant Timer',
+    SCRIPT: 'Script'
   };
 
   return names[step.stepType] || 'Scenario Step';
@@ -245,6 +283,15 @@ function toSaveScenarioStepPayload(step: ApiScenarioStep): ApiScenarioStepPayloa
   if (payload.stepType === 'CONSTANT_TIMER') {
     payload.children = [];
     payload.delayMs = normalizeWaitDelay(payload.delayMs);
+  }
+
+  if (payload.stepType === 'SCRIPT') {
+    payload.children = [];
+    payload.resource = null;
+    payload.resourceId = null;
+    payload.resourceType = null;
+    payload.requestConfig = null;
+    payload.script = (payload.script || '').trim();
   }
 
   return payload;
