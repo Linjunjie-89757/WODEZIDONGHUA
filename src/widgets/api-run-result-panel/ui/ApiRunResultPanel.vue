@@ -114,7 +114,7 @@
       <a-tab-pane v-if="result.stepResults.length > 1" key="steps" :title="t.apiAutomation.runSteps">
         <div class="api-run-result-panel__items" data-testid="api-run-result-steps">
           <article
-            v-for="step in result.stepResults"
+            v-for="(step, index) in result.stepResults"
             :key="`${step.stepOrder}-${step.stepName}`"
             class="api-run-result-panel__item"
             data-testid="api-run-result-step-row"
@@ -125,6 +125,7 @@
             />
             <div>
               <strong>{{ step.stepName || t.apiAutomation.runStepFallback }}</strong>
+              <p v-if="stepDisplayMessage(step, index)">{{ stepDisplayMessage(step, index) }}</p>
               <p>{{ t.apiAutomation.responseDuration }}: {{ step.durationMs }}ms</p>
               <small v-if="step.errorMessage">{{ step.errorMessage }}</small>
             </div>
@@ -141,12 +142,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import type { ApiRunResponse } from '@entities/api-automation';
+import type { ApiRunResponse, ApiRunStepResult, ApiScenarioStep } from '@entities/api-automation';
 import { t } from '@shared/i18n';
 import { AppStatusBadge } from '@shared/ui';
 
 const props = defineProps<{
   result: ApiRunResponse;
+  scenarioSteps?: ApiScenarioStep[];
 }>();
 
 const firstStep = computed(() => props.result.stepResults?.[0] || null);
@@ -162,6 +164,7 @@ const extractionResults = computed(() =>
   (props.result.stepResults || []).flatMap((step) => step.extractionResults || [])
 );
 const rawResult = computed(() => JSON.stringify(props.result, null, 2));
+const inferredScenarioStepMessages = computed(() => inferScenarioStepMessages(props.scenarioSteps || []));
 
 function assertionResultTypeLabel(type: string) {
   const labels: Record<string, string> = {
@@ -172,6 +175,44 @@ function assertionResultTypeLabel(type: string) {
   };
 
   return labels[type] || type;
+}
+
+function stepDisplayMessage(step: ApiRunStepResult, index: number) {
+  return step.message || inferredScenarioStepMessages.value[index] || '';
+}
+
+function inferScenarioStepMessages(steps: ApiScenarioStep[]) {
+  const messages: string[] = [];
+  const onceOnlyKeys = new Set<string>();
+
+  function visit(stepList: ApiScenarioStep[]) {
+    for (const step of stepList) {
+      if (step.enabled === false) {
+        continue;
+      }
+
+      if (step.stepType === 'ONCE_ONLY_CONTROLLER') {
+        const key = String(step.id || step.stepName || step.name || `once-only-${messages.length + 1}`);
+        const firstRun = !onceOnlyKeys.has(key);
+        onceOnlyKeys.add(key);
+        messages.push(firstRun ? 'Executed' : 'Skipped');
+
+        if (firstRun) {
+          visit(step.children || []);
+        }
+        continue;
+      }
+
+      messages.push('');
+
+      if (step.children?.length) {
+        visit(step.children);
+      }
+    }
+  }
+
+  visit(steps);
+  return messages;
 }
 </script>
 

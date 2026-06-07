@@ -8,9 +8,14 @@ const username = process.env.SMOKE_USERNAME || 'superadmin';
 const password = process.env.SMOKE_PASSWORD || 'superadmin123';
 const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
 const scenarioName = `smoke-once-scenario-${stamp}`;
+const duplicateScenarioName = `smoke-once-duplicate-${stamp}`;
 const onceStepName = `smoke-once-step-${stamp}`;
 const childStepName = `smoke-once-child-${stamp}`;
 const deletedChildName = `smoke-once-delete-${stamp}`;
+const duplicateFirstStepName = `smoke-once-duplicate-first-${stamp}`;
+const duplicateSecondStepName = `smoke-once-duplicate-second-${stamp}`;
+const duplicateFirstChildName = `smoke-once-duplicate-first-child-${stamp}`;
+const duplicateSecondChildName = `smoke-once-duplicate-second-child-${stamp}`;
 const childRequestUrl = 'http://localhost:8080/api/auth/me';
 const editedChildRequestUrl = 'http://localhost:8080/api/workspaces/switchable';
 const screenshotPath = `output/playwright/api-scenario-once-${stamp}.png`;
@@ -24,6 +29,8 @@ const pageErrors = [];
 let createScenarioPayload = null;
 let updateScenarioPayload = null;
 let runScenarioBody = null;
+let backendMessageFieldSupported = false;
+let duplicateScenarioId = null;
 
 page.on('response', (response) => {
   const url = response.url();
@@ -143,12 +150,20 @@ function pageItems(payload) {
 async function cleanupByApi() {
   const scenarioPage = await apiFetch('/automation/api/scenarios');
   const scenarios = pageItems(scenarioPage).filter((item) =>
-    String(item.name || '').startsWith('smoke-once-scenario-')
+    String(item.name || '').startsWith('smoke-once-scenario-') ||
+    String(item.name || '').startsWith('smoke-once-duplicate-')
   );
 
   for (const scenario of scenarios) {
     await apiFetch(`/automation/api/scenarios/${scenario.id}`, { method: 'DELETE' });
   }
+}
+
+async function loadScenarioList() {
+  await page.keyboard.press('Escape');
+  await page.locator('.arco-drawer:visible').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => undefined);
+  await page.getByTestId('api-scenario-retry').click();
+  await page.getByTestId('api-scenario-list').waitFor({ timeout: 15000 });
 }
 
 function parsePayload(payload) {
@@ -335,12 +350,176 @@ async function runScenarioAndVerifyOnceResult() {
   await page.getByTestId('api-scenario-run-result').getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
   await page.getByTestId('api-scenario-run-result').getByTestId('api-run-result-steps').waitFor({ timeout: 25000 });
   await page.getByTestId('api-run-result-step-row').filter({ hasText: onceStepName }).waitFor({ timeout: 25000 });
+  await page.getByTestId('api-run-result-step-row').filter({ hasText: onceStepName }).filter({ hasText: 'Executed' }).waitFor({ timeout: 25000 });
 
   const runData = runScenarioBody?.data || runScenarioBody;
   const onceResult = (runData?.stepResults || []).find((step) => step.stepName === onceStepName);
 
   if (!onceResult) {
     throw new Error('Run response does not include an independent once-only controller result.');
+  }
+
+  backendMessageFieldSupported = onceResult.message === 'Executed';
+}
+
+function customRequestStep(id, name, path) {
+  return {
+    id,
+    stepName: name,
+    stepType: 'CUSTOM_REQUEST',
+    enabled: true,
+    resourceId: null,
+    resourceType: 'CUSTOM',
+    requestConfig: {
+      method: 'GET',
+      path,
+      timeoutMs: 10000,
+      queryParams: [],
+      headers: [],
+      cookies: [],
+      body: {
+        type: 'RAW',
+        rawText: '',
+        formItems: [],
+        contentType: 'application/json'
+      },
+      authConfig: {
+        authType: 'NONE',
+        basicAuth: null,
+        digestAuth: null
+      }
+    },
+    assertions: [],
+    preProcessors: [],
+    postProcessors: [],
+    children: []
+  };
+}
+
+function onceOnlyStep(name, childName, childPath) {
+  return {
+    id: `stable-once-${stamp}`,
+    stepName: name,
+    stepType: 'ONCE_ONLY_CONTROLLER',
+    enabled: true,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    assertions: [],
+    preProcessors: [],
+    postProcessors: [],
+    children: [
+      customRequestStep(`custom-${childName}`, childName, childPath)
+    ]
+  };
+}
+
+async function createDuplicateOnceScenarioByApi() {
+  const payload = {
+    workspaceCode: 'account-open',
+    moduleId: null,
+    name: duplicateScenarioName,
+    description: 'once-only duplicate key smoke',
+    status: 'ACTIVE',
+    environmentId: null,
+    variableSetId: null,
+    variables: [],
+    assertions: [],
+    steps: [
+      onceOnlyStep(duplicateFirstStepName, duplicateFirstChildName, childRequestUrl),
+      onceOnlyStep(duplicateSecondStepName, duplicateSecondChildName, childRequestUrl)
+    ]
+  };
+
+  const response = await apiFetch('/automation/api/scenarios', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`Failed to create duplicate once-only scenario by API: ${response.status}.`);
+  }
+
+  duplicateScenarioId = response.body?.data?.id || response.body?.id;
+  if (!duplicateScenarioId) {
+    throw new Error('Duplicate once-only scenario API response did not include scenario id.');
+  }
+}
+
+async function runDuplicateOnceScenarioAndVerifySkipped() {
+  await createDuplicateOnceScenarioByApi();
+
+  const runResponse = await apiFetch(`/automation/api/scenarios/${duplicateScenarioId}/run`, {
+    method: 'POST',
+    body: JSON.stringify({
+      workspaceCode: 'account-open',
+      environmentId: null,
+      variableSetId: null
+    })
+  });
+
+  if (runResponse.status < 200 || runResponse.status >= 300) {
+    throw new Error(`Duplicate once-only scenario run failed: ${runResponse.status}.`);
+  }
+
+  const runData = runResponse.body?.data || runResponse.body;
+  const stepResults = runData?.stepResults || [];
+  const firstOnce = stepResults.find((step) => step.stepName === duplicateFirstStepName);
+  const secondOnce = stepResults.find((step) => step.stepName === duplicateSecondStepName);
+  const firstChild = stepResults.find((step) => step.stepName === duplicateFirstChildName);
+  const secondChild = stepResults.find((step) => step.stepName === duplicateSecondChildName);
+
+  if (!firstOnce || !secondOnce) {
+    throw new Error('Duplicate once-only run did not include both controller result rows.');
+  }
+
+  if (!firstChild) {
+    throw new Error('Duplicate once-only first controller child did not execute.');
+  }
+
+  if (secondChild) {
+    throw new Error('Duplicate once-only second controller child should be skipped but was executed.');
+  }
+
+  if (firstOnce.message || secondOnce.message) {
+    backendMessageFieldSupported = true;
+  }
+}
+
+async function runDuplicateOnceScenarioInUiAndVerifyMessages() {
+  await page.getByText(duplicateScenarioName).waitFor({ timeout: 15000 });
+  const row = page.getByTestId('api-scenario-row').filter({ hasText: duplicateScenarioName }).first();
+  await row.locator('.api-scenario-management__row-main').click();
+  await page.getByTestId('api-scenario-detail').waitFor({ timeout: 15000 });
+  await page.keyboard.press('Escape');
+  await page.locator('.arco-drawer:visible').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => undefined);
+
+  const runResponse = page.waitForResponse((response) =>
+    response.url().includes(`/api/automation/api/scenarios/${duplicateScenarioId}/run`) &&
+    response.request().method() === 'POST' &&
+    response.status() >= 200 &&
+    response.status() < 300
+  );
+  await row.getByTestId('api-scenario-run').click();
+  await runResponse;
+  await page.getByTestId('api-scenario-run-result').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-run-result').getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-run-result-step-row')
+    .filter({ hasText: duplicateFirstStepName })
+    .filter({ hasText: 'Executed' })
+    .waitFor({ timeout: 25000 });
+  await page.getByTestId('api-run-result-step-row')
+    .filter({ hasText: duplicateSecondStepName })
+    .filter({ hasText: 'Skipped' })
+    .waitFor({ timeout: 25000 });
+
+  const skippedChildVisible = await page.getByTestId('api-run-result-step-row')
+    .filter({ hasText: duplicateSecondChildName })
+    .isVisible()
+    .catch(() => false);
+
+  if (skippedChildVisible) {
+    throw new Error('Duplicate once-only skipped child is visible in UI run result.');
   }
 }
 
@@ -362,6 +541,9 @@ try {
   await createScenarioWithOnceStep();
   await editScenarioAndVerifyOnceStep();
   await runScenarioAndVerifyOnceResult();
+  await runDuplicateOnceScenarioAndVerifySkipped();
+  await loadScenarioList();
+  await runDuplicateOnceScenarioInUiAndVerifyMessages();
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   if (overflow) {
@@ -392,6 +574,10 @@ try {
       scenarioName,
       onceStepName,
       childStepName,
+      duplicateScenarioName,
+      duplicateFirstStepName,
+      duplicateSecondStepName,
+      backendMessageFieldSupported,
       screenshotPath,
       consoleMessages,
       pageErrors,
@@ -411,6 +597,10 @@ try {
       scenarioName,
       onceStepName,
       childStepName,
+      duplicateScenarioName,
+      duplicateFirstStepName,
+      duplicateSecondStepName,
+      backendMessageFieldSupported,
       screenshotPath,
       error: error instanceof Error ? error.message : String(error),
       consoleMessages,

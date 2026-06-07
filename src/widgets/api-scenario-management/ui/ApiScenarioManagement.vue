@@ -99,7 +99,7 @@
             <div v-else class="api-scenario-management__steps" data-testid="api-scenario-step-tree">
               <ScenarioStepNode
                 v-for="(step, index) in selectedScenarioDetail.steps"
-                :key="step.id || index"
+                :key="`${step.id || step.stepName || 'step'}-${index}`"
                 :step="step"
               />
             </div>
@@ -107,7 +107,7 @@
 
           <section v-if="runResult" data-testid="api-scenario-run-result">
             <h4>{{ t.apiAutomation.scenarioRunResult }}</h4>
-            <ApiRunResultPanel :result="runResult" />
+            <ApiRunResultPanel :result="runResult" :scenario-steps="selectedScenarioDetail?.steps || []" />
           </section>
         </div>
       </a-spin>
@@ -214,7 +214,12 @@ const ScenarioStepNode = defineComponent({
           ? h(
               'div',
               { class: 'api-scenario-management__step-children' },
-              stepProps.step.children.map((child) => h(ScenarioStepNode, { step: child }))
+              stepProps.step.children.map((child, index) =>
+                h(ScenarioStepNode, {
+                  key: `${child.id || child.stepName || 'step'}-${index}`,
+                  step: child
+                })
+              )
             )
           : null
       ]);

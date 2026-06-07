@@ -260,6 +260,7 @@ export interface ApiRunStepResult {
   assertionResults: ApiAssertionResult[];
   extractionResults: ApiExtractionResult[];
   processorResults: ApiProcessorResult[];
+  message?: string | null;
   errorMessage: string | null;
   createdAt: string | null;
 }

@@ -65,15 +65,17 @@ Latest result:
 
 ```text
 status: pass
-scenario: smoke-once-scenario-20260607071019
-once step: smoke-once-step-20260607071019
-child step: smoke-once-child-20260607071019
+scenario: smoke-once-scenario-20260607073221
+once step: smoke-once-step-20260607073221
+child step: smoke-once-child-20260607073221
+duplicate scenario: smoke-once-duplicate-20260607073221
+backend message field supported: false
 ```
 
 Screenshot:
 
 ```text
-output/playwright/api-scenario-once-20260607071019.png
+output/playwright/api-scenario-once-20260607073221.png
 ```
 
 Covered checks:
@@ -89,11 +91,14 @@ Covered checks:
 - Once-only controller top-level sorting controls work.
 - Scenario run completes.
 - Shared run result panel displays the once-only controller step row.
+- UI displays `Executed` for the first once-only controller.
+- API-only duplicate stable id scenario verifies the second controller child is skipped.
+- UI displays `Executed` and `Skipped` for duplicate stable id once-only controllers.
 - Screenshot is captured.
 - Page has no horizontal overflow.
 - Created smoke scenario is deleted by API cleanup.
 
 ## Risks
 
-- The backend run response type currently exposes controller synthetic rows, but the frontend result model does not surface the controller message field directly. The result panel verifies the controller row by step name.
-- `Skipped` behavior depends on stable duplicate once-only keys inside one scenario run. Normal UI does not intentionally create duplicate ids.
+- The backend run response type currently exposes controller synthetic rows but does not return a dedicated success `message` field. Frontend 2.0 accepts `message` when present and otherwise infers once-only `Executed` / `Skipped` display from the selected scenario steps.
+- `Skipped` behavior depends on stable duplicate once-only keys inside one scenario run. Normal UI does not intentionally create duplicate ids; smoke creates the duplicate-key scenario through API only.
