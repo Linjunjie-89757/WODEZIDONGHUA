@@ -68,7 +68,11 @@ function inputByTestId(testId) {
 }
 
 async function openWorkbenchTab(label) {
-  await page.getByTestId('api-automation-workbench-tabs').locator('.arco-tabs-tab-title').filter({ hasText: label }).click();
+  await page
+    .getByTestId('api-automation-workbench-tabs')
+    .locator('> .arco-tabs-nav .arco-tabs-tab-title')
+    .filter({ hasText: label })
+    .click();
 }
 
 async function clickVisibleModalPrimaryButton() {

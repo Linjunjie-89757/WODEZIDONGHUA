@@ -9,7 +9,7 @@ const password = process.env.SMOKE_PASSWORD || 'superadmin123';
 const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
 const definitionName = `smoke-api-definition-${stamp}`;
 const editedDefinitionName = `${definitionName}-edited`;
-const screenshotPath = `output/playwright/api-automation-phase1-4-${stamp}.png`;
+const screenshotPath = `output/playwright/api-automation-phase3b-${stamp}.png`;
 const smokeRequestUrl = 'http://localhost:8080/api/auth/me';
 
 const browser = await chromium.launch({ headless: true });
@@ -68,6 +68,18 @@ function endpointReturned(path, method = 'GET') {
 
 function inputByTestId(testId) {
   return page.getByTestId(testId).locator('input, textarea').first();
+}
+
+async function assertRequestEditorShell() {
+  await page.getByTestId('api-definition-request-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-editor-tabs').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-command-row').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-content-tabs').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-response-shell').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求头' }).click();
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求体' }).click();
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: 'Params' }).click();
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '断言' }).click();
 }
 
 async function clickVisibleModalPrimaryButton() {
@@ -181,7 +193,10 @@ async function debugDefinition() {
   const row = page.locator('[data-testid="api-definition-row"]').filter({ hasText: editedDefinitionName }).first();
 
   await row.getByTestId('api-definition-debug').click();
+  await assertRequestEditorShell();
+  await page.getByTestId('api-definition-command-row').getByText(smokeRequestUrl).waitFor({ timeout: 15000 });
   await page.getByTestId('api-debug-send').click();
+  await page.getByTestId('api-definition-response-shell').getByTestId('api-run-result-panel').waitFor({ timeout: 20000 });
   await page.getByTestId('api-run-result-status').waitFor({ timeout: 20000 });
   await page.getByTestId('api-run-result-response-body').waitFor({ timeout: 20000 });
   await page.getByTestId('api-run-result-assertion-tab').click();
