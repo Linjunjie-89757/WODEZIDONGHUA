@@ -2,7 +2,10 @@
   <AppCard>
     <section class="config-list-panel">
       <header class="config-list-panel__header">
-        <h3 class="config-list-panel__title">{{ title }}</h3>
+        <div>
+          <h3 class="config-list-panel__title">{{ title }}</h3>
+          <p v-if="description" class="config-list-panel__description">{{ description }}</p>
+        </div>
         <div v-if="$slots.actions" class="config-list-panel__actions">
           <slot name="actions" />
         </div>
@@ -22,6 +25,7 @@ defineProps<{
   title: string;
   emptyText: string;
   count: number;
+  description?: string;
 }>();
 </script>
 
@@ -41,14 +45,26 @@ defineProps<{
 
 .config-list-panel__title {
   margin: 0;
-  font-size: 15px;
+  color: #111827;
+  font-size: 16px;
   font-weight: 650;
   line-height: 1.4;
+}
+
+.config-list-panel__description {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 13px;
 }
 
 .config-list-panel__actions {
   display: flex;
   gap: var(--app-spacing-xs);
+}
+
+.config-list-panel__actions :deep(.arco-btn) {
+  height: 34px;
+  border-radius: 10px;
 }
 
 .config-list-panel__list {

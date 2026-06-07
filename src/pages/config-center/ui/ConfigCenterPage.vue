@@ -1,11 +1,19 @@
 <template>
-  <AppPage :title="t.pages.configCenterTitle" :description="t.pages.configCenterDescription">
+  <section class="config-center-page">
     <ConfigCenterOverview />
-  </AppPage>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { t } from '@shared/i18n';
-import { AppPage } from '@shared/ui';
 import { ConfigCenterOverview } from '@widgets/config-center-overview';
 </script>
+
+<style scoped>
+.config-center-page {
+  width: 100%;
+  min-width: 0;
+  min-height: calc(100vh - 56px);
+  overflow: hidden;
+  background: #f5f6f8;
+}
+</style>

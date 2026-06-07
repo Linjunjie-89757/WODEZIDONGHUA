@@ -12,6 +12,7 @@
     "smoke:dashboard-visual": "node scripts/smoke-dashboard-visual.mjs",
     "smoke:case-center-visual": "node scripts/smoke-case-center-visual.mjs",
     "smoke:system-settings-visual": "node scripts/smoke-system-settings-visual.mjs",
+    "smoke:config-center-visual": "node scripts/smoke-config-center-visual.mjs",
     "smoke:api-wait": "node scripts/smoke-api-scenario-wait.mjs",
     "smoke:api-script": "node scripts/smoke-api-scenario-script.mjs",
     "smoke:api-once": "node scripts/smoke-api-scenario-once.mjs",

@@ -13,13 +13,17 @@ const viewports = [
     name: 'desktop',
     width: 1440,
     height: 960,
-    screenshotPath: `output/playwright/config-center-module-desktop-${stamp}.png`
+    envScreenshotPath: `output/playwright/config-center-env-desktop-${stamp}.png`,
+    paramScreenshotPath: `output/playwright/config-center-param-desktop-${stamp}.png`,
+    dbScreenshotPath: `output/playwright/config-center-db-desktop-${stamp}.png`
   },
   {
     name: 'mobile',
     width: 390,
     height: 844,
-    screenshotPath: `output/playwright/config-center-module-mobile-${stamp}.png`
+    envScreenshotPath: `output/playwright/config-center-env-mobile-${stamp}.png`,
+    paramScreenshotPath: `output/playwright/config-center-param-mobile-${stamp}.png`,
+    dbScreenshotPath: `output/playwright/config-center-db-mobile-${stamp}.png`
   }
 ];
 
@@ -37,9 +41,7 @@ async function login(page) {
 
   await page.waitForURL('**/config-center', { timeout: 15000 });
   await page.getByText('配置中心总览').waitFor({ timeout: 15000 });
-  await page.getByText('环境配置').first().waitFor({ timeout: 15000 });
-  await page.getByText('参数集').first().waitFor({ timeout: 15000 });
-  await page.getByText('数据库连接').first().waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: /环境配置/ }).waitFor({ timeout: 15000 });
 }
 
 try {
@@ -64,7 +66,16 @@ try {
     });
 
     await login(page);
-    await page.screenshot({ path: viewport.screenshotPath, fullPage: true });
+    await page.getByText('管理不同测试环境的基础地址和扩展配置。').waitFor({ timeout: 15000 });
+    await page.screenshot({ path: viewport.envScreenshotPath, fullPage: true });
+
+    await page.getByRole('button', { name: /参数集/ }).click();
+    await page.getByText('维护当前空间可复用的全局参数和业务参数。').waitFor({ timeout: 15000 });
+    await page.screenshot({ path: viewport.paramScreenshotPath, fullPage: true });
+
+    await page.getByRole('button', { name: /数据库连接/ }).click();
+    await page.getByText('管理接口调试和处理器可引用的数据库连接。').waitFor({ timeout: 15000 });
+    await page.screenshot({ path: viewport.dbScreenshotPath, fullPage: true });
 
     const layout = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -77,7 +88,9 @@ try {
       name: viewport.name,
       width: viewport.width,
       height: viewport.height,
-      screenshotPath: viewport.screenshotPath,
+      envScreenshotPath: viewport.envScreenshotPath,
+      paramScreenshotPath: viewport.paramScreenshotPath,
+      dbScreenshotPath: viewport.dbScreenshotPath,
       hasHorizontalOverflow:
         layout.scrollWidth > layout.clientWidth || layout.bodyScrollWidth > layout.bodyClientWidth,
       layout,
