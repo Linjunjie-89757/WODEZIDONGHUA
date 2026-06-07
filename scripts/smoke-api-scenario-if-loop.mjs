@@ -78,6 +78,10 @@ function inputByTestId(testId) {
   return page.getByTestId(testId).locator('input, textarea').first();
 }
 
+function scenarioEditorStepRows(selector = '') {
+  return page.locator(`[data-testid="api-scenario-editor-workspace"] [data-testid="api-scenario-step-row"]${selector}:visible`);
+}
+
 async function openWorkbenchTab(label) {
   await page
     .getByTestId('api-automation-workbench-tabs')
@@ -155,6 +159,9 @@ async function cleanupByApi() {
 async function reloadScenarioList() {
   await page.keyboard.press('Escape');
   await page.locator('.arco-drawer:visible').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => undefined);
+  if ((await page.getByTestId('api-scenario-list-editor-tab').count()) > 0) {
+    await page.getByTestId('api-scenario-list-editor-tab').click();
+  }
   await page.getByTestId('api-scenario-retry').click();
   await page.getByTestId('api-scenario-list').waitFor({ timeout: 15000 });
 }
@@ -296,17 +303,18 @@ async function createIfScenarioInUi() {
 }
 
 async function verifyIfScenarioHydrationAndRun() {
-  const row = page.getByTestId('api-scenario-row').filter({ hasText: ifScenarioName }).first();
+  let row = page.getByTestId('api-scenario-row').filter({ hasText: ifScenarioName }).first();
   await row.getByTestId('api-scenario-edit').click();
-  const ifRow = page.locator('[data-testid="api-scenario-step-row"][data-step-type="IF_CONTROLLER"]').first();
+  await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
+  const ifRow = scenarioEditorStepRows('[data-step-type="IF_CONTROLLER"]').first();
   await ifRow.waitFor({ timeout: 15000 });
   const expression = await ifRow.getByTestId('api-scenario-condition-expression-input').locator('input, textarea').first().inputValue();
   if (expression !== 'true') {
     throw new Error(`IF condition expression was not hydrated. Expected true, got ${expression}.`);
   }
-  await page.keyboard.press('Escape');
-  await page.locator('.arco-modal:visible').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => undefined);
+  await page.getByTestId('api-scenario-list-editor-tab').click();
 
+  row = page.getByTestId('api-scenario-row').filter({ hasText: ifScenarioName }).first();
   await row.locator('.api-scenario-management__row-main').click();
   await page.getByTestId('api-scenario-detail').waitFor({ timeout: 15000 });
   await page.keyboard.press('Escape');
@@ -411,17 +419,18 @@ async function createLoopScenarioInUi() {
 }
 
 async function verifyLoopScenarioHydrationAndRun() {
-  const row = page.getByTestId('api-scenario-row').filter({ hasText: loopScenarioName }).first();
+  let row = page.getByTestId('api-scenario-row').filter({ hasText: loopScenarioName }).first();
   await row.getByTestId('api-scenario-edit').click();
-  const loopRow = page.locator('[data-testid="api-scenario-step-row"][data-step-type="LOOP_CONTROLLER"]').first();
+  await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
+  const loopRow = scenarioEditorStepRows('[data-step-type="LOOP_CONTROLLER"]').first();
   await loopRow.waitFor({ timeout: 15000 });
   const count = await loopRow.getByTestId('api-scenario-loop-count-input').locator('input, textarea').first().inputValue();
   if (Number(count) !== 2) {
     throw new Error(`Loop count was not hydrated. Expected 2, got ${count}.`);
   }
-  await page.keyboard.press('Escape');
-  await page.locator('.arco-modal:visible').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => undefined);
+  await page.getByTestId('api-scenario-list-editor-tab').click();
 
+  row = page.getByTestId('api-scenario-row').filter({ hasText: loopScenarioName }).first();
   await row.locator('.api-scenario-management__row-main').click();
   await page.getByTestId('api-scenario-detail').waitFor({ timeout: 15000 });
   await page.keyboard.press('Escape');

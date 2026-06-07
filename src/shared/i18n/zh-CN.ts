@@ -533,6 +533,13 @@ export const zhCN = {
     scenarioRunSuccess: '接口场景运行完成',
     scenarioRunFailed: '接口场景运行失败',
     scenarioRunResult: '场景运行结果',
+    scenarioParams: '参数',
+    scenarioAssertions: '断言',
+    scenarioHistory: '执行历史',
+    scenarioPropertyPanel: '场景属性',
+    scenarioEditorShellHint: '当前阶段先搭建旧项目场景编辑工作台壳，详细配置会在后续阶段逐步加厚。',
+    scenarioEditorHistoryHint: '运行历史仍在详情抽屉中展示，后续会并入工作台历史页签。',
+    scenarioEditorSettingsHint: '保存策略、失败后继续等设置后续并入右侧属性面板。',
     updatedAt: '更新时间'
   },
   pages: {

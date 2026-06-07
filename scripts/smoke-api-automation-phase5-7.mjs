@@ -67,6 +67,26 @@ function inputByTestId(testId) {
   return page.getByTestId(testId).locator('input, textarea').first();
 }
 
+function scenarioEditorStepRows(selector = '') {
+  return page.locator(`[data-testid="api-scenario-editor-workspace"] [data-testid="api-scenario-step-row"]${selector}:visible`);
+}
+
+async function waitForVisibleScenarioStepCount(selector, expectedCount) {
+  await page.waitForFunction(
+    ({ selector, expectedCount }) => {
+      const rows = Array.from(document.querySelectorAll(
+        `[data-testid="api-scenario-editor-workspace"] [data-testid="api-scenario-step-row"]${selector}`
+      ));
+
+      return rows.filter((element) =>
+        Boolean(element.offsetWidth || element.offsetHeight || element.getClientRects().length)
+      ).length === expectedCount;
+    },
+    { selector, expectedCount },
+    { timeout: 10000 }
+  );
+}
+
 async function openWorkbenchTab(label) {
   await page
     .getByTestId('api-automation-workbench-tabs')
@@ -237,6 +257,12 @@ async function openCasesWorkbench() {
   await page.getByTestId('api-case-management').waitFor({ timeout: 15000 });
 }
 
+async function openScenarioListTabAndWaitForRow(name) {
+  await page.getByTestId('api-scenario-list-editor-tab').click();
+  await page.getByTestId('api-scenario-list').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-row').filter({ hasText: name }).first().waitFor({ timeout: 15000 });
+}
+
 async function createCase() {
   await page.getByTestId('api-case-create').click();
   await inputByTestId('api-case-name-input').fill(caseName);
@@ -298,7 +324,7 @@ async function createScenario() {
 }
 
 async function editScenarioAndVerifySteps() {
-  const row = page.getByTestId('api-scenario-row').filter({ hasText: scenarioName }).first();
+  let row = page.getByTestId('api-scenario-row').filter({ hasText: scenarioName }).first();
   const detailResponsePromise = page.waitForResponse((response) =>
     response.url().includes('/api/automation/api/scenarios/') &&
     response.request().method() === 'GET' &&
@@ -308,37 +334,49 @@ async function editScenarioAndVerifySteps() {
 
   await row.getByTestId('api-scenario-edit').click();
   await detailResponsePromise;
+  await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-property-panel').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-workbench-name-input').locator('input, textarea').first().waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-step-editor').first().waitFor({ timeout: 15000 });
-  await page.locator('[data-testid="api-scenario-step-row"][data-step-type="CUSTOM_REQUEST"]').first().waitFor({ timeout: 15000 });
-  await page.locator('[data-testid="api-scenario-step-row"][data-step-type="API"]').first().waitFor({ timeout: 15000 });
-  await page.locator('[data-testid="api-scenario-step-row"][data-step-type="API_CASE"]').first().waitFor({ timeout: 15000 });
-  await page.locator('[data-testid="api-scenario-step-row"][data-step-type="GROUP"]').first().waitFor({ timeout: 15000 });
-  await page.locator('[data-testid="api-scenario-step-row"][data-depth="1"]').first().waitFor({ timeout: 15000 });
+  await scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"]').first().waitFor({ timeout: 15000 });
+  await scenarioEditorStepRows('[data-step-type="API"]').first().waitFor({ timeout: 15000 });
+  await scenarioEditorStepRows('[data-step-type="API_CASE"]').first().waitFor({ timeout: 15000 });
+  await scenarioEditorStepRows('[data-step-type="GROUP"]').first().waitFor({ timeout: 15000 });
+  await scenarioEditorStepRows('[data-depth="1"]').first().waitFor({ timeout: 15000 });
 
   const editedRequestUrl = 'http://localhost:8080/api/workspaces/switchable';
-  const customStep = page.locator('[data-testid="api-scenario-step-row"][data-step-type="CUSTOM_REQUEST"][data-depth="0"]').first();
+  const customStep = scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"][data-depth="0"]').first();
   await customStep.getByTestId('api-scenario-custom-path-input').locator('input, textarea').first().fill(editedRequestUrl);
   await customStep.getByTestId('api-scenario-step-move-down').click();
-  await page.locator('[data-testid="api-scenario-step-row"][data-step-type="CUSTOM_REQUEST"][data-depth="0"]').first().getByTestId('api-scenario-step-move-up').click();
+  await scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"][data-depth="0"]').first().getByTestId('api-scenario-step-move-up').click();
 
-  const nestedDefinitionStep = page.locator('[data-testid="api-scenario-step-row"][data-step-type="API"][data-depth="1"]').first();
+  const nestedDefinitionStep = scenarioEditorStepRows('[data-step-type="API"][data-depth="1"]').first();
   await nestedDefinitionStep.getByTestId('api-scenario-step-delete').click();
-  await page.locator('[data-testid="api-scenario-step-row"][data-step-type="API"][data-depth="1"]').waitFor({ state: 'detached', timeout: 10000 });
-  await clickVisibleModalPrimaryButton();
-  await page.getByText(scenarioName).waitFor({ timeout: 15000 });
+  await waitForVisibleScenarioStepCount('[data-step-type="API"][data-depth="1"]', 0);
+  const updateResponsePromise = page.waitForResponse((response) =>
+    response.url().includes('/api/automation/api/scenarios/') &&
+    response.request().method() === 'PUT' &&
+    response.status() >= 200 &&
+    response.status() < 300
+  );
+  await page.getByTestId('api-scenario-workbench-save').click();
+  await updateResponsePromise;
+  await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
 
+  await openScenarioListTabAndWaitForRow(scenarioName);
+  row = page.getByTestId('api-scenario-row').filter({ hasText: scenarioName }).first();
   await row.getByTestId('api-scenario-edit').click();
+  await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-step-editor').first().waitFor({ timeout: 15000 });
-  const persistedPath = await page.locator('[data-testid="api-scenario-step-row"][data-step-type="CUSTOM_REQUEST"][data-depth="0"]').first().getByTestId('api-scenario-custom-path-input').locator('input, textarea').first().inputValue();
+  const persistedPath = await scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"][data-depth="0"]').first().getByTestId('api-scenario-custom-path-input').locator('input, textarea').first().inputValue();
 
   if (persistedPath !== editedRequestUrl) {
     throw new Error('Scenario custom request path was not persisted after edit.');
   }
 
-  await page.locator('[data-testid="api-scenario-step-row"][data-step-type="GROUP"]').first().waitFor({ timeout: 15000 });
-  await page.locator('[data-testid="api-scenario-step-row"][data-depth="1"]').first().waitFor({ timeout: 15000 });
-  await page.keyboard.press('Escape');
-  await page.locator('.arco-modal:visible').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => undefined);
+  await scenarioEditorStepRows('[data-step-type="GROUP"]').first().waitFor({ timeout: 15000 });
+  await scenarioEditorStepRows('[data-depth="1"]').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-list-editor-tab').click();
 }
 
 async function runScenarioIfAvailable() {

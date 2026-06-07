@@ -26,7 +26,7 @@
 
     <a-grid :cols="{ xs: 1, lg: 3 }" :col-gap="12" :row-gap="12">
       <a-grid-item>
-        <section class="api-scenario-management__panel">
+        <section class="api-scenario-management__panel api-scenario-management__module-pane">
           <h4>{{ t.apiAutomation.scenarioModules }}</h4>
           <div v-if="!modules.length" class="api-scenario-management__empty">
             {{ t.apiAutomation.scenarioModuleEmpty }}
@@ -40,44 +40,171 @@
         </section>
       </a-grid-item>
       <a-grid-item :span="2">
-        <section class="api-scenario-management__panel">
-          <h4>{{ t.apiAutomation.scenarioList }}</h4>
-          <AppLoadingState v-if="loading" />
-          <div v-else-if="!scenarios.length" class="api-scenario-management__empty">
-            {{ t.apiAutomation.scenarioEmpty }}
-          </div>
-          <div v-else class="api-scenario-management__list" data-testid="api-scenario-list">
-            <div class="api-scenario-management__list-head">
-              <span>{{ t.apiAutomation.scenarioName }}</span>
-              <span>{{ t.apiAutomation.fieldStatus }}</span>
-              <span>{{ t.apiAutomation.lastRunResult }}</span>
-              <span></span>
-            </div>
-            <article
-              v-for="scenario in scenarios"
-              :key="scenario.id"
-              class="api-scenario-management__row"
-              data-testid="api-scenario-row"
-              @click="selectScenario(scenario.id)"
+        <section class="api-scenario-management__workbench" data-testid="api-scenario-workbench">
+          <div class="api-scenario-management__editor-tabs" data-testid="api-scenario-editor-tabs">
+            <button
+              type="button"
+              :class="[
+                'api-scenario-management__editor-tab',
+                { 'api-scenario-management__editor-tab--active': activeEditorTab === 'list' }
+              ]"
+              data-testid="api-scenario-list-editor-tab"
+              @click="activeEditorTab = 'list'"
             >
-              <button type="button" class="api-scenario-management__row-main" @click.stop="selectScenario(scenario.id)">
-                <strong>{{ scenario.name }}</strong>
-              </button>
-              <small>{{ scenario.status || '-' }}</small>
-              <small>{{ scenario.lastRunResult || '-' }}</small>
-              <div class="api-scenario-management__row-actions" @click.stop>
-                <ApiScenarioRunButton
-                  :scenario-id="scenario.id"
-                  :environment-id="environmentId"
-                  :variable-set-id="variableSetId"
-                  @success="setRunResult"
-                />
-                <AppButton type="text" data-testid="api-scenario-edit" @click="openEditDialog(scenario.id)">
-                  {{ t.common.edit }}
-                </AppButton>
-                <ApiScenarioDeleteButton :scenario-id="scenario.id" @success="loadScenarios" />
+              {{ t.apiAutomation.scenarioList }}
+            </button>
+            <button
+              v-if="editingScenarioForm"
+              type="button"
+              :class="[
+                'api-scenario-management__editor-tab',
+                { 'api-scenario-management__editor-tab--active': activeEditorTab === 'editor' }
+              ]"
+              data-testid="api-scenario-editor-tab"
+              @click="activeEditorTab = 'editor'"
+            >
+              {{ editingScenarioForm.name || t.apiAutomation.scenarioEditTitle }}
+              <span class="api-scenario-management__dirty-dot"></span>
+            </button>
+            <button type="button" class="api-scenario-management__tab-add" @click="openCreateDialog">
+              +
+            </button>
+          </div>
+
+          <div v-if="activeEditorTab === 'list'" class="api-scenario-management__list-workspace">
+            <section class="api-scenario-management__panel">
+              <div class="api-scenario-management__list-toolbar">
+                <h4>{{ t.apiAutomation.scenarioList }}</h4>
+                <span>{{ scenarios.length }}</span>
               </div>
-            </article>
+              <AppLoadingState v-if="loading" />
+              <div v-else-if="!scenarios.length" class="api-scenario-management__empty">
+                {{ t.apiAutomation.scenarioEmpty }}
+              </div>
+              <div v-else class="api-scenario-management__list" data-testid="api-scenario-list">
+                <div class="api-scenario-management__list-head">
+                  <span>{{ t.apiAutomation.scenarioName }}</span>
+                  <span>{{ t.apiAutomation.fieldStatus }}</span>
+                  <span>{{ t.apiAutomation.lastRunResult }}</span>
+                  <span></span>
+                </div>
+                <article
+                  v-for="scenario in scenarios"
+                  :key="scenario.id"
+                  class="api-scenario-management__row"
+                  data-testid="api-scenario-row"
+                  @click="selectScenario(scenario.id)"
+                >
+                  <button type="button" class="api-scenario-management__row-main" @click.stop="selectScenario(scenario.id)">
+                    <strong>{{ scenario.name }}</strong>
+                  </button>
+                  <small>{{ scenario.status || '-' }}</small>
+                  <small>{{ scenario.lastRunResult || '-' }}</small>
+                  <div class="api-scenario-management__row-actions" @click.stop>
+                    <ApiScenarioRunButton
+                      :scenario-id="scenario.id"
+                      :environment-id="environmentId"
+                      :variable-set-id="variableSetId"
+                      @success="setRunResult"
+                    />
+                    <AppButton type="text" data-testid="api-scenario-edit" @click="openEditorWorkspace(scenario.id)">
+                      {{ t.common.edit }}
+                    </AppButton>
+                    <ApiScenarioDeleteButton :scenario-id="scenario.id" @success="loadScenarios" />
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <div v-else class="api-scenario-management__editor-workspace" data-testid="api-scenario-editor-workspace">
+            <section class="api-scenario-management__editor-main">
+              <a-spin :loading="editorLoading">
+                <a-tabs
+                  v-model:active-key="activeScenarioDetailTab"
+                  class="api-scenario-management__detail-tabs"
+                  data-testid="api-scenario-detail-tabs"
+                >
+                  <a-tab-pane key="steps" :title="t.apiAutomation.scenarioSteps">
+                    <ApiScenarioStepEditor
+                      v-if="editingScenarioForm"
+                      v-model="editingScenarioForm.steps"
+                      :definitions="definitions()"
+                      :cases="cases"
+                    />
+                  </a-tab-pane>
+                  <a-tab-pane key="params" :title="t.apiAutomation.scenarioParams">
+                    <div class="api-scenario-management__editor-placeholder">
+                      {{ t.apiAutomation.scenarioEditorShellHint }}
+                    </div>
+                  </a-tab-pane>
+                  <a-tab-pane key="assertions" :title="t.apiAutomation.scenarioAssertions">
+                    <div class="api-scenario-management__editor-placeholder">
+                      {{ t.apiAutomation.scenarioEditorShellHint }}
+                    </div>
+                  </a-tab-pane>
+                  <a-tab-pane key="history" :title="t.apiAutomation.scenarioHistory">
+                    <div class="api-scenario-management__editor-placeholder">
+                      {{ t.apiAutomation.scenarioEditorHistoryHint }}
+                    </div>
+                  </a-tab-pane>
+                  <a-tab-pane key="settings" :title="t.apiAutomation.requestTabSettings">
+                    <div class="api-scenario-management__editor-placeholder">
+                      {{ t.apiAutomation.scenarioEditorSettingsHint }}
+                    </div>
+                  </a-tab-pane>
+                </a-tabs>
+              </a-spin>
+            </section>
+
+            <aside class="api-scenario-management__property-panel" data-testid="api-scenario-property-panel">
+              <header>
+                <strong>{{ t.apiAutomation.scenarioPropertyPanel }}</strong>
+                <span>{{ editingScenarioId || '-' }}</span>
+              </header>
+              <template v-if="editingScenarioForm">
+                <label>
+                  <span>{{ t.apiAutomation.scenarioName }}</span>
+                  <a-input
+                    v-model="editingScenarioForm.name"
+                    data-testid="api-scenario-workbench-name-input"
+                    :placeholder="t.apiAutomation.scenarioNamePlaceholder"
+                  />
+                </label>
+                <label>
+                  <span>{{ t.apiAutomation.fieldStatus }}</span>
+                  <a-select v-model="editingScenarioForm.status">
+                    <a-option value="ACTIVE">{{ t.apiAutomation.scenarioStatusActive }}</a-option>
+                    <a-option value="DISABLED">{{ t.apiAutomation.scenarioStatusDisabled }}</a-option>
+                  </a-select>
+                </label>
+                <label>
+                  <span>{{ t.apiAutomation.fieldDescription }}</span>
+                  <a-textarea
+                    v-model="editingScenarioForm.description"
+                    :auto-size="{ minRows: 3, maxRows: 5 }"
+                    :placeholder="t.apiAutomation.fieldDescriptionPlaceholder"
+                  />
+                </label>
+                <div class="api-scenario-management__property-actions">
+                  <AppButton
+                    type="primary"
+                    :loading="saving"
+                    data-testid="api-scenario-workbench-save"
+                    @click="saveEditorWorkspace"
+                  >
+                    {{ t.apiAutomation.save }}
+                  </AppButton>
+                  <ApiScenarioRunButton
+                    v-if="editingScenarioId"
+                    :scenario-id="editingScenarioId"
+                    :environment-id="environmentId"
+                    :variable-set-id="variableSetId"
+                    @success="setRunResult"
+                  />
+                </div>
+              </template>
+            </aside>
           </div>
         </section>
       </a-grid-item>
@@ -135,10 +262,17 @@
 <script setup lang="ts">
 import { defineComponent, h, nextTick, ref, watch } from 'vue';
 
-import type { ApiDefinitionItem, ApiScenarioStep } from '@entities/api-automation';
+import {
+  apiAutomationApi,
+  createScenarioEditForm,
+  type ApiDefinitionItem,
+  type ApiScenarioFormValues,
+  type ApiScenarioStep
+} from '@entities/api-automation';
+import { useWorkspaceStore } from '@entities/workspace';
 import { ApiScenarioDeleteButton } from '@features/api-scenario-delete';
 import { ApiScenarioRunButton } from '@features/api-scenario-run';
-import { ApiScenarioDialog } from '@features/api-scenario-save';
+import { ApiScenarioDialog, ApiScenarioStepEditor, useApiScenarioSave } from '@features/api-scenario-save';
 import { t } from '@shared/i18n';
 import { AppButton, AppDrawer, AppLoadingState } from '@shared/ui';
 import { ApiRunResultPanel } from '@widgets/api-run-result-panel';
@@ -166,9 +300,15 @@ const {
   setRunResult
 } = useApiScenarioManagement(() => props.definitions);
 
+const workspaceStore = useWorkspaceStore();
+const { saving, saveScenario } = useApiScenarioSave();
 const detailVisible = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
 const editingScenarioId = ref<number | null>(null);
+const activeEditorTab = ref<'list' | 'editor'>('list');
+const activeScenarioDetailTab = ref('steps');
+const editorLoading = ref(false);
+const editingScenarioForm = ref<ApiScenarioFormValues | null>(null);
 const scenarioDialogRef = ref<{
   openCreate: () => void;
   openEdit: () => void | Promise<void>;
@@ -181,11 +321,31 @@ async function openCreateDialog() {
   scenarioDialogRef.value?.openCreate();
 }
 
-async function openEditDialog(id: number) {
-  dialogMode.value = 'edit';
+async function openEditorWorkspace(id: number) {
   editingScenarioId.value = id;
-  await nextTick();
-  await scenarioDialogRef.value?.openEdit();
+  activeEditorTab.value = 'editor';
+  activeScenarioDetailTab.value = 'steps';
+  editorLoading.value = true;
+
+  try {
+    const detail = await apiAutomationApi.getScenarioDetail(id, workspaceStore.currentWorkspace.code);
+    editingScenarioForm.value = createScenarioEditForm(detail);
+  } finally {
+    editorLoading.value = false;
+  }
+}
+
+async function saveEditorWorkspace() {
+  if (!editingScenarioForm.value || !editingScenarioId.value) {
+    return;
+  }
+
+  const succeed = await saveScenario(editingScenarioForm.value, editingScenarioId.value);
+
+  if (succeed) {
+    await loadScenarios();
+    await openEditorWorkspace(editingScenarioId.value);
+  }
 }
 
 watch(selectedScenarioDetail, (value) => {
@@ -304,6 +464,169 @@ const ScenarioStepNode = defineComponent({
   padding: 10px;
 }
 
+.api-scenario-management__module-pane {
+  min-height: 100%;
+}
+
+.api-scenario-management__workbench {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-color-surface);
+}
+
+.api-scenario-management__editor-tabs {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-bottom: 1px solid var(--app-color-border);
+  background: #f8fafc;
+}
+
+.api-scenario-management__editor-tab,
+.api-scenario-management__tab-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  min-width: 0;
+  border: 0;
+  border-right: 1px solid var(--app-color-border);
+  background: transparent;
+  color: var(--app-color-text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 12px;
+}
+
+.api-scenario-management__editor-tab {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-scenario-management__editor-tab--active {
+  background: #ffffff;
+  color: var(--app-color-text);
+  font-weight: 650;
+}
+
+.api-scenario-management__dirty-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgb(var(--primary-6));
+}
+
+.api-scenario-management__tab-add {
+  width: 34px;
+  justify-content: center;
+  color: rgb(var(--primary-6));
+  font-size: 18px;
+}
+
+.api-scenario-management__list-workspace {
+  min-width: 0;
+  padding: 10px;
+}
+
+.api-scenario-management__list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-spacing-sm);
+}
+
+.api-scenario-management__list-toolbar span {
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+}
+
+.api-scenario-management__editor-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  min-width: 0;
+  min-height: 620px;
+}
+
+.api-scenario-management__editor-main {
+  min-width: 0;
+  border-right: 1px solid var(--app-color-border);
+  padding: 10px;
+}
+
+.api-scenario-management__detail-tabs :deep(.arco-tabs-nav) {
+  margin: 0;
+}
+
+.api-scenario-management__detail-tabs :deep(.arco-tabs-tab) {
+  height: 36px;
+  margin: 0;
+  padding: 0 12px;
+}
+
+.api-scenario-management__detail-tabs :deep(.arco-tabs-content) {
+  padding-top: 10px;
+}
+
+.api-scenario-management__editor-placeholder {
+  display: grid;
+  min-height: 240px;
+  align-content: center;
+  justify-items: center;
+  border: 1px dashed var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #fbfcfe;
+  color: var(--app-color-text-muted);
+  font-size: 13px;
+  padding: 20px;
+  text-align: center;
+}
+
+.api-scenario-management__property-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  background: #fbfcfe;
+  padding: 12px;
+}
+
+.api-scenario-management__property-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--app-color-border);
+  padding-bottom: 8px;
+}
+
+.api-scenario-management__property-panel header strong {
+  color: var(--app-color-text);
+  font-size: 14px;
+}
+
+.api-scenario-management__property-panel header span,
+.api-scenario-management__property-panel label span {
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+}
+
+.api-scenario-management__property-panel label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.api-scenario-management__property-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .api-scenario-management__meta {
   overflow: hidden;
   border-radius: var(--app-radius-sm);
@@ -399,6 +722,15 @@ const ScenarioStepNode = defineComponent({
   .api-scenario-management__list-head {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .api-scenario-management__editor-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .api-scenario-management__editor-main {
+    border-right: 0;
+    border-bottom: 1px solid var(--app-color-border);
   }
 }
 </style>
