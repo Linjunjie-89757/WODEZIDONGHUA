@@ -18,11 +18,13 @@ import { AppSidebar } from '@widgets/app-sidebar';
 <style scoped>
 .main-layout {
   min-height: 100vh;
-  background: var(--app-color-bg);
+  background: #f5f6f8;
 }
 
 .main-layout__content {
   min-width: 0;
-  padding: var(--app-spacing-xl);
+  min-height: calc(100vh - 56px);
+  overflow: auto;
+  padding: 24px;
 }
 </style>

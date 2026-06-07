@@ -1,6 +1,11 @@
 export const zhCN = {
   common: {
     appName: 'AutoTestHub',
+    execute: '执行',
+    appSubtitle: '全功能自动化测试平台',
+    superAdmin: '超级管理员',
+    userAvatarText: '超',
+    notifications: '通知',
     confirm: '确认',
     confirmAction: '确认操作',
     cancel: '取消',
@@ -602,6 +607,7 @@ export const zhCN = {
     updatedAt: '更新时间'
   },
   pages: {
+    dashboardPlaceholder: '工作台 页面建设中...',
     loginSubtitle: '新前端 2.0',
     dashboardTitle: '仪表盘',
     systemSettingsTitle: '系统设置',
@@ -620,6 +626,9 @@ export const zhCN = {
     appAutomationTitle: 'App 自动化'
   },
   navigation: {
+    dashboard: '工作台',
+    webAutomation: 'Web UI 自动化',
+    appAutomation: 'APP 自动化',
     systemSettings: '系统设置',
     configCenter: '配置中心',
     caseCenter: '用例中心',

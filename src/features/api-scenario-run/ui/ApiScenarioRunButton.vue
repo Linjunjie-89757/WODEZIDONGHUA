@@ -1,6 +1,6 @@
 <template>
   <AppButton type="text" :loading="running" data-testid="api-scenario-run" @click="handleRun">
-    {{ t.apiAutomation.scenarioRun }}
+    {{ t.common.execute }}
   </AppButton>
 </template>
 

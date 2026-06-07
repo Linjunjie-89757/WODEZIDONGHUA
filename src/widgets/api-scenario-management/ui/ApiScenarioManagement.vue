@@ -298,15 +298,6 @@
                     </a-option>
                   </a-select>
                   <div class="scenario-property-run-actions api-scenario-management__property-actions" data-testid="api-scenario-property-actions">
-                    <AppButton
-                      type="primary"
-                      class="scenario-property-save-button"
-                      :loading="saving"
-                      data-testid="api-scenario-workbench-save"
-                      @click="saveEditorWorkspace"
-                    >
-                      {{ t.apiAutomation.save }}
-                    </AppButton>
                     <ApiScenarioRunButton
                       v-if="editingScenarioId && editingScenarioForm"
                       :scenario-id="editingScenarioId"
@@ -314,6 +305,14 @@
                       :variable-set-id="editingScenarioForm.variableSetId ?? variableSetId"
                       @success="handleWorkbenchRunSuccess"
                     />
+                    <AppButton
+                      class="scenario-property-save-button"
+                      :loading="saving"
+                      data-testid="api-scenario-workbench-save"
+                      @click="saveEditorWorkspace"
+                    >
+                      {{ t.apiAutomation.save }}
+                    </AppButton>
                   </div>
                 </div>
                 <div v-if="editingScenarioForm" class="scenario-property-body">
@@ -1966,6 +1965,284 @@ const ScenarioStepNode = defineComponent({
 
 .api-scenario-management .api-scenario-management__module-row em {
   display: none;
+}
+
+/* Phase S1: screenshot-driven scenario workbench reproduction. */
+.api-scenario-management {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  background: #ffffff;
+}
+
+.api-scenario-management__header {
+  display: none;
+}
+
+.api-scenario-management > .arco-alert {
+  margin: 8px 12px;
+}
+
+.scenario-workbench.ms-scenario-workbench {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.scenario-module-pane {
+  min-width: 0;
+  border-right: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 16px 16px 0;
+}
+
+.ms-like-sidebar-tools {
+  display: grid;
+  gap: 12px;
+  padding: 0 0 16px;
+}
+
+.scenario-sidebar-primary {
+  height: 36px;
+  border-radius: 8px;
+  background: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.scenario-sidebar-search :deep(.arco-input-wrapper) {
+  height: 36px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 0;
+  background: #f3f4f6;
+  font-size: 13px;
+}
+
+.ms-like-directory-shell {
+  border-top: 1px solid #edf0f5;
+}
+
+.scenario-directory-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.scenario-directory-title-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scenario-directory-title-main small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.scenario-directory-collapse-button {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+}
+
+.scenario-module-tree {
+  display: grid;
+  gap: 5px;
+}
+
+.api-scenario-management .api-scenario-management__module-row {
+  min-height: 32px;
+  border-radius: 6px;
+  color: #1f2937;
+  font-size: 13px;
+  padding: 0 8px;
+}
+
+.api-scenario-management .api-scenario-management__module-row--active {
+  background: #eaf2ff;
+  color: #2563eb;
+}
+
+.scenario-main-pane {
+  display: grid;
+  grid-template-rows: 40px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  background: #ffffff;
+}
+
+.scenario-editor-tab-strip {
+  height: 40px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.ms-like-tab-strip-main {
+  display: flex;
+  height: 40px;
+  min-width: 0;
+}
+
+.ms-like-tab-nav {
+  display: flex;
+  min-width: 0;
+}
+
+.ms-like-editor-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 290px;
+  height: 40px;
+  min-width: 88px;
+  border: 0;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 2px solid transparent;
+  background: #ffffff;
+  color: #4b5563;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 16px;
+}
+
+.ms-like-editor-tab.active {
+  border-bottom-color: #2563eb;
+  color: #111827;
+  font-weight: 500;
+}
+
+.ms-like-editor-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ms-like-editor-tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #3b82f6;
+}
+
+.ms-like-tab-add {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-right: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.scenario-edit-workspace {
+  grid-template-columns: minmax(0, 1fr) 288px;
+  min-height: 0;
+}
+
+.scenario-edit-main {
+  border-right: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.scenario-detail-tabs :deep(.arco-tabs-nav) {
+  height: 42px;
+  padding: 0 16px;
+}
+
+.scenario-detail-tabs :deep(.arco-tabs-nav-tab-list) {
+  gap: 22px;
+  height: 42px;
+}
+
+.scenario-detail-tabs :deep(.arco-tabs-tab) {
+  height: 42px;
+  font-size: 14px;
+  line-height: 42px;
+}
+
+.scenario-detail-tabs :deep(.arco-tabs-content) {
+  height: calc(100% - 42px);
+}
+
+.api-scenario-management .api-scenario-management__property-panel.scenario-property-panel {
+  padding: 14px 12px;
+  background: #ffffff;
+}
+
+.api-scenario-management .scenario-property-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #f9fafb;
+  box-shadow: none;
+}
+
+.scenario-property-header {
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 0;
+}
+
+.scenario-property-run-actions :deep(.arco-btn) {
+  height: 38px;
+  border-radius: 8px;
+}
+
+.scenario-property-run-actions :deep([data-testid="api-scenario-run"]) {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.scenario-property-save-button {
+  border-color: #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 500;
+}
+
+.scenario-property-body {
+  gap: 12px;
+  padding: 10px 12px 14px;
+}
+
+.api-scenario-management .scenario-property-field {
+  gap: 7px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.api-scenario-management .scenario-property-field :deep(.arco-input-wrapper),
+.api-scenario-management .scenario-property-field :deep(.arco-select-view-single),
+.api-scenario-management .scenario-property-field :deep(.arco-textarea-wrapper) {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.api-scenario-management .api-scenario-management__property-section {
+  gap: 8px;
+}
+
+.api-scenario-management .api-scenario-management__stat-grid span,
+.api-scenario-management .api-scenario-management__inspector-grid span {
+  border-color: #e5e7eb;
+  border-radius: 8px;
 }
 
 @media (max-width: 720px) {

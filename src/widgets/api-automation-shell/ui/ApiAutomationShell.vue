@@ -1,11 +1,14 @@
 <template>
   <AppSection
-    :title="t.apiAutomation.overviewTitle"
-    :description="t.apiAutomation.overviewDescription"
-    class="api-automation-shell"
+    :title="activeWorkbenchTab === 'scenarios' ? undefined : t.apiAutomation.overviewTitle"
+    :description="activeWorkbenchTab === 'scenarios' ? undefined : t.apiAutomation.overviewDescription"
+    :class="[
+      'api-automation-shell',
+      { 'api-automation-shell--scenario-focus': activeWorkbenchTab === 'scenarios' }
+    ]"
     data-testid="api-automation-shell"
   >
-    <template #actions>
+    <template v-if="activeWorkbenchTab !== 'scenarios'" #actions>
       <AppButton type="text" :loading="loading" @click="loadReadonly">
         {{ t.apiAutomation.retry }}
       </AppButton>
@@ -17,7 +20,7 @@
       <AppButton type="text" @click="loadReadonly">{{ t.common.retry }}</AppButton>
     </a-alert>
     <div v-else class="api-automation-shell__workbench" data-testid="api-automation-workbench">
-      <header class="api-automation-shell__toolbar">
+      <header v-if="activeWorkbenchTab !== 'scenarios'" class="api-automation-shell__toolbar">
         <div class="api-automation-shell__metrics" aria-label="api automation metrics">
           <span>{{ t.apiAutomation.definitionTotal }} <strong>{{ summary.definitionTotal }}</strong></span>
           <span>{{ t.apiAutomation.moduleTotal }} <strong>{{ summary.moduleTotal }}</strong></span>
@@ -861,6 +864,80 @@ async function handleDebugDefinition() {
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-md);
   background: var(--app-color-surface);
+  overflow: hidden;
+}
+
+.api-automation-shell--scenario-focus {
+  gap: 0;
+}
+
+.api-automation-shell--scenario-focus :deep(.app-section__header) {
+  display: none;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__workbench {
+  min-height: calc(100vh - 104px);
+  border-color: #dfe3ea;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-nav) {
+  height: 48px;
+  padding: 0 24px;
+  background: #ffffff;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-nav-tab-list) {
+  gap: 4px;
+  height: 48px;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-tab) {
+  height: 34px;
+  margin: 7px 0;
+  border-radius: 8px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 34px;
+  padding: 0 18px;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-tab-active) {
+  background: #ffffff;
+  box-shadow: 0 1px 5px rgba(15, 23, 42, 0.08);
+  color: #111827;
+  font-weight: 600;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-nav::before) {
+  background: #f1f3f6;
+  border-radius: 8px;
+  content: "";
+  height: 34px;
+  left: 24px;
+  position: absolute;
+  top: 7px;
+  width: 326px;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-nav-tab) {
+  position: relative;
+  z-index: 1;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-nav-ink) {
+  display: none;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-content) {
+  height: calc(100vh - 152px);
+  padding: 0;
+}
+
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-content-item),
+.api-automation-shell--scenario-focus .api-automation-shell__tabs :deep(.arco-tabs-pane) {
+  height: 100%;
   overflow: hidden;
 }
 
