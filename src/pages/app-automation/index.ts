@@ -1,0 +1,1 @@
+export { appAutomationRoutePath } from './route';

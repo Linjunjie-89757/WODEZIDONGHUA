@@ -1,0 +1,1 @@
+export { apiAutomationRoutePath } from './route';

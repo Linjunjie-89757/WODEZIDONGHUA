@@ -1,0 +1,1 @@
+export { webAutomationRoutePath } from './route';

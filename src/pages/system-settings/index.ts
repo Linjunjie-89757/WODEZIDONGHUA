@@ -1,0 +1,1 @@
+export { systemSettingsRoutePath } from './route';

@@ -1,0 +1,1 @@
+export { caseAiRecordDetailRoutePath } from './route';

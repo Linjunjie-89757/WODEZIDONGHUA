@@ -1,0 +1,23 @@
+:root {
+  --app-color-bg: #f6f8fb;
+  --app-color-surface: #ffffff;
+  --app-color-border: #e5e8ef;
+  --app-color-text: #172033;
+  --app-color-text-muted: #667085;
+  --app-color-primary: #165dff;
+  --app-color-success: #00a870;
+  --app-color-warning: #ffb400;
+  --app-color-danger: #f53f3f;
+
+  --app-radius-sm: 4px;
+  --app-radius-md: 6px;
+  --app-radius-lg: 8px;
+
+  --app-spacing-xs: 4px;
+  --app-spacing-sm: 8px;
+  --app-spacing-md: 12px;
+  --app-spacing-lg: 16px;
+  --app-spacing-xl: 24px;
+
+  --app-shadow-panel: 0 8px 24px rgba(20, 35, 64, 0.08);
+}

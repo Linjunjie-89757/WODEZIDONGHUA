@@ -1,0 +1,1 @@
+export { configCenterRoutePath } from './route';

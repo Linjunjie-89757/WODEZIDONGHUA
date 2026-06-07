@@ -1,0 +1,567 @@
+最适合你现在情况的：清楚、可扩展、不会过度设计，也能解决当前大文件堆叠的问题。
+
+src/
+  app/
+    main.ts
+    App.vue
+
+    providers/
+      arco.ts
+      pinia.ts
+
+    router/
+      index.ts
+      routes.ts
+      guards.ts
+
+    layouts/
+      MainLayout.vue
+      AuthLayout.vue
+
+  shared/
+    api/
+      request.ts
+      platform.ts
+      endpoints.ts
+
+    config/
+      env.ts
+
+    styles/
+      tokens.css
+      global.css
+      arco-theme.css
+
+    ui/
+      app-page/
+        AppPage.vue
+        index.ts
+      app-section/
+        AppSection.vue
+        index.ts
+      app-card/
+        AppCard.vue
+        index.ts
+      app-button/
+        AppButton.vue
+        index.ts
+      app-table/
+        AppTable.vue
+        index.ts
+      app-toolbar/
+        AppToolbar.vue
+        index.ts
+      app-dialog/
+        AppDialog.vue
+        index.ts
+      app-drawer/
+        AppDrawer.vue
+        index.ts
+      app-empty-state/
+        AppEmptyState.vue
+        index.ts
+      app-loading-state/
+        AppLoadingState.vue
+        index.ts
+      app-status-badge/
+        AppStatusBadge.vue
+        index.ts
+      app-provider-badge/
+        AppProviderBadge.vue
+        index.ts
+      app-confirm/
+        AppConfirm.ts
+        index.ts
+
+    lib/
+      date.ts
+      storage.ts
+      format.ts
+      guards.ts
+      download.ts
+
+    types/
+      api.ts
+      common.ts
+      route.ts
+
+  entities/
+    workspace/
+      api/
+        workspaceApi.ts
+      model/
+        types.ts
+        store.ts
+      lib/
+        workspaceFormat.ts
+      ui/
+        WorkspaceBadge.vue
+        WorkspaceSelect.vue
+      index.ts
+
+    user/
+      api/
+        userApi.ts
+      model/
+        types.ts
+        store.ts
+      lib/
+        userFormat.ts
+      ui/
+        UserAvatar.vue
+        UserDisplayName.vue
+      index.ts
+
+    ai-model/
+      api/
+        aiModelApi.ts
+      model/
+        types.ts
+      lib/
+        providerMeta.ts
+        modelFormat.ts
+      ui/
+        ProviderBadge.vue
+        ModelSelect.vue
+      index.ts
+
+    case/
+      api/
+        caseApi.ts
+      model/
+        types.ts
+      lib/
+        caseFormat.ts
+        caseStatus.ts
+      ui/
+        CasePriorityBadge.vue
+        CaseReviewStatusBadge.vue
+        CaseExecutionStatusBadge.vue
+      index.ts
+
+    bug/
+      api/
+        bugApi.ts
+      model/
+        types.ts
+      lib/
+        bugFormat.ts
+        bugStatus.ts
+      ui/
+        BugPriorityBadge.vue
+        BugSeverityBadge.vue
+        BugStatusBadge.vue
+      index.ts
+
+    api-definition/
+      api/
+        apiDefinitionApi.ts
+      model/
+        types.ts
+      lib/
+        requestFormat.ts
+        responseFormat.ts
+      ui/
+        HttpMethodBadge.vue
+        ApiStatusBadge.vue
+      index.ts
+
+    config/
+      api/
+        configApi.ts
+      model/
+        types.ts
+      lib/
+        configFormat.ts
+      ui/
+        EnvTypeBadge.vue
+        ConfigStatusBadge.vue
+      index.ts
+
+  features/
+    auth-login/
+      api/
+        loginApi.ts
+      model/
+        useLogin.ts
+      ui/
+        LoginForm.vue
+      index.ts
+
+    auth-logout/
+      model/
+        useLogout.ts
+      ui/
+        LogoutButton.vue
+      index.ts
+
+    workspace-switch/
+      model/
+        useWorkspaceSwitch.ts
+      ui/
+        WorkspaceSwitcher.vue
+      index.ts
+
+    ai-connection-create/
+      model/
+        useAiConnectionCreate.ts
+      ui/
+        AiConnectionCreateDialog.vue
+      index.ts
+
+    ai-connection-edit/
+      model/
+        useAiConnectionEdit.ts
+      ui/
+        AiConnectionEditDialog.vue
+      index.ts
+
+    ai-connection-test/
+      model/
+        useAiConnectionTest.ts
+      ui/
+        AiConnectionTestButton.vue
+      index.ts
+
+    case-create/
+      model/
+        useCaseCreate.ts
+      ui/
+        CaseCreateDrawer.vue
+      index.ts
+
+    case-edit/
+      model/
+        useCaseEdit.ts
+      ui/
+        CaseEditDrawer.vue
+      index.ts
+
+    case-delete/
+      model/
+        useCaseDelete.ts
+      ui/
+        CaseDeleteButton.vue
+      index.ts
+
+    case-adopt/
+      model/
+        useCaseAdopt.ts
+      ui/
+        CaseAdoptDialog.vue
+      index.ts
+
+    ai-case-generate/
+      model/
+        useAiCaseGenerate.ts
+      ui/
+        AiCaseGeneratePanel.vue
+      index.ts
+
+    ai-case-review/
+      model/
+        useAiCaseReview.ts
+      ui/
+        AiCaseReviewPanel.vue
+      index.ts
+
+    bug-create/
+      model/
+        useBugCreate.ts
+      ui/
+        BugCreateDrawer.vue
+      index.ts
+
+    bug-edit/
+      model/
+        useBugEdit.ts
+      ui/
+        BugEditDrawer.vue
+      index.ts
+
+    bug-delete/
+      model/
+        useBugDelete.ts
+      ui/
+        BugDeleteButton.vue
+      index.ts
+
+    api-send-request/
+      model/
+        useApiSendRequest.ts
+      ui/
+        ApiSendButton.vue
+      index.ts
+
+    api-save-definition/
+      model/
+        useApiSaveDefinition.ts
+      ui/
+        ApiSaveButton.vue
+      index.ts
+
+  widgets/
+    app-sidebar/
+      model/
+        menu.ts
+      ui/
+        AppSidebar.vue
+      index.ts
+
+    app-header/
+      model/
+        useHeaderState.ts
+      ui/
+        AppHeader.vue
+      index.ts
+
+    settings-sidebar/
+      model/
+        settingsMenu.ts
+      ui/
+        SettingsSidebar.vue
+      index.ts
+
+    config-sidebar/
+      model/
+        configMenu.ts
+      ui/
+        ConfigSidebar.vue
+      index.ts
+
+    ai-connection-pool/
+      model/
+        useAiConnectionPool.ts
+      ui/
+        AiConnectionPool.vue
+        AiConnectionCard.vue
+        AiProviderGrid.vue
+      index.ts
+
+    workspace-config-panel/
+      model/
+        useWorkspaceConfig.ts
+      ui/
+        WorkspaceConfigPanel.vue
+        WorkspaceCard.vue
+        WorkspaceMemberPanel.vue
+      index.ts
+
+    config-env-panel/
+      model/
+        useConfigEnv.ts
+      ui/
+        ConfigEnvPanel.vue
+        EnvConfigCard.vue
+      index.ts
+
+    config-param-panel/
+      model/
+        useConfigParam.ts
+      ui/
+        ConfigParamPanel.vue
+        ParamConfigTable.vue
+      index.ts
+
+    config-db-panel/
+      model/
+        useConfigDb.ts
+      ui/
+        ConfigDbPanel.vue
+        DbConnectionCard.vue
+      index.ts
+
+    case-directory-tree/
+      model/
+        useCaseDirectoryTree.ts
+      ui/
+        CaseDirectoryTree.vue
+      index.ts
+
+    case-table/
+      model/
+        useCaseTable.ts
+      ui/
+        CaseTable.vue
+        CaseTableToolbar.vue
+      index.ts
+
+    ai-case-config-panel/
+      model/
+        useAiCaseConfig.ts
+      ui/
+        AiCaseConfigPanel.vue
+        AiRoleConfigCard.vue
+      index.ts
+
+    ai-generation-record-table/
+      model/
+        useAiGenerationRecords.ts
+      ui/
+        AiGenerationRecordTable.vue
+      index.ts
+
+    ai-generation-detail/
+      model/
+        useAiGenerationDetail.ts
+      ui/
+        AiGenerationDetail.vue
+        AiOutputPanel.vue
+        AiGeneratedCaseTable.vue
+      index.ts
+
+    bug-table/
+      model/
+        useBugTable.ts
+      ui/
+        BugTable.vue
+        BugTableToolbar.vue
+      index.ts
+
+    bug-detail-panel/
+      model/
+        useBugDetail.ts
+      ui/
+        BugDetailPanel.vue
+        BugActivityTimeline.vue
+        BugAttachmentPanel.vue
+        BugRelatedCasesPanel.vue
+      index.ts
+
+    api-workspace/
+      model/
+        useApiWorkspace.ts
+      ui/
+        ApiWorkspace.vue
+        ApiDirectoryTree.vue
+        ApiRequestTabs.vue
+      index.ts
+
+    api-request-editor/
+      model/
+        useApiRequestEditor.ts
+      ui/
+        ApiRequestEditor.vue
+        ApiParamsEditor.vue
+        ApiHeadersEditor.vue
+        ApiBodyEditor.vue
+      index.ts
+
+    api-response-panel/
+      model/
+        useApiResponsePanel.ts
+      ui/
+        ApiResponsePanel.vue
+        ApiResponseBody.vue
+        ApiResponseHeaders.vue
+      index.ts
+
+  processes/
+    ai-generation-flow/
+      model/
+        useAiGenerationFlow.ts
+        aiGenerationEvents.ts
+      lib/
+        parseAiStreamEvent.ts
+      index.ts
+
+    api-execution-flow/
+      model/
+        useApiExecutionFlow.ts
+      lib/
+        normalizeApiExecutionResult.ts
+      index.ts
+
+  pages/
+    login/
+      ui/
+        LoginPage.vue
+      route.ts
+      index.ts
+
+    dashboard/
+      ui/
+        DashboardPage.vue
+      route.ts
+      index.ts
+
+    system-settings/
+      ui/
+        SystemSettingsPage.vue
+      route.ts
+      index.ts
+
+    config-center/
+      ui/
+        ConfigCenterPage.vue
+      route.ts
+      index.ts
+
+    case-center/
+      ui/
+        CaseCenterPage.vue
+      route.ts
+      index.ts
+
+    case-ai-record-detail/
+      ui/
+        CaseAiRecordDetailPage.vue
+      route.ts
+      index.ts
+
+    bug-management/
+      ui/
+        BugManagementPage.vue
+      route.ts
+      index.ts
+
+    bug-detail/
+      ui/
+        BugDetailPage.vue
+      route.ts
+      index.ts
+
+    api-automation/
+      ui/
+        ApiAutomationPage.vue
+      route.ts
+      index.ts
+
+    web-automation/
+      ui/
+        WebAutomationPage.vue
+      route.ts
+      index.ts
+
+    app-automation/
+      ui/
+        AppAutomationPage.vue
+      route.ts
+      index.ts
+
+  tests/
+    ui-acceptance-audit.spec.ts
+    ui-visual-round.spec.ts
+依赖方向固定为：
+
+app
+  -> pages
+    -> widgets
+      -> features
+        -> entities
+          -> shared
+规则：
+
+shared 不能依赖任何业务模块。
+entities 不能依赖 features/widgets/pages。
+features 不能依赖 widgets/pages。
+widgets 可以组合 features/entities/shared。
+pages 只负责页面组合，尽量不写复杂业务逻辑。
+processes 只放跨多步骤的复杂流程，比如 AI 生成、接口执行流程。
+新项目里最重要的纪律：
+
+页面不要再写成 100KB 大文件。
+不直接到处裸写 Arco 组件，优先用 shared/ui。
+样式优先用 token 和 shared/ui，页面 scoped CSS 只做局部布局。
+每个模块都要有 index.ts 对外导出，避免跨目录乱 import。
+每迁移一个模块就做截图验收。

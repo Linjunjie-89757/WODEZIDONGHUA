@@ -1,0 +1,1 @@
+export { bugManagementRoutePath } from './route';

@@ -1,0 +1,38 @@
+{
+  "name": "auto-test-hub",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint . --ext .vue,.ts --fix",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@arco-design/web-vue": "^2.57.0",
+    "@vueuse/core": "^10.11.0",
+    "axios": "^1.7.2",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.31",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-patch": "^1.10.3",
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.14.10",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "@vue/tsconfig": "^0.5.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "npm-run-all2": "^6.2.2",
+    "prettier": "^3.3.2",
+    "typescript": "~5.5.3",
+    "vite": "^5.3.3",
+    "vue-tsc": "^2.0.26"
+  }
+}
