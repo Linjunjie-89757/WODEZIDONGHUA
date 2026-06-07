@@ -35,6 +35,27 @@ export const zhCN = {
     all: '全部空间',
     unselected: '未选择空间'
   },
+  systemSettings: {
+    categoryTitle: '设置分类',
+    aiConnectionMenuDescription: '配置 AI 大模型连接池',
+    workspaceMenu: '空间管理',
+    workspaceMenuDescription: '管理测试空间',
+    workspaceTitle: '工作空间配置',
+    workspaceDescription: '管理测试空间，控制不同项目和团队的测试资源隔离。',
+    workspaceCreate: '新增空间',
+    workspaceTotal: '空间总数',
+    workspaceEnabled: '启用空间',
+    workspaceAllScope: '全局空间',
+    workspaceProject: '项目空间',
+    workspaceEmpty: '暂无工作空间',
+    workspaceNoDescription: '暂无空间说明',
+    workspaceCode: '编码',
+    workspaceType: '类型',
+    workspaceOwner: '负责人',
+    workspaceMembers: '成员管理',
+    workspaceContractHint: '当前已接入工作空间读取；新增、编辑、成员管理等写操作需补读旧后端 contract 后再接入。',
+    workspaceLoadFailed: '工作空间加载失败，请检查后端接口或当前登录状态。'
+  },
   aiConnection: {
     title: 'AI 连接池',
     description: '统一管理模型供应商、连接状态和测试入口。',
@@ -74,7 +95,10 @@ export const zhCN = {
     statsTotal: '连接总数',
     statsReady: '可用连接',
     statsDisabled: '停用连接',
+    statsProviders: '可用供应商',
     providerConnectionCountSuffix: '个连接',
+    supportedProviders: '支持的供应商',
+    createdAtLabel: '最近验证',
     empty: '暂无 AI 连接',
     loadFailed: 'AI 连接加载失败，请检查后端接口或当前空间权限。'
   },
