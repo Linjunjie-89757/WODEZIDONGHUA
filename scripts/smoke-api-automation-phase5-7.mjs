@@ -67,6 +67,10 @@ function inputByTestId(testId) {
   return page.getByTestId(testId).locator('input, textarea').first();
 }
 
+async function openWorkbenchTab(label) {
+  await page.getByTestId('api-automation-workbench-tabs').locator('.arco-tabs-tab-title').filter({ hasText: label }).click();
+}
+
 async function clickVisibleModalPrimaryButton() {
   await page.locator('.arco-modal:visible .arco-modal-footer .arco-btn-primary').last().click();
 }
@@ -222,6 +226,10 @@ async function createDefinitionWithProcessors() {
 async function selectDefinition() {
   const row = page.getByTestId('api-definition-row').filter({ hasText: definitionName }).first();
   await row.click();
+}
+
+async function openCasesWorkbench() {
+  await openWorkbenchTab('用例');
   await page.getByTestId('api-case-management').waitFor({ timeout: 15000 });
 }
 
@@ -254,6 +262,8 @@ async function runCaseIfAvailable() {
 }
 
 async function createScenario() {
+  await openWorkbenchTab('场景');
+  await page.getByTestId('api-scenario-management').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-retry').click();
   await page.waitForResponse((response) =>
     response.url().includes('/api/automation/api/cases') &&
@@ -360,11 +370,13 @@ function hasSuccessfulRequest(pathPart, method) {
 try {
   await login();
   await page.getByTestId('api-automation-shell').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-scenario-management').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-automation-workbench').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-run-context-toolbar').waitFor({ timeout: 15000 });
 
   await cleanupSmokeData();
   await createDefinitionWithProcessors();
   await selectDefinition();
+  await openCasesWorkbench();
   await createCase();
   await runCaseIfAvailable();
   await createScenario();

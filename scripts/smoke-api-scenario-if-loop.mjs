@@ -78,6 +78,10 @@ function inputByTestId(testId) {
   return page.getByTestId(testId).locator('input, textarea').first();
 }
 
+async function openWorkbenchTab(label) {
+  await page.getByTestId('api-automation-workbench-tabs').locator('.arco-tabs-tab-title').filter({ hasText: label }).click();
+}
+
 async function clickVisibleModalPrimaryButton() {
   await page.locator('.arco-modal:visible .arco-modal-footer .arco-btn-primary').last().click();
 }
@@ -451,6 +455,8 @@ function hasSuccessfulRequest(pathPart, method) {
 try {
   await login();
   await page.getByTestId('api-automation-shell').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-automation-workbench').waitFor({ timeout: 15000 });
+  await openWorkbenchTab('场景');
   await page.getByTestId('api-scenario-management').waitFor({ timeout: 15000 });
   await cleanupByApi();
 
