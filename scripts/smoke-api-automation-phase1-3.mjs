@@ -11,7 +11,7 @@ const definitionName = `smoke-api-definition-${stamp}`;
 const editedDefinitionName = `${definitionName}-edited`;
 const caseName = `smoke-api-case-${stamp}`;
 const screenshotPath = `output/playwright/api-automation-phase3b-${stamp}.png`;
-const detailScreenshotPath = `output/playwright/api-automation-phase3f-editor-${stamp}.png`;
+const detailScreenshotPath = `output/playwright/api-automation-phase3h-editor-${stamp}.png`;
 const smokeRequestUrl = 'http://localhost:8080/api/auth/me';
 
 const browser = await chromium.launch({ headless: true });
@@ -72,17 +72,21 @@ function inputByTestId(testId) {
   return page.getByTestId(testId).locator('input:visible, textarea:visible').first();
 }
 
+async function clickRequestContentTab(index) {
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab').nth(index).click();
+}
+
 async function assertRequestEditorShell() {
   await page.getByTestId('api-definition-request-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-editor-tabs').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-command-row').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-content-tabs').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-response-shell').waitFor({ timeout: 15000 });
-  await assertRequestEditorPhase3E();
+  await assertRequestEditorPhase3H();
 }
 
-async function assertRequestEditorPhase3E() {
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求头' }).click();
+async function assertRequestEditorPhase3H() {
+  await clickRequestContentTab(0);
   await page.getByTestId('api-definition-headers-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-inline-header-key-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-header-row').first().waitFor({ timeout: 15000 });
@@ -93,7 +97,16 @@ async function assertRequestEditorPhase3E() {
   await page.getByTestId('api-definition-header-row').nth(1).waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-header-row').nth(1).getByTestId('api-definition-inline-header-key-input').locator('input').fill('X-Smoke-Extra');
   await page.getByTestId('api-definition-header-row').nth(1).getByTestId('api-definition-inline-header-value-input').locator('input').fill('phase3g');
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求体' }).click();
+  await assertBatchAddTools({
+    addButtonTestId: 'api-definition-header-batch-add',
+    rowTestId: 'api-definition-header-row',
+    keyInputTestId: 'api-definition-inline-header-key-input',
+    firstKey: 'X-Batch-One',
+    secondKey: 'X-Batch-Two',
+    thirdKey: 'X-Batch-Only'
+  });
+
+  await clickRequestContentTab(1);
   await page.getByTestId('api-definition-body-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-body-mode-raw').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-body-mode-json').waitFor({ timeout: 15000 });
@@ -106,9 +119,18 @@ async function assertRequestEditorPhase3E() {
   await page.getByTestId('api-definition-body-form-row').first().getByTestId('api-definition-param-required-toggle').click();
   await page.getByTestId('api-definition-body-form-row').first().getByTestId('api-definition-body-form-key-input').locator('input').fill('phase');
   await page.getByTestId('api-definition-body-form-row').first().getByTestId('api-definition-body-form-value-input').locator('input').fill('3g');
+  await assertBatchAddTools({
+    addButtonTestId: 'api-definition-body-form-batch-add',
+    rowTestId: 'api-definition-body-form-row',
+    keyInputTestId: 'api-definition-body-form-key-input',
+    firstKey: 'bodyBatchOne',
+    secondKey: 'bodyBatchTwo',
+    thirdKey: 'bodyBatchOnly'
+  });
   await page.getByTestId('api-definition-body-mode-raw').click();
   await page.getByTestId('api-definition-inline-body-input').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: 'Params' }).click();
+
+  await clickRequestContentTab(2);
   await page.getByTestId('api-definition-params-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-inline-query-key-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-query-row').first().waitFor({ timeout: 15000 });
@@ -119,19 +141,28 @@ async function assertRequestEditorPhase3E() {
   await page.getByTestId('api-definition-query-row').nth(1).waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-query-row').nth(1).getByTestId('api-definition-inline-query-key-input').locator('input').fill('phase');
   await page.getByTestId('api-definition-query-row').nth(1).getByTestId('api-definition-inline-query-value-input').locator('input').fill('3g');
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: 'Auth' }).click();
+  await assertBatchAddTools({
+    addButtonTestId: 'api-definition-query-batch-add',
+    rowTestId: 'api-definition-query-row',
+    keyInputTestId: 'api-definition-inline-query-key-input',
+    firstKey: 'queryBatchOne',
+    secondKey: 'queryBatchTwo',
+    thirdKey: 'queryBatchOnly'
+  });
+
+  await clickRequestContentTab(3);
   await page.getByTestId('api-definition-auth-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-auth-type').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '前置处理' }).click();
+  await clickRequestContentTab(4);
   await page.getByTestId('api-definition-pre-editor').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '后置处理' }).click();
+  await clickRequestContentTab(5);
   await page.getByTestId('api-definition-post-editor').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '断言' }).click();
+  await clickRequestContentTab(6);
   await page.getByTestId('api-definition-tests-editor').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '设置' }).click();
+  await clickRequestContentTab(7);
   await page.getByTestId('api-definition-settings-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-inline-timeout-input').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '用例' }).click();
+  await clickRequestContentTab(8);
   await page.getByTestId('api-definition-cases-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-management').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-create').click();
@@ -141,8 +172,64 @@ async function assertRequestEditorPhase3E() {
   await page.getByTestId('api-definition-cases-editor').getByText(caseName).waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-list-density-shell').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-cases-editor').getByTestId('api-case-detail-entry').first().waitFor({ timeout: 15000 });
-  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求体' }).click();
+  await clickRequestContentTab(1);
   await page.getByTestId('api-definition-response-shell').waitFor({ timeout: 15000 });
+}
+
+async function assertBatchAddTools({ addButtonTestId, rowTestId, keyInputTestId, firstKey, secondKey, thirdKey }) {
+  const initialRows = await page.getByTestId(rowTestId).count();
+  await page.getByTestId(addButtonTestId).click();
+  await page.getByTestId('api-definition-batch-add-drawer').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-batch-add-input').locator('textarea').fill([
+    `${firstKey}=alpha`,
+    `${secondKey}: beta`,
+    thirdKey
+  ].join('\n'));
+  await page.getByTestId('api-definition-batch-add-confirm').click();
+  await page.getByTestId('api-definition-batch-add-drawer').waitFor({ state: 'hidden', timeout: 15000 });
+  await page.waitForFunction(
+    ({ testId, count }) => document.querySelectorAll(`[data-testid="${testId}"]`).length >= count + 3,
+    { testId: rowTestId, count: initialRows },
+    { timeout: 15000 }
+  );
+  await page.waitForFunction(
+    ({ rowsTestId, inputTestId, expectedKeys }) => {
+      const values = Array.from(document.querySelectorAll(`[data-testid="${rowsTestId}"] [data-testid="${inputTestId}"] input`))
+        .map((input) => input instanceof HTMLInputElement ? input.value : '');
+      return expectedKeys.every((key) => values.includes(key));
+    },
+    { rowsTestId: rowTestId, inputTestId: keyInputTestId, expectedKeys: [firstKey, secondKey, thirdKey] },
+    { timeout: 15000 }
+  );
+
+  await page.getByTestId(`${addButtonTestId}-disable-all`).click();
+  await page.waitForFunction(
+    ({ switchRowTestId }) => {
+      const rows = Array.from(document.querySelectorAll(`[data-testid="${switchRowTestId}"]`));
+      return rows.length > 0 && rows.every((row) => !row.querySelector('.arco-switch')?.classList.contains('arco-switch-checked'));
+    },
+    { switchRowTestId: rowTestId },
+    { timeout: 15000 }
+  );
+  await page.getByTestId(`${addButtonTestId}-enable-all`).click();
+  await page.waitForFunction(
+    ({ switchRowTestId }) => {
+      const rows = Array.from(document.querySelectorAll(`[data-testid="${switchRowTestId}"]`));
+      return rows.length > 0 && rows.every((row) => row.querySelector('.arco-switch')?.classList.contains('arco-switch-checked'));
+    },
+    { switchRowTestId: rowTestId },
+    { timeout: 15000 }
+  );
+
+  const beforeClear = await page.getByTestId(rowTestId).count();
+  const keyInputs = page.getByTestId(rowTestId).getByTestId(keyInputTestId).locator('input');
+  await keyInputs.last().fill('');
+  await page.getByTestId(`${addButtonTestId}-clear-empty`).click();
+  await page.waitForFunction(
+    ({ testId, count }) => document.querySelectorAll(`[data-testid="${testId}"]`).length < count,
+    { testId: rowTestId, count: beforeClear },
+    { timeout: 15000 }
+  );
 }
 
 async function clickVisibleModalPrimaryButton() {

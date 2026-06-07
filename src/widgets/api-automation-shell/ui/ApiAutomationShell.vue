@@ -184,6 +184,40 @@
                             <strong>{{ t.apiAutomation.requestTabHeaders }}</strong>
                             <span>{{ t.apiAutomation.requestEditorMultiRowHint }}</span>
                           </header>
+                          <div class="api-automation-shell__param-tools">
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-header-batch-add"
+                              @click="openBatchAdd('headers')"
+                            >
+                              <span data-testid="api-definition-param-batch-add">{{ t.apiAutomation.batchAdd }}</span>
+                            </button>
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-header-batch-add-enable-all"
+                              @click="toggleKeyValueRows(definitionEditorForm.headers, true)"
+                            >
+                              {{ t.apiAutomation.enableAll }}
+                            </button>
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-header-batch-add-disable-all"
+                              @click="toggleKeyValueRows(definitionEditorForm.headers, false)"
+                            >
+                              {{ t.apiAutomation.disableAll }}
+                            </button>
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-header-batch-add-clear-empty"
+                              @click="clearEmptyKeyValueRows(definitionEditorForm.headers)"
+                            >
+                              {{ t.apiAutomation.clearEmptyRows }}
+                            </button>
+                          </div>
                           <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--header">
                             <span>{{ t.apiAutomation.enabled }}</span>
                             <span>{{ t.apiAutomation.fieldHeaderKey }}</span>
@@ -192,9 +226,7 @@
                             <span>{{ t.apiAutomation.lengthRange }}</span>
                             <span>{{ t.apiAutomation.encode }}</span>
                             <span>{{ t.apiAutomation.fieldDescription }}</span>
-                            <button type="button" class="api-automation-shell__batch-link" data-testid="api-definition-param-batch-add">
-                              {{ t.apiAutomation.batchAdd }}
-                            </button>
+                            <span>{{ t.common.actions }}</span>
                           </div>
                           <div
                             v-for="(row, index) in definitionEditorForm.headers"
@@ -350,6 +382,40 @@
                             v-else-if="definitionEditorForm.bodyType === 'FORM_URLENCODED'"
                             class="api-automation-shell__kv-editor"
                           >
+                            <div class="api-automation-shell__param-tools">
+                              <button
+                                type="button"
+                                class="api-automation-shell__batch-link"
+                                data-testid="api-definition-body-form-batch-add"
+                                @click="openBatchAdd('bodyForm')"
+                              >
+                                <span data-testid="api-definition-param-batch-add">{{ t.apiAutomation.batchAdd }}</span>
+                              </button>
+                              <button
+                                type="button"
+                                class="api-automation-shell__batch-link"
+                                data-testid="api-definition-body-form-batch-add-enable-all"
+                                @click="toggleKeyValueRows(definitionEditorForm.bodyFormItems, true)"
+                              >
+                                {{ t.apiAutomation.enableAll }}
+                              </button>
+                              <button
+                                type="button"
+                                class="api-automation-shell__batch-link"
+                                data-testid="api-definition-body-form-batch-add-disable-all"
+                                @click="toggleKeyValueRows(definitionEditorForm.bodyFormItems, false)"
+                              >
+                                {{ t.apiAutomation.disableAll }}
+                              </button>
+                              <button
+                                type="button"
+                                class="api-automation-shell__batch-link"
+                                data-testid="api-definition-body-form-batch-add-clear-empty"
+                                @click="clearEmptyKeyValueRows(definitionEditorForm.bodyFormItems)"
+                              >
+                                {{ t.apiAutomation.clearEmptyRows }}
+                              </button>
+                            </div>
                             <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--body">
                               <span>{{ t.apiAutomation.enabled }}</span>
                               <span>{{ t.apiAutomation.fieldQueryKey }}</span>
@@ -357,9 +423,7 @@
                               <span>{{ t.apiAutomation.fieldQueryValue }}</span>
                               <span>{{ t.apiAutomation.lengthRange }}</span>
                               <span>{{ t.apiAutomation.fieldDescription }}</span>
-                              <button type="button" class="api-automation-shell__batch-link" data-testid="api-definition-param-batch-add">
-                                {{ t.apiAutomation.batchAdd }}
-                              </button>
+                              <span>{{ t.common.actions }}</span>
                             </div>
                             <div
                               v-for="(row, index) in definitionEditorForm.bodyFormItems"
@@ -429,6 +493,40 @@
                             <strong>Params</strong>
                             <span>{{ t.apiAutomation.requestEditorMultiRowHint }}</span>
                           </header>
+                          <div class="api-automation-shell__param-tools">
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-query-batch-add"
+                              @click="openBatchAdd('query')"
+                            >
+                              <span data-testid="api-definition-param-batch-add">{{ t.apiAutomation.batchAdd }}</span>
+                            </button>
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-query-batch-add-enable-all"
+                              @click="toggleKeyValueRows(definitionEditorForm.queryParams, true)"
+                            >
+                              {{ t.apiAutomation.enableAll }}
+                            </button>
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-query-batch-add-disable-all"
+                              @click="toggleKeyValueRows(definitionEditorForm.queryParams, false)"
+                            >
+                              {{ t.apiAutomation.disableAll }}
+                            </button>
+                            <button
+                              type="button"
+                              class="api-automation-shell__batch-link"
+                              data-testid="api-definition-query-batch-add-clear-empty"
+                              @click="clearEmptyKeyValueRows(definitionEditorForm.queryParams)"
+                            >
+                              {{ t.apiAutomation.clearEmptyRows }}
+                            </button>
+                          </div>
                           <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--query">
                             <span>{{ t.apiAutomation.enabled }}</span>
                             <span>{{ t.apiAutomation.fieldQueryKey }}</span>
@@ -437,9 +535,7 @@
                             <span>{{ t.apiAutomation.lengthRange }}</span>
                             <span>{{ t.apiAutomation.encode }}</span>
                             <span>{{ t.apiAutomation.fieldDescription }}</span>
-                            <button type="button" class="api-automation-shell__batch-link" data-testid="api-definition-param-batch-add">
-                              {{ t.apiAutomation.batchAdd }}
-                            </button>
+                            <span>{{ t.common.actions }}</span>
                           </div>
                           <div
                             v-for="(row, index) in definitionEditorForm.queryParams"
@@ -691,11 +787,35 @@
       :definition-id="editingDefinitionId"
       @success="loadReadonly"
     />
+    <a-drawer
+      v-model:visible="batchAddVisible"
+      :title="batchAddTitle"
+      :width="520"
+      data-testid="api-definition-batch-add-drawer"
+    >
+      <div class="api-automation-shell__batch-drawer">
+        <p>{{ t.apiAutomation.batchAddHint }}</p>
+        <a-textarea
+          v-model="batchAddInput"
+          data-testid="api-definition-batch-add-input"
+          :auto-size="{ minRows: 14, maxRows: 18 }"
+          :placeholder="t.apiAutomation.batchAddPlaceholder"
+        />
+      </div>
+      <template #footer>
+        <div class="api-automation-shell__drawer-footer">
+          <AppButton @click="batchAddVisible = false">{{ t.common.cancel }}</AppButton>
+          <AppButton type="primary" data-testid="api-definition-batch-add-confirm" @click="confirmBatchAdd">
+            {{ t.apiAutomation.batchAddConfirm }}
+          </AppButton>
+        </div>
+      </template>
+    </a-drawer>
   </AppSection>
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 import {
   apiAutomationApi,
@@ -753,10 +873,26 @@ const requestMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEA
 const queryParamTypes = ['string', 'integer', 'number', 'boolean', 'array'] as const;
 const bodyParamTypes = ['string', 'integer', 'number', 'boolean', 'array', 'json', 'file'] as const;
 const rawBodyTypes = ['RAW', 'RAW_JSON', 'RAW_XML', 'RAW_TEXT'] as const;
+type BatchAddTarget = 'headers' | 'query' | 'bodyForm';
+const batchAddVisible = ref(false);
+const batchAddTarget = ref<BatchAddTarget>('headers');
+const batchAddInput = ref('');
 const definitionDialogRef = ref<{
   openCreate: () => void;
   openEdit: () => void | Promise<void>;
 } | null>(null);
+
+const batchAddTitle = computed(() => {
+  if (batchAddTarget.value === 'query') {
+    return t.apiAutomation.batchAddParamsTitle;
+  }
+
+  if (batchAddTarget.value === 'bodyForm') {
+    return t.apiAutomation.batchAddBodyFormTitle;
+  }
+
+  return t.apiAutomation.batchAddHeadersTitle;
+});
 
 watch(
   selectedDefinitionId,
@@ -818,8 +954,8 @@ async function handleSaveInlineDefinition() {
   await loadDefinitionDetail(selectedDefinitionId.value);
 }
 
-function addKeyValueRow(rows: ApiKeyValue[]) {
-  rows.push({
+function createKeyValueRow(values: Partial<ApiKeyValue> = {}): ApiKeyValue {
+  return {
     key: '',
     value: '',
     description: '',
@@ -831,8 +967,13 @@ function addKeyValueRow(rows: ApiKeyValue[]) {
     maxLength: null,
     fileName: '',
     contentType: '',
-    fileBase64: ''
-  });
+    fileBase64: '',
+    ...values
+  };
+}
+
+function addKeyValueRow(rows: ApiKeyValue[]) {
+  rows.push(createKeyValueRow());
 }
 
 function removeKeyValueRow(rows: ApiKeyValue[], index: number) {
@@ -841,6 +982,96 @@ function removeKeyValueRow(rows: ApiKeyValue[], index: number) {
   if (!rows.length) {
     addKeyValueRow(rows);
   }
+}
+
+function isKeyValueRowEmpty(row: ApiKeyValue) {
+  return ![
+    row.key,
+    row.value,
+    row.description,
+    row.fileName,
+    row.contentType,
+    row.fileBase64
+  ].some((value) => String(value ?? '').trim());
+}
+
+function clearEmptyKeyValueRows(rows: ApiKeyValue[]) {
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    if (isKeyValueRowEmpty(rows[index])) {
+      rows.splice(index, 1);
+    }
+  }
+
+  if (!rows.length) {
+    addKeyValueRow(rows);
+  }
+}
+
+function toggleKeyValueRows(rows: ApiKeyValue[], enabled: boolean) {
+  rows.forEach((row) => {
+    row.enabled = enabled;
+  });
+}
+
+function openBatchAdd(target: BatchAddTarget) {
+  batchAddTarget.value = target;
+  batchAddInput.value = '';
+  batchAddVisible.value = true;
+}
+
+function targetRows(target: BatchAddTarget) {
+  if (!definitionEditorForm.value) {
+    return [];
+  }
+
+  if (target === 'query') {
+    return definitionEditorForm.value.queryParams;
+  }
+
+  if (target === 'bodyForm') {
+    return definitionEditorForm.value.bodyFormItems;
+  }
+
+  return definitionEditorForm.value.headers;
+}
+
+function parseBatchAddInput(input: string) {
+  return input
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const equalIndex = line.indexOf('=');
+      const colonIndex = line.indexOf(':');
+      const splitIndex = equalIndex >= 0
+        ? equalIndex
+        : colonIndex >= 0
+          ? colonIndex
+          : -1;
+
+      if (splitIndex < 0) {
+        return createKeyValueRow({ key: line });
+      }
+
+      return createKeyValueRow({
+        key: line.slice(0, splitIndex).trim(),
+        value: line.slice(splitIndex + 1).trim()
+      });
+    })
+    .filter((row) => row.key.trim());
+}
+
+function confirmBatchAdd() {
+  const rows = targetRows(batchAddTarget.value);
+  const parsedRows = parseBatchAddInput(batchAddInput.value);
+
+  if (!parsedRows.length) {
+    feedback.warning(t.apiAutomation.batchAddEmptyWarning);
+    return;
+  }
+
+  rows.push(...parsedRows);
+  batchAddVisible.value = false;
 }
 
 async function handleDebugDefinition() {
@@ -1342,11 +1573,40 @@ async function handleDebugDefinition() {
   border: 0;
   background: transparent;
   color: rgb(var(--primary-6));
-  cursor: default;
+  cursor: pointer;
   font-size: 12px;
   font-weight: 600;
   padding: 0;
   text-align: left;
+}
+
+.api-automation-shell__param-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #fbfcfe;
+  padding: 4px 8px;
+}
+
+.api-automation-shell__batch-drawer {
+  display: grid;
+  gap: 10px;
+}
+
+.api-automation-shell__batch-drawer p {
+  margin: 0;
+  color: var(--app-color-text-muted);
+  font-size: 13px;
+}
+
+.api-automation-shell__drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .api-automation-shell__body-mode-row {
