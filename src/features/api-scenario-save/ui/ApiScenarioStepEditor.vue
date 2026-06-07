@@ -472,9 +472,17 @@ function isChildContainerType(type: ApiScenarioStepType) {
 .api-scenario-step-editor,
 .api-scenario-step-editor__row,
 .api-scenario-step-editor__children {
-  display: grid;
-  gap: 6px;
   min-width: 0;
+}
+
+.api-scenario-step-editor {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  background: #fff;
 }
 
 .api-scenario-step-editor__toolbar,
@@ -498,88 +506,52 @@ function isChildContainerType(type: ApiScenarioStepType) {
 
 .api-scenario-step-editor__toolbar {
   min-height: 42px;
-  border: 1px solid var(--app-color-border);
-  border-radius: var(--app-radius-sm);
+  border: 0;
+  border-bottom: 1px solid #f3f4f6;
+  border-radius: 0;
   background: #f9fafb;
-  padding: 6px 10px;
+  padding: 0 16px;
 }
 
 .api-scenario-step-editor__toolbar h3 {
   margin: 0;
-  color: var(--app-color-text-muted);
-  font-size: 13px;
-  font-weight: 650;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .api-scenario-step-editor__row,
 .api-scenario-step-editor__empty {
-  border: 1px solid var(--app-color-border);
+  border: 0;
+  border-bottom: 1px solid #f3f4f6;
   border-radius: 0;
-  background: var(--app-color-surface);
+  background: #fff;
   padding: 0;
 }
 
 .api-scenario-step-editor__row {
   position: relative;
-  overflow: hidden;
-  border-color: #f0f1f4;
-}
-
-.api-scenario-step-editor__row + .api-scenario-step-editor__row {
-  margin-top: -1px;
+  overflow: visible;
 }
 
 .api-scenario-step-editor__row:hover {
   z-index: 1;
-  border-color: #bfdbfe;
-  background: #fbfdff;
+  background: rgba(239, 246, 255, 0.42);
 }
 
 .api-scenario-step-editor__row[data-selected='true'] {
   z-index: 2;
-  border-color: #60a5fa;
-  background: #f8fbff;
-  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.22);
-}
-
-.api-scenario-step-editor__row::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 3px;
-  background: #93c5fd;
-}
-
-.api-scenario-step-editor__row--if-controller::before {
-  background: #ec4899;
-}
-
-.api-scenario-step-editor__row--loop-controller::before,
-.api-scenario-step-editor__row--once-only-controller::before {
-  background: #f97316;
-}
-
-.api-scenario-step-editor__row--constant-timer::before {
-  background: #f59e0b;
-}
-
-.api-scenario-step-editor__row--script::before {
-  background: #14b8a6;
-}
-
-.api-scenario-step-editor__row--group::before {
-  background: #64748b;
+  background: #eff6ff;
+  box-shadow: inset 3px 0 0 #3b82f6;
 }
 
 .api-scenario-step-editor__head {
   display: grid;
-  grid-template-columns: 28px 138px minmax(160px, 1fr) auto;
+  grid-template-columns: auto 154px minmax(0, 1fr) auto;
   align-items: center;
   min-height: 48px;
   gap: 8px;
-  padding: 7px 10px 7px 12px;
+  padding: 8px 16px;
 }
 
 .api-scenario-step-editor__row[data-depth='1'] {
@@ -593,9 +565,12 @@ function isChildContainerType(type: ApiScenarioStepType) {
 
 .api-scenario-step-editor__children {
   position: relative;
-  border-left: 2px solid rgba(var(--primary-6), 0.22);
-  margin: 0 10px 10px 24px;
-  padding: 8px 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-left: 2px solid rgba(37, 99, 235, 0.16);
+  margin: 0 0 0 32px;
+  padding: 0;
 }
 
 .api-scenario-step-editor__children > header {
@@ -608,31 +583,33 @@ function isChildContainerType(type: ApiScenarioStepType) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
   background: #f3f4f6;
-  color: var(--app-color-text-muted);
+  color: #6b7280;
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .api-scenario-step-editor__config-grid {
-  padding: 0 10px 10px 40px;
+  padding: 0 16px 10px 56px;
 }
 
 .api-scenario-step-editor :deep(.arco-select-view-single),
 .api-scenario-step-editor :deep(.arco-input-wrapper),
 .api-scenario-step-editor :deep(.arco-input-number) {
-  min-height: 30px;
-  border-radius: 6px;
+  min-height: 26px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
 .api-scenario-step-editor__actions :deep(.arco-btn),
 .api-scenario-step-editor__toolbar-actions :deep(.arco-btn),
 .api-scenario-step-editor__child-actions :deep(.arco-btn) {
-  height: 28px;
-  padding: 0 6px;
+  height: 26px;
+  padding: 0 4px;
+  color: #2563eb;
 }
 
 .api-scenario-step-editor__actions {
@@ -651,9 +628,13 @@ function isChildContainerType(type: ApiScenarioStepType) {
   border-style: dashed;
   border-color: #93c5fd;
   background: #fbfdff;
-  color: var(--app-color-text-muted);
+  color: #2563eb;
   padding: 10px;
   text-align: center;
+}
+
+.api-scenario-step-editor__head > .arco-select {
+  min-width: 0;
 }
 
 @media (max-width: 860px) {

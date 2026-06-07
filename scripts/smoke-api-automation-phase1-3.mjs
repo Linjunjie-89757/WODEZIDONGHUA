@@ -450,7 +450,7 @@ async function assertScenarioWorkbenchVisualShell() {
   await createVisualScenarioByApi();
   await openWorkbenchTab('场景');
   await page.getByTestId('api-scenario-management').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-scenario-retry').click();
+  await page.getByTestId('api-scenario-list-refresh').click();
   await page.waitForResponse((response) =>
     response.url().includes('/api/automation/api/scenarios') &&
     response.request().method() === 'GET' &&

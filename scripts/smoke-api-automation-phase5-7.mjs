@@ -313,14 +313,14 @@ async function runCaseIfAvailable() {
 async function createScenario() {
   await openWorkbenchTab('场景');
   await page.getByTestId('api-scenario-management').waitFor({ timeout: 15000 });
-  await page.getByTestId('api-scenario-retry').click();
+  await page.getByTestId('api-scenario-list-refresh').click();
   await page.waitForResponse((response) =>
     response.url().includes('/api/automation/api/cases') &&
     response.request().method() === 'GET' &&
     response.status() >= 200 &&
     response.status() < 300
   );
-  await page.getByTestId('api-scenario-create').click();
+  await page.getByTestId('api-scenario-rail-create').click();
   await inputByTestId('api-scenario-name-input').fill(scenarioName);
   await page.getByTestId('api-scenario-step-editor').first().waitFor({ timeout: 15000 });
   await inputByTestId('api-scenario-custom-path-input').fill(smokeRequestUrl);

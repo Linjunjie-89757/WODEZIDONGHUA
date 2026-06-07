@@ -21,6 +21,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3M: shared response result panel old-project shell alignment is complete.
 - Phase 3N: case drawer and case management old-project experience alignment is complete.
 - Phase 3O: scenario rail/list/step inspector precision alignment is complete.
+- Scenario workbench visual migration V1 is complete with old-project class/CSS translation as the primary strategy.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -45,6 +46,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Scenario creation still uses the existing dialog.
 - Scenario editing now uses the workbench, but the editor is still a shell-level alignment.
 - Scenario module rail now has a compact create/search tool row, directory title row, all-scenarios node, module row counts, selected visual treatment, and denser row height.
+- Scenario workbench V1 now uses old-project class structures such as `scenario-workbench`, `scenario-module-pane`, `scenario-main-pane`, `scenario-editor-tab-strip`, `ms-scenario-list-shell`, `ms-scenario-table`, `scenario-edit-workspace`, and `scenario-property-card`.
 - Right property panel currently covers:
   - scenario name;
   - status;
@@ -72,6 +74,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Step group visual treatment can be closer to old project.
 - Selected-step metadata is now separated into a right-side read-only inspector.
 - Selected-step property editing is not implemented.
+- V1 translated step editor density toward the old `scenario-step-node` shell, but exact old-project inline controls are still deferred.
 - Step config drawers for custom/system/script steps are not yet visually aligned to the old `scenario-step-config-*` drawer shell.
 
 ## API Definition Request Editor Backlog
@@ -129,6 +132,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 4. Phase 3P: dialog/drawer consistency pass.
    - Normalize create/edit dialog sizing, drawer title/footer rhythm, and dense form rows across API Automation.
    - Keep this separate from response/case/scenario work.
+   - Scenario detail drawer remains a key remaining old-project visual gap after V1.
 
 5. Phase 3Q: narrow viewport visual audit.
    - Go beyond document overflow checks and inspect desktop-narrow/mobile layouts.
