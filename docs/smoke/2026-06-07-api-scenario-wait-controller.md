@@ -44,7 +44,7 @@ Status: pass
 Screenshot:
 
 ```text
-output/playwright/api-scenario-wait-20260607061716.png
+output/playwright/api-scenario-wait-20260607062646.png
 ```
 
 Observed backend behavior:
