@@ -12,6 +12,7 @@
     "smoke:api-wait": "node scripts/smoke-api-scenario-wait.mjs",
     "smoke:api-script": "node scripts/smoke-api-scenario-script.mjs",
     "smoke:api-once": "node scripts/smoke-api-scenario-once.mjs",
+    "smoke:api-if-loop": "node scripts/smoke-api-scenario-if-loop.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

@@ -77,6 +77,44 @@ export function createOnceOnlyStep(): ApiScenarioStep {
   };
 }
 
+export function createIfControllerStep(): ApiScenarioStep {
+  return {
+    id: stepId('if'),
+    name: 'If Controller',
+    stepName: 'If Controller',
+    stepType: 'IF_CONTROLLER',
+    enabled: true,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    conditionType: 'EXPRESSION',
+    conditionExpression: 'true',
+    assertions: [],
+    preProcessors: [],
+    postProcessors: [],
+    children: []
+  };
+}
+
+export function createLoopControllerStep(): ApiScenarioStep {
+  return {
+    id: stepId('loop'),
+    name: 'Loop Controller',
+    stepName: 'Loop Controller',
+    stepType: 'LOOP_CONTROLLER',
+    enabled: true,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    loopType: 'FIXED',
+    loopCount: 1,
+    assertions: [],
+    preProcessors: [],
+    postProcessors: [],
+    children: []
+  };
+}
+
 export function createReferenceDefinitionStep(): ApiScenarioStep {
   return {
     id: stepId('definition'),
@@ -259,6 +297,49 @@ export function normalizeScenarioSteps(steps: ApiScenarioStep[]): ApiScenarioSte
       };
     }
 
+    if (base.stepType === 'IF_CONTROLLER') {
+      return {
+        ...base,
+        stepType: 'IF_CONTROLLER',
+        resource: null,
+        resourceId: null,
+        resourceType: null,
+        definitionId: null,
+        definitionName: null,
+        caseId: null,
+        caseName: null,
+        requestConfig: null,
+        conditionType: 'EXPRESSION',
+        conditionExpression: base.conditionExpression || 'true',
+        assertions: [],
+        preProcessors: [],
+        postProcessors: []
+      };
+    }
+
+    if (base.stepType === 'LOOP_CONTROLLER') {
+      return {
+        ...base,
+        stepType: 'LOOP_CONTROLLER',
+        resource: null,
+        resourceId: null,
+        resourceType: null,
+        definitionId: null,
+        definitionName: null,
+        caseId: null,
+        caseName: null,
+        requestConfig: null,
+        loopType: 'FIXED',
+        loopCount: normalizeLoopCount(base.loopCount),
+        conditionType: null,
+        conditionExpression: null,
+        foreachExpression: null,
+        assertions: [],
+        preProcessors: [],
+        postProcessors: []
+      };
+    }
+
     return {
       ...base,
       stepType: 'CUSTOM_REQUEST',
@@ -282,7 +363,9 @@ function fallbackStepName(step: ApiScenarioStep) {
     GROUP: 'Step Group',
     CONSTANT_TIMER: 'Constant Timer',
     SCRIPT: 'Script',
-    ONCE_ONLY_CONTROLLER: 'Once-only Controller'
+    ONCE_ONLY_CONTROLLER: 'Once-only Controller',
+    IF_CONTROLLER: 'If Controller',
+    LOOP_CONTROLLER: 'Loop Controller'
   };
 
   return names[step.stepType] || 'Scenario Step';
@@ -296,6 +379,16 @@ function normalizeWaitDelay(delayMs?: number | string | null) {
   }
 
   return Math.max(1, Math.min(60000, Math.round(value)));
+}
+
+function normalizeLoopCount(loopCount?: number | string | null) {
+  const value = Number(loopCount ?? 1);
+
+  if (!Number.isFinite(value)) {
+    return 1;
+  }
+
+  return Math.max(0, Math.min(50, Math.round(value)));
 }
 
 type ApiScenarioStepPayload = Omit<ApiScenarioStep, 'name' | 'children'> & {
@@ -335,6 +428,33 @@ function toSaveScenarioStepPayload(step: ApiScenarioStep): ApiScenarioStepPayloa
     payload.resourceId = null;
     payload.resourceType = null;
     payload.requestConfig = null;
+    payload.assertions = [];
+    payload.preProcessors = [];
+    payload.postProcessors = [];
+  }
+
+  if (payload.stepType === 'IF_CONTROLLER') {
+    payload.resource = null;
+    payload.resourceId = null;
+    payload.resourceType = null;
+    payload.requestConfig = null;
+    payload.conditionType = 'EXPRESSION';
+    payload.conditionExpression = payload.conditionExpression || 'true';
+    payload.assertions = [];
+    payload.preProcessors = [];
+    payload.postProcessors = [];
+  }
+
+  if (payload.stepType === 'LOOP_CONTROLLER') {
+    payload.resource = null;
+    payload.resourceId = null;
+    payload.resourceType = null;
+    payload.requestConfig = null;
+    payload.loopType = 'FIXED';
+    payload.loopCount = normalizeLoopCount(payload.loopCount);
+    payload.conditionType = null;
+    payload.conditionExpression = null;
+    payload.foreachExpression = null;
     payload.assertions = [];
     payload.preProcessors = [];
     payload.postProcessors = [];

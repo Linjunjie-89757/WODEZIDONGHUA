@@ -21,6 +21,12 @@
         <AppButton type="text" data-testid="api-scenario-add-once-step" @click="addStep('ONCE_ONLY_CONTROLLER')">
           {{ t.apiAutomation.scenarioAddOnceOnlyStep }}
         </AppButton>
+        <AppButton type="text" data-testid="api-scenario-add-if-step" @click="addStep('IF_CONTROLLER')">
+          {{ t.apiAutomation.scenarioAddIfStep }}
+        </AppButton>
+        <AppButton type="text" data-testid="api-scenario-add-loop-step" @click="addStep('LOOP_CONTROLLER')">
+          {{ t.apiAutomation.scenarioAddLoopStep }}
+        </AppButton>
         <AppButton type="text" data-testid="api-scenario-add-group-step" @click="addStep('GROUP')">
           {{ t.apiAutomation.scenarioAddGroupStep }}
         </AppButton>
@@ -51,6 +57,8 @@
           <a-option value="CONSTANT_TIMER">{{ t.apiAutomation.scenarioStepWait }}</a-option>
           <a-option value="SCRIPT">{{ t.apiAutomation.scenarioStepScript }}</a-option>
           <a-option value="ONCE_ONLY_CONTROLLER">{{ t.apiAutomation.scenarioStepOnceOnly }}</a-option>
+          <a-option value="IF_CONTROLLER">{{ t.apiAutomation.scenarioStepIf }}</a-option>
+          <a-option value="LOOP_CONTROLLER">{{ t.apiAutomation.scenarioStepLoop }}</a-option>
           <a-option value="GROUP">{{ t.apiAutomation.scenarioStepGroup }}</a-option>
         </a-select>
         <a-input
@@ -148,6 +156,25 @@
             @update:model-value="(value) => patchScript(index, value)"
           />
         </a-grid-item>
+        <a-grid-item v-if="step.stepType === 'IF_CONTROLLER'" :span="2">
+          <a-input
+            :model-value="step.conditionExpression || ''"
+            data-testid="api-scenario-condition-expression-input"
+            :placeholder="t.apiAutomation.scenarioConditionExpressionPlaceholder"
+            @update:model-value="(value) => patchConditionExpression(index, value)"
+          />
+        </a-grid-item>
+        <a-grid-item v-if="step.stepType === 'LOOP_CONTROLLER'">
+          <a-input-number
+            :model-value="step.loopCount || 1"
+            data-testid="api-scenario-loop-count-input"
+            :min="0"
+            :max="50"
+            :step="1"
+            :placeholder="t.apiAutomation.scenarioLoopCountPlaceholder"
+            @update:model-value="(value) => patchLoopCount(index, value)"
+          />
+        </a-grid-item>
       </a-grid>
 
       <section v-if="isChildContainerStep(step)" class="api-scenario-step-editor__children">
@@ -184,6 +211,8 @@ import {
   createCustomRequestStep,
   createDefaultRequestConfig,
   createGroupStep,
+  createIfControllerStep,
+  createLoopControllerStep,
   createOnceOnlyStep,
   createReferenceCaseStep,
   createReferenceDefinitionStep,
@@ -259,7 +288,7 @@ function moveStep(index: number, direction: -1 | 1) {
 function changeStepType(index: number, type: ApiScenarioStepType) {
   const current = props.modelValue[index];
   const template = createStep(type);
-  const shouldKeepChildren = type === 'GROUP' || type === 'ONCE_ONLY_CONTROLLER';
+  const shouldKeepChildren = isChildContainerType(type);
   const next = {
     ...template,
     id: current.id,
@@ -337,6 +366,27 @@ function patchScript(index: number, script: string) {
   });
 }
 
+function patchConditionExpression(index: number, conditionExpression: string) {
+  patchStep(index, {
+    conditionType: 'EXPRESSION',
+    conditionExpression,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null
+  });
+}
+
+function patchLoopCount(index: number, loopCount: number | string | null | undefined) {
+  const value = Number(loopCount ?? 1);
+  patchStep(index, {
+    loopType: 'FIXED',
+    loopCount: Number.isFinite(value) ? Math.max(0, Math.min(50, Math.round(value))) : 1,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null
+  });
+}
+
 function createStep(type: ApiScenarioStepType) {
   if (type === 'API') {
     return createReferenceDefinitionStep();
@@ -362,6 +412,14 @@ function createStep(type: ApiScenarioStepType) {
     return createOnceOnlyStep();
   }
 
+  if (type === 'IF_CONTROLLER') {
+    return createIfControllerStep();
+  }
+
+  if (type === 'LOOP_CONTROLLER') {
+    return createLoopControllerStep();
+  }
+
   return createCustomRequestStep();
 }
 
@@ -379,7 +437,11 @@ function displayStepType(step: ApiScenarioStep) {
 }
 
 function isChildContainerStep(step: ApiScenarioStep) {
-  return isGroupStep(step) || step.stepType === 'ONCE_ONLY_CONTROLLER';
+  return isGroupStep(step) || isChildContainerType(step.stepType);
+}
+
+function isChildContainerType(type: ApiScenarioStepType) {
+  return type === 'ONCE_ONLY_CONTROLLER' || type === 'IF_CONTROLLER' || type === 'LOOP_CONTROLLER';
 }
 </script>
 

@@ -203,6 +203,26 @@ function inferScenarioStepMessages(steps: ApiScenarioStep[]) {
         continue;
       }
 
+      if (step.stepType === 'IF_CONTROLLER') {
+        const matched = evaluateExpressionCondition(step.conditionExpression || '');
+        messages.push(matched ? 'Condition matched' : 'Condition not matched');
+
+        if (matched) {
+          visit(step.children || []);
+        }
+        continue;
+      }
+
+      if (step.stepType === 'LOOP_CONTROLLER') {
+        const loopCount = normalizeLoopCount(step.loopCount);
+        messages.push(`Loop count: ${loopCount}`);
+
+        for (let index = 0; index < loopCount; index += 1) {
+          visit(step.children || []);
+        }
+        continue;
+      }
+
       messages.push('');
 
       if (step.children?.length) {
@@ -213,6 +233,70 @@ function inferScenarioStepMessages(steps: ApiScenarioStep[]) {
 
   visit(steps);
   return messages;
+}
+
+function evaluateExpressionCondition(expression: string) {
+  const normalized = expression.trim().toLowerCase();
+
+  if (!normalized || normalized === 'false') {
+    return false;
+  }
+
+  if (normalized === 'true') {
+    return true;
+  }
+
+  const comparison = expression.match(/^(.+?)\s*(==|=|!=|<>|>=|<=|>|<|contains)\s*(.+)$/i);
+  if (!comparison) {
+    return false;
+  }
+
+  const left = comparison[1].trim();
+  const operator = comparison[2].toLowerCase();
+  const right = comparison[3].trim();
+  const leftNumber = Number(left);
+  const rightNumber = Number(right);
+  const canCompareNumber = Number.isFinite(leftNumber) && Number.isFinite(rightNumber);
+
+  if (operator === 'contains') {
+    return left.includes(right);
+  }
+
+  if (operator === '==' || operator === '=') {
+    return left === right;
+  }
+
+  if (operator === '!=' || operator === '<>') {
+    return left !== right;
+  }
+
+  if (!canCompareNumber) {
+    return false;
+  }
+
+  if (operator === '>=') {
+    return leftNumber >= rightNumber;
+  }
+
+  if (operator === '<=') {
+    return leftNumber <= rightNumber;
+  }
+
+  if (operator === '>') {
+    return leftNumber > rightNumber;
+  }
+
+  return leftNumber < rightNumber;
+}
+
+function normalizeLoopCount(loopCount?: number | string | null) {
+  const value = Number(loopCount ?? 1);
+
+  if (!Number.isFinite(value)) {
+    return 1;
+  }
+
+  return Math.max(0, Math.min(50, Math.round(value)));
 }
 </script>
 

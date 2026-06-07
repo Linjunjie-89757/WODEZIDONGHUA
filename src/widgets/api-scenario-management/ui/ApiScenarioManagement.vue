@@ -201,6 +201,8 @@ const ScenarioStepNode = defineComponent({
         CONSTANT_TIMER: t.apiAutomation.scenarioStepWait,
         SCRIPT: t.apiAutomation.scenarioStepScript,
         ONCE_ONLY_CONTROLLER: t.apiAutomation.scenarioStepOnceOnly,
+        IF_CONTROLLER: t.apiAutomation.scenarioStepIf,
+        LOOP_CONTROLLER: t.apiAutomation.scenarioStepLoop,
         GROUP: t.apiAutomation.scenarioStepGroup
       };
       return labels[type] || type;

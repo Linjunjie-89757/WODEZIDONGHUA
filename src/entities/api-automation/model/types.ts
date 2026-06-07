@@ -435,6 +435,11 @@ export interface ApiScenarioStep {
   preProcessors?: ApiProcessorConfig[];
   postProcessors?: ApiProcessorConfig[];
   delayMs?: number | null;
+  conditionType?: string | null;
+  conditionExpression?: string | null;
+  loopType?: string | null;
+  loopCount?: number | null;
+  foreachExpression?: string | null;
   script?: string | null;
   children?: ApiScenarioStep[];
 }
