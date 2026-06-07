@@ -13,13 +13,15 @@ const viewports = [
     name: 'desktop',
     width: 1440,
     height: 960,
-    screenshotPath: `output/playwright/case-center-module-desktop-${stamp}.png`
+    screenshotPath: `output/playwright/case-center-module-desktop-${stamp}.png`,
+    aiScreenshotPath: `output/playwright/case-center-ai-desktop-${stamp}.png`
   },
   {
     name: 'mobile',
     width: 390,
     height: 844,
-    screenshotPath: `output/playwright/case-center-module-mobile-${stamp}.png`
+    screenshotPath: `output/playwright/case-center-module-mobile-${stamp}.png`,
+    aiScreenshotPath: `output/playwright/case-center-ai-mobile-${stamp}.png`
   }
 ];
 
@@ -41,6 +43,23 @@ async function login(page) {
   await page.getByPlaceholder('搜索用例编号、名称...').waitFor({ timeout: 15000 });
   await page.getByRole('columnheader', { name: '编号' }).waitFor({ timeout: 15000 });
   await page.getByRole('columnheader', { name: '操作' }).waitFor({ timeout: 15000 });
+}
+
+async function verifyAiTabs(page) {
+  await page.getByRole('button', { name: 'AI 用例生成' }).click();
+  await page.getByText('从需求描述生成测试用例').waitFor({ timeout: 15000 });
+  await page.getByText('生成过程').waitFor({ timeout: 15000 });
+  await page.getByText('生成结果', { exact: true }).waitFor({ timeout: 15000 });
+
+  await page.getByRole('button', { name: 'AI 生成记录' }).click();
+  await page.getByText('任务总数').waitFor({ timeout: 15000 });
+  await page.getByRole('columnheader', { name: '任务 ID' }).waitFor({ timeout: 15000 });
+  await page.getByText('待接入').waitFor({ timeout: 15000 });
+
+  await page.getByRole('button', { name: 'AI 配置' }).click();
+  await page.getByText('用例生成', { exact: true }).waitFor({ timeout: 15000 });
+  await page.getByText('用例评审', { exact: true }).waitFor({ timeout: 15000 });
+  await page.getByText('角色提示词').first().waitFor({ timeout: 15000 });
 }
 
 try {
@@ -66,6 +85,8 @@ try {
 
     await login(page);
     await page.screenshot({ path: viewport.screenshotPath, fullPage: true });
+    await verifyAiTabs(page);
+    await page.screenshot({ path: viewport.aiScreenshotPath, fullPage: true });
 
     const layout = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -79,6 +100,7 @@ try {
       width: viewport.width,
       height: viewport.height,
       screenshotPath: viewport.screenshotPath,
+      aiScreenshotPath: viewport.aiScreenshotPath,
       hasHorizontalOverflow:
         layout.scrollWidth > layout.clientWidth || layout.bodyScrollWidth > layout.bodyClientWidth,
       layout,

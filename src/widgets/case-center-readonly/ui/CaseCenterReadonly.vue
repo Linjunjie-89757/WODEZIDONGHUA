@@ -81,10 +81,7 @@
       </main>
     </template>
 
-    <section v-else class="case-center-readonly__coming-soon">
-      <strong>{{ activeTabLabel }}</strong>
-      <p>{{ t.caseCenter.aiTabContractHint }}</p>
-    </section>
+    <CaseAiPanels v-else :active-tab="activeTab" />
   </section>
 </template>
 
@@ -96,6 +93,7 @@ import { AppButton, AppLoadingState } from '@shared/ui';
 import { CaseCreateDialog } from '@features/case-create';
 
 import { useCaseCenterReadonly } from '../model/useCaseCenterReadonly';
+import CaseAiPanels from './CaseAiPanels.vue';
 import CaseDirectoryTree from './CaseDirectoryTree.vue';
 import CaseReadonlyList from './CaseReadonlyList.vue';
 
@@ -140,9 +138,6 @@ const statCards = computed(() => [
   }
 ]);
 
-const activeTabLabel = computed(
-  () => tabs.find((tab) => tab.key === activeTab.value)?.label || t.caseCenter.tabManage
-);
 </script>
 
 <style scoped>
@@ -323,8 +318,7 @@ const activeTabLabel = computed(
 }
 
 .case-center-readonly__stats article,
-.case-center-readonly__table-shell,
-.case-center-readonly__coming-soon {
+.case-center-readonly__table-shell {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #ffffff;
@@ -479,23 +473,6 @@ const activeTabLabel = computed(
 
 .case-center-readonly__state {
   margin: 0;
-}
-
-.case-center-readonly__coming-soon {
-  grid-column: 1 / -1;
-  margin: 24px;
-  padding: 28px;
-}
-
-.case-center-readonly__coming-soon strong {
-  color: #111827;
-  font-size: 16px;
-}
-
-.case-center-readonly__coming-soon p {
-  margin: 8px 0 0;
-  color: #6b7280;
-  font-size: 13px;
 }
 
 @media (max-width: 1024px) {
