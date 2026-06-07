@@ -59,8 +59,8 @@ const currentTitle = computed(() => {
 .app-header__left h1 {
   margin: 0;
   color: #0f172a;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   line-height: 56px;
 }
 
@@ -71,7 +71,7 @@ const currentTitle = computed(() => {
 }
 
 .app-header__left :deep(.workspace-switcher) {
-  width: 88px;
+  width: 180px;
 }
 
 .app-header__left :deep(.arco-select-view-single) {
@@ -83,7 +83,7 @@ const currentTitle = computed(() => {
 }
 
 .app-header__right {
-  gap: 16px;
+  gap: 8px;
 }
 
 .app-header__notice {
@@ -133,6 +133,17 @@ const currentTitle = computed(() => {
   gap: 8px;
   color: #1f2937;
   font-size: 14px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 8px;
+  transition: background 0.18s ease;
+}
+
+.app-header__user:hover {
+  background: #f3f4f6;
 }
 
 .app-header__avatar {
@@ -158,5 +169,47 @@ const currentTitle = computed(() => {
   border-right: 1.5px solid #94a3b8;
   border-bottom: 1.5px solid #94a3b8;
   transform: rotate(45deg) translateY(-2px);
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .app-header__left {
+    flex: 1;
+    gap: 8px;
+  }
+
+  .app-header__left h1 {
+    max-width: 64px;
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-header__left :deep(.workspace-switcher) {
+    width: 96px;
+  }
+
+  .app-header__right {
+    gap: 4px;
+  }
+
+  .app-header__notice {
+    width: 28px;
+    padding-right: 8px;
+  }
+
+  .app-header__user {
+    padding: 0 4px;
+  }
+
+  .app-header__user strong,
+  .app-header__caret {
+    display: none;
+  }
 }
 </style>

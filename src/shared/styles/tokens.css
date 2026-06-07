@@ -1,10 +1,10 @@
 :root {
-  --app-color-bg: #f6f8fb;
+  --app-color-bg: #f5f6f8;
   --app-color-surface: #ffffff;
-  --app-color-border: #e5e8ef;
-  --app-color-text: #172033;
-  --app-color-text-muted: #667085;
-  --app-color-primary: #165dff;
+  --app-color-border: #e5e7eb;
+  --app-color-text: #111827;
+  --app-color-text-muted: #6b7280;
+  --app-color-primary: #2563eb;
   --app-color-success: #00a870;
   --app-color-warning: #ffb400;
   --app-color-danger: #f53f3f;

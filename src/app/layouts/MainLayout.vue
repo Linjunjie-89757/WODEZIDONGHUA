@@ -1,7 +1,7 @@
 <template>
   <a-layout class="main-layout">
     <AppSidebar />
-    <a-layout>
+    <a-layout class="main-layout__main">
       <AppHeader />
       <a-layout-content class="main-layout__content">
         <router-view />
@@ -21,10 +21,14 @@ import { AppSidebar } from '@widgets/app-sidebar';
   background: #f5f6f8;
 }
 
+.main-layout__main {
+  min-width: 0;
+}
+
 .main-layout__content {
   min-width: 0;
   min-height: calc(100vh - 56px);
   overflow: auto;
-  padding: 24px;
+  background: #f5f6f8;
 }
 </style>
