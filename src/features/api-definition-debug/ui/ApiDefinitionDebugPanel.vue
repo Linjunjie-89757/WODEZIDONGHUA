@@ -59,15 +59,16 @@ function handleDebug() {
 <style scoped>
 .api-definition-debug {
   display: grid;
-  gap: var(--app-spacing-md);
+  gap: 8px;
   min-width: 0;
 }
 
 .api-definition-debug__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--app-spacing-md);
+  gap: var(--app-spacing-sm);
+  min-width: 0;
 }
 
 .api-definition-debug__title,
@@ -76,13 +77,21 @@ function handleDebug() {
 }
 
 .api-definition-debug__title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
 }
 
 .api-definition-debug__description {
-  margin-top: 4px;
+  max-width: 56ch;
+  margin-top: 2px;
   color: var(--app-color-text-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+.api-definition-debug__header :deep(.arco-btn) {
+  height: 32px;
+}
 </style>

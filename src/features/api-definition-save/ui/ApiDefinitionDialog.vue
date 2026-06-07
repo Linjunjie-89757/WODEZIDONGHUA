@@ -7,6 +7,7 @@
     :confirm-loading="saving || detailLoading"
     :before-ok="handleSubmit"
     width="760px"
+    class="api-definition-dialog"
   >
     <a-spin :loading="detailLoading">
       <a-form :model="form" layout="vertical">
@@ -198,3 +199,15 @@ defineExpose({
   openEdit
 });
 </script>
+
+<style scoped>
+.api-definition-dialog :deep(.arco-modal-body) {
+  max-height: 72vh;
+  overflow: auto;
+  padding-top: 14px;
+}
+
+.api-definition-dialog :deep(.arco-form-item) {
+  margin-bottom: 12px;
+}
+</style>

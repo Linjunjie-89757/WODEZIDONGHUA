@@ -2,6 +2,7 @@
   <AppSection
     :title="t.apiAutomation.overviewTitle"
     :description="t.apiAutomation.overviewDescription"
+    class="api-automation-shell"
     data-testid="api-automation-shell"
   >
     <template #actions>
@@ -181,9 +182,27 @@ async function openEditDialog(id: number) {
 <style scoped>
 .api-automation-shell__grid {
   display: grid;
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  grid-template-columns: minmax(210px, 280px) minmax(0, 1fr);
   gap: 10px;
   min-width: 0;
+}
+
+.api-automation-shell :deep(.app-section__header) {
+  align-items: center;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-color-surface);
+  padding: 10px 12px;
+}
+
+.api-automation-shell :deep(.app-section__title) {
+  font-size: 16px;
+}
+
+.api-automation-shell :deep(.app-section__description) {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .api-automation-shell__summary {
@@ -237,6 +256,15 @@ async function openEditDialog(id: number) {
   min-height: 32px;
 }
 
+.api-automation-shell__context .api-automation-shell__panel {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.api-automation-shell__context .api-automation-shell__panel-header {
+  white-space: nowrap;
+}
+
 .api-automation-shell__panel {
   display: grid;
   gap: 10px;
@@ -261,6 +289,10 @@ async function openEditDialog(id: number) {
 
 @media (max-width: 1024px) {
   .api-automation-shell__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .api-automation-shell__context .api-automation-shell__panel {
     grid-template-columns: 1fr;
   }
 }

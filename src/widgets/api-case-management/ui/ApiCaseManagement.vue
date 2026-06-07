@@ -67,7 +67,7 @@
     >
       <a-spin :loading="detailLoading">
         <div class="api-case-management__drawer" data-testid="api-case-detail">
-          <a-descriptions :column="1" bordered>
+          <a-descriptions :column="2" bordered size="small" class="api-case-management__meta">
             <a-descriptions-item :label="t.apiAutomation.fieldMethod">
               {{ selectedCaseDetail?.requestConfig?.method || '-' }}
             </a-descriptions-item>
@@ -80,7 +80,7 @@
           </a-descriptions>
 
           <section>
-            <h4>{{ t.apiAutomation.caseRunHistory }}</h4>
+            <h4 class="api-case-management__drawer-title">{{ t.apiAutomation.caseRunHistory }}</h4>
             <div v-if="!runHistory.length" class="api-case-management__empty">
               {{ t.apiAutomation.caseRunHistoryEmpty }}
             </div>
@@ -93,7 +93,7 @@
           </section>
 
           <section>
-            <h4>{{ t.apiAutomation.caseChangeHistory }}</h4>
+            <h4 class="api-case-management__drawer-title">{{ t.apiAutomation.caseChangeHistory }}</h4>
             <div v-if="!changeHistory.length" class="api-case-management__empty">
               {{ t.apiAutomation.caseChangeHistoryEmpty }}
             </div>
@@ -106,7 +106,7 @@
           </section>
 
           <section v-if="runResult" data-testid="api-case-run-result">
-            <h4>{{ t.apiAutomation.caseRunResult }}</h4>
+            <h4 class="api-case-management__drawer-title">{{ t.apiAutomation.caseRunResult }}</h4>
             <ApiRunResultPanel :result="runResult" />
           </section>
         </div>
@@ -191,6 +191,20 @@ watch(selectedCase, (value) => {
   display: grid;
   gap: 10px;
   min-width: 0;
+}
+
+.api-case-management__drawer {
+  gap: 12px;
+}
+
+.api-case-management__meta {
+  overflow: hidden;
+  border-radius: var(--app-radius-sm);
+}
+
+.api-case-management__drawer-title {
+  border-bottom: 1px solid var(--app-color-border);
+  padding-bottom: 6px;
 }
 
 .api-case-management__header,

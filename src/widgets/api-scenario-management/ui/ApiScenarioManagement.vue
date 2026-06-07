@@ -90,7 +90,7 @@
     >
       <a-spin :loading="detailLoading">
         <div class="api-scenario-management__drawer" data-testid="api-scenario-detail">
-          <a-descriptions :column="1" bordered>
+          <a-descriptions :column="2" bordered size="small" class="api-scenario-management__meta">
             <a-descriptions-item :label="t.apiAutomation.fieldDescription">
               {{ selectedScenarioDetail?.description || '-' }}
             </a-descriptions-item>
@@ -100,7 +100,7 @@
           </a-descriptions>
 
           <section>
-            <h4>{{ t.apiAutomation.scenarioSteps }}</h4>
+            <h4 class="api-scenario-management__drawer-title">{{ t.apiAutomation.scenarioSteps }}</h4>
             <div v-if="!selectedScenarioDetail?.steps?.length" class="api-scenario-management__empty">
               {{ t.apiAutomation.scenarioStepEmpty }}
             </div>
@@ -114,7 +114,7 @@
           </section>
 
           <section v-if="runResult" data-testid="api-scenario-run-result">
-            <h4>{{ t.apiAutomation.scenarioRunResult }}</h4>
+            <h4 class="api-scenario-management__drawer-title">{{ t.apiAutomation.scenarioRunResult }}</h4>
             <ApiRunResultPanel :result="runResult" :scenario-steps="selectedScenarioDetail?.steps || []" />
           </section>
         </div>
@@ -218,8 +218,10 @@ const ScenarioStepNode = defineComponent({
 
     return () =>
       h('article', { class: 'api-scenario-management__step' }, [
-        h('strong', stepProps.step.name || typeLabel(stepProps.step.stepType)),
-        h('small', typeLabel(stepProps.step.stepType)),
+        h('div', { class: 'api-scenario-management__step-main' }, [
+          h('strong', stepProps.step.name || typeLabel(stepProps.step.stepType)),
+          h('small', typeLabel(stepProps.step.stepType))
+        ]),
         stepProps.step.children?.length
           ? h(
               'div',
@@ -245,7 +247,7 @@ const ScenarioStepNode = defineComponent({
 .api-scenario-management__modules,
 .api-scenario-management__steps {
   display: grid;
-  gap: var(--app-spacing-md);
+  gap: 10px;
   min-width: 0;
 }
 
@@ -298,6 +300,24 @@ const ScenarioStepNode = defineComponent({
   padding: var(--app-spacing-sm);
 }
 
+.api-scenario-management__panel {
+  padding: 10px;
+}
+
+.api-scenario-management__meta {
+  overflow: hidden;
+  border-radius: var(--app-radius-sm);
+}
+
+.api-scenario-management__drawer {
+  gap: 12px;
+}
+
+.api-scenario-management__drawer-title {
+  border-bottom: 1px solid var(--app-color-border);
+  padding-bottom: 6px;
+}
+
 .api-scenario-management__list {
   gap: 0;
   overflow: hidden;
@@ -347,13 +367,30 @@ const ScenarioStepNode = defineComponent({
 
 .api-scenario-management__step {
   display: grid;
-  gap: 4px;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.api-scenario-management__step-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-spacing-sm);
+  min-width: 0;
+}
+
+.api-scenario-management__step-main strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .api-scenario-management__step-children {
   display: grid;
-  gap: var(--app-spacing-sm);
-  margin-left: var(--app-spacing-md);
+  gap: 6px;
+  border-left: 2px solid rgba(var(--primary-6), 0.22);
+  margin-left: 4px;
+  padding-left: 10px;
 }
 
 @media (max-width: 720px) {

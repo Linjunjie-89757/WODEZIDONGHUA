@@ -7,6 +7,7 @@
     :confirm-loading="saving || detailLoading"
     :before-ok="handleSubmit"
     width="720px"
+    class="api-case-dialog"
   >
     <a-spin :loading="detailLoading">
       <a-form :model="form" layout="vertical">
@@ -185,3 +186,15 @@ defineExpose({
   openEdit
 });
 </script>
+
+<style scoped>
+.api-case-dialog :deep(.arco-modal-body) {
+  max-height: 72vh;
+  overflow: auto;
+  padding-top: 14px;
+}
+
+.api-case-dialog :deep(.arco-form-item) {
+  margin-bottom: 12px;
+}
+</style>

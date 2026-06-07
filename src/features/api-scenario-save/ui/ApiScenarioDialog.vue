@@ -137,6 +137,8 @@ defineExpose({
 
 <style scoped>
 .api-scenario-dialog :deep(.arco-modal-body) {
+  max-height: 72vh;
+  overflow: auto;
   padding-top: 14px;
 }
 
