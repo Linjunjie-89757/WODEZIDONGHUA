@@ -226,6 +226,8 @@
           <section class="api-automation-shell__tab-surface" data-testid="api-automation-scenarios-tab">
             <ApiScenarioManagement
               :definitions="definitions"
+              :environments="environments"
+              :variable-sets="variableSets"
               :environment-id="selectedEnvironmentId"
               :variable-set-id="selectedVariableSetId"
             />

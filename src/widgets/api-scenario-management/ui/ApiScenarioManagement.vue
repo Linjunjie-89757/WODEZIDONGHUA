@@ -143,9 +143,48 @@
                       {{ t.apiAutomation.scenarioEditorShellHint }}
                     </div>
                   </a-tab-pane>
-                  <a-tab-pane key="history" :title="t.apiAutomation.scenarioHistory">
-                    <div class="api-scenario-management__editor-placeholder">
-                      {{ t.apiAutomation.scenarioEditorHistoryHint }}
+                  <a-tab-pane key="history">
+                    <template #title>
+                      <span data-testid="api-scenario-history-tab">{{ t.apiAutomation.scenarioHistory }}</span>
+                    </template>
+                    <div class="api-scenario-management__history" data-testid="api-scenario-workbench-history">
+                      <div v-if="!runResult?.stepResults?.length" class="api-scenario-management__editor-placeholder">
+                        {{ t.apiAutomation.scenarioHistoryEmpty }}
+                      </div>
+                      <div v-else class="api-scenario-management__history-table">
+                        <div class="api-scenario-management__history-head">
+                          <span>#</span>
+                          <span>{{ t.apiAutomation.scenarioHistoryStep }}</span>
+                          <span>{{ t.apiAutomation.scenarioHistoryResult }}</span>
+                          <span>{{ t.apiAutomation.scenarioHistoryDuration }}</span>
+                        </div>
+                        <article
+                          v-for="step in runResult.stepResults"
+                          :key="`${step.stepOrder}-${step.stepName}`"
+                          class="api-scenario-management__history-row"
+                          data-testid="api-run-result-step-row"
+                        >
+                          <span>{{ step.stepOrder || '-' }}</span>
+                          <strong>{{ step.stepName || t.apiAutomation.runStepFallback }}</strong>
+                          <span>{{ step.success ? t.apiAutomation.assertionPassed : t.apiAutomation.assertionFailed }}</span>
+                          <span>{{ step.durationMs ?? '-' }} ms</span>
+                        </article>
+                      </div>
+                    </div>
+                  </a-tab-pane>
+                  <a-tab-pane key="result">
+                    <template #title>
+                      <span data-testid="api-scenario-result-tab">{{ t.apiAutomation.scenarioRunResult }}</span>
+                    </template>
+                    <div class="api-scenario-management__run-result" data-testid="api-scenario-workbench-run-result">
+                      <ApiRunResultPanel
+                        v-if="runResult"
+                        :result="runResult"
+                        :scenario-steps="editingScenarioForm?.steps || []"
+                      />
+                      <div v-else class="api-scenario-management__editor-placeholder">
+                        {{ t.apiAutomation.scenarioRunResultEmpty }}
+                      </div>
                     </div>
                   </a-tab-pane>
                   <a-tab-pane key="settings" :title="t.apiAutomation.requestTabSettings">
@@ -163,29 +202,83 @@
                 <span>{{ editingScenarioId || '-' }}</span>
               </header>
               <template v-if="editingScenarioForm">
-                <label>
-                  <span>{{ t.apiAutomation.scenarioName }}</span>
-                  <a-input
-                    v-model="editingScenarioForm.name"
-                    data-testid="api-scenario-workbench-name-input"
-                    :placeholder="t.apiAutomation.scenarioNamePlaceholder"
-                  />
-                </label>
-                <label>
-                  <span>{{ t.apiAutomation.fieldStatus }}</span>
-                  <a-select v-model="editingScenarioForm.status">
-                    <a-option value="ACTIVE">{{ t.apiAutomation.scenarioStatusActive }}</a-option>
-                    <a-option value="DISABLED">{{ t.apiAutomation.scenarioStatusDisabled }}</a-option>
-                  </a-select>
-                </label>
-                <label>
-                  <span>{{ t.apiAutomation.fieldDescription }}</span>
-                  <a-textarea
-                    v-model="editingScenarioForm.description"
-                    :auto-size="{ minRows: 3, maxRows: 5 }"
-                    :placeholder="t.apiAutomation.fieldDescriptionPlaceholder"
-                  />
-                </label>
+                <section class="api-scenario-management__property-section">
+                  <h5>{{ t.apiAutomation.scenarioBasicInfo }}</h5>
+                  <label>
+                    <span>{{ t.apiAutomation.scenarioName }}</span>
+                    <a-input
+                      v-model="editingScenarioForm.name"
+                      data-testid="api-scenario-workbench-name-input"
+                      :placeholder="t.apiAutomation.scenarioNamePlaceholder"
+                    />
+                  </label>
+                  <label>
+                    <span>{{ t.apiAutomation.fieldStatus }}</span>
+                    <a-select v-model="editingScenarioForm.status">
+                      <a-option value="ACTIVE">{{ t.apiAutomation.scenarioStatusActive }}</a-option>
+                      <a-option value="DISABLED">{{ t.apiAutomation.scenarioStatusDisabled }}</a-option>
+                    </a-select>
+                  </label>
+                  <label>
+                    <span>{{ t.apiAutomation.fieldDescription }}</span>
+                    <a-textarea
+                      v-model="editingScenarioForm.description"
+                      :auto-size="{ minRows: 3, maxRows: 5 }"
+                      :placeholder="t.apiAutomation.fieldDescriptionPlaceholder"
+                    />
+                  </label>
+                </section>
+
+                <section class="api-scenario-management__property-section" data-testid="api-scenario-property-run-context">
+                  <h5>{{ t.apiAutomation.runContextSection }}</h5>
+                  <label>
+                    <span>{{ t.apiAutomation.environmentSelect }}</span>
+                    <a-select
+                      v-model="editingScenarioForm.environmentId"
+                      allow-clear
+                      :placeholder="t.apiAutomation.environmentDefault"
+                    >
+                      <a-option v-for="environment in environments" :key="environment.id" :value="environment.id">
+                        {{ environment.name }}
+                      </a-option>
+                    </a-select>
+                  </label>
+                  <label>
+                    <span>{{ t.apiAutomation.variableSetSelect }}</span>
+                    <a-select
+                      v-model="editingScenarioForm.variableSetId"
+                      allow-clear
+                      :placeholder="t.apiAutomation.variableSetDefault"
+                    >
+                      <a-option v-for="variableSet in variableSets" :key="variableSet.id" :value="variableSet.id">
+                        {{ variableSet.name }}
+                      </a-option>
+                    </a-select>
+                  </label>
+                </section>
+
+                <section class="api-scenario-management__property-section" data-testid="api-scenario-property-step-stats">
+                  <h5>{{ t.apiAutomation.scenarioStepStats }}</h5>
+                  <div class="api-scenario-management__stat-grid">
+                    <span>
+                      {{ t.apiAutomation.scenarioStepTotal }}
+                      <strong>{{ scenarioStepStats.total }}</strong>
+                    </span>
+                    <span>
+                      {{ t.apiAutomation.scenarioControllerTotal }}
+                      <strong>{{ scenarioStepStats.controllers }}</strong>
+                    </span>
+                    <span>
+                      {{ t.apiAutomation.scenarioDisabledStepTotal }}
+                      <strong>{{ scenarioStepStats.disabled }}</strong>
+                    </span>
+                    <span>
+                      {{ t.apiAutomation.scenarioLastRunResult }}
+                      <strong>{{ runResult?.result || selectedScenarioItem?.lastRunResult || '-' }}</strong>
+                    </span>
+                  </div>
+                </section>
+
                 <div class="api-scenario-management__property-actions">
                   <AppButton
                     type="primary"
@@ -198,9 +291,9 @@
                   <ApiScenarioRunButton
                     v-if="editingScenarioId"
                     :scenario-id="editingScenarioId"
-                    :environment-id="environmentId"
-                    :variable-set-id="variableSetId"
-                    @success="setRunResult"
+                    :environment-id="editingScenarioForm.environmentId ?? environmentId"
+                    :variable-set-id="editingScenarioForm.variableSetId ?? variableSetId"
+                    @success="handleWorkbenchRunSuccess"
                   />
                 </div>
               </template>
@@ -260,14 +353,18 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, h, nextTick, ref, watch } from 'vue';
+import { computed, defineComponent, h, nextTick, ref, watch } from 'vue';
 
 import {
   apiAutomationApi,
   createScenarioEditForm,
   type ApiDefinitionItem,
+  type ApiEnvironmentItem,
+  type ApiRunResponse,
   type ApiScenarioFormValues,
-  type ApiScenarioStep
+  type ApiScenarioItem,
+  type ApiScenarioStep,
+  type ApiVariableSetItem
 } from '@entities/api-automation';
 import { useWorkspaceStore } from '@entities/workspace';
 import { ApiScenarioDeleteButton } from '@features/api-scenario-delete';
@@ -281,6 +378,8 @@ import { useApiScenarioManagement } from '../model/useApiScenarioManagement';
 
 const props = defineProps<{
   definitions: ApiDefinitionItem[];
+  environments?: ApiEnvironmentItem[];
+  variableSets?: ApiVariableSetItem[];
   environmentId?: number | null;
   variableSetId?: number | null;
 }>();
@@ -314,6 +413,45 @@ const scenarioDialogRef = ref<{
   openEdit: () => void | Promise<void>;
 } | null>(null);
 
+const selectedScenarioItem = computed<ApiScenarioItem | null>(
+  () => scenarios.value.find((item) => item.id === editingScenarioId.value) || null
+);
+
+const scenarioStepStats = computed(() => {
+  const stats = {
+    total: 0,
+    controllers: 0,
+    disabled: 0
+  };
+  const controllerTypes = new Set([
+    'IF_CONTROLLER',
+    'LOOP_CONTROLLER',
+    'ONCE_ONLY_CONTROLLER',
+    'CONSTANT_TIMER',
+    'SCRIPT',
+    'GROUP'
+  ]);
+
+  function visit(steps: ApiScenarioStep[] = []) {
+    for (const step of steps) {
+      stats.total += 1;
+
+      if (controllerTypes.has(step.stepType)) {
+        stats.controllers += 1;
+      }
+
+      if (step.enabled === false) {
+        stats.disabled += 1;
+      }
+
+      visit(step.children || []);
+    }
+  }
+
+  visit(editingScenarioForm.value?.steps || []);
+  return stats;
+});
+
 async function openCreateDialog() {
   dialogMode.value = 'create';
   editingScenarioId.value = null;
@@ -346,6 +484,11 @@ async function saveEditorWorkspace() {
     await loadScenarios();
     await openEditorWorkspace(editingScenarioId.value);
   }
+}
+
+function handleWorkbenchRunSuccess(result: ApiRunResponse) {
+  setRunResult(result);
+  activeScenarioDetailTab.value = 'result';
 }
 
 watch(selectedScenarioDetail, (value) => {
@@ -595,6 +738,21 @@ const ScenarioStepNode = defineComponent({
   padding: 12px;
 }
 
+.api-scenario-management__property-section {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  border-bottom: 1px solid var(--app-color-border);
+  padding-bottom: 10px;
+}
+
+.api-scenario-management__property-section h5 {
+  margin: 0;
+  color: var(--app-color-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
 .api-scenario-management__property-panel header {
   display: flex;
   align-items: center;
@@ -621,10 +779,85 @@ const ScenarioStepNode = defineComponent({
   min-width: 0;
 }
 
+.api-scenario-management__stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  min-width: 0;
+}
+
+.api-scenario-management__stat-grid span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #ffffff;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  padding: 7px 8px;
+}
+
+.api-scenario-management__stat-grid strong {
+  overflow: hidden;
+  color: var(--app-color-text);
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .api-scenario-management__property-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.api-scenario-management__run-result,
+.api-scenario-management__history {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.api-scenario-management__history-table {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.api-scenario-management__history-head,
+.api-scenario-management__history-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 110px 110px;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.api-scenario-management__history-head {
+  background: #f8fafc;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.api-scenario-management__history-row {
+  border-top: 1px solid var(--app-color-border);
+  background: #ffffff;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+}
+
+.api-scenario-management__history-row strong {
+  overflow: hidden;
+  color: var(--app-color-text);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .api-scenario-management__meta {
@@ -731,6 +964,11 @@ const ScenarioStepNode = defineComponent({
   .api-scenario-management__editor-main {
     border-right: 0;
     border-bottom: 1px solid var(--app-color-border);
+  }
+
+  .api-scenario-management__history-head,
+  .api-scenario-management__history-row {
+    grid-template-columns: 1fr;
   }
 }
 </style>

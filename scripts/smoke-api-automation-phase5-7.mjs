@@ -336,6 +336,8 @@ async function editScenarioAndVerifySteps() {
   await detailResponsePromise;
   await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-property-panel').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-property-run-context').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-property-step-stats').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-workbench-name-input').locator('input, textarea').first().waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-step-editor').first().waitFor({ timeout: 15000 });
   await scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"]').first().waitFor({ timeout: 15000 });
@@ -368,6 +370,8 @@ async function editScenarioAndVerifySteps() {
   await row.getByTestId('api-scenario-edit').click();
   await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-step-editor').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-result-tab').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-history-tab').waitFor({ timeout: 15000 });
   const persistedPath = await scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"][data-depth="0"]').first().getByTestId('api-scenario-custom-path-input').locator('input, textarea').first().inputValue();
 
   if (persistedPath !== editedRequestUrl) {
@@ -391,6 +395,17 @@ async function runScenarioIfAvailable() {
 
   await row.getByTestId('api-scenario-run').click();
   await runResponsePromise;
+  await row.getByTestId('api-scenario-edit').click();
+  await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-result-tab').click();
+  await page.getByTestId('api-scenario-workbench-run-result').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-status').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-response-body').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-history-tab').click();
+  await page.getByTestId('api-scenario-workbench-history').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-workbench-history').getByTestId('api-run-result-step-row').first().waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-list-editor-tab').click();
   await row.click();
   await page.getByTestId('api-scenario-step-tree').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-run-result').waitFor({ timeout: 25000 });
