@@ -407,6 +407,8 @@ async function runScenarioIfAvailable() {
   await page.getByTestId('api-scenario-result-tab').click();
   await page.getByTestId('api-scenario-workbench-run-result').waitFor({ timeout: 25000 });
   await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-header').waitFor({ timeout: 25000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-content-panel').waitFor({ timeout: 25000 });
   await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-status').waitFor({ timeout: 25000 });
   await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-response-body').waitFor({ timeout: 25000 });
   await page.getByTestId('api-scenario-history-tab').click();

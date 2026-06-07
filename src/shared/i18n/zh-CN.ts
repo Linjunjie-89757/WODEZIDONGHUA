@@ -408,6 +408,7 @@ export const zhCN = {
     variableSetDefault: '不使用变量集',
     responseStatus: '状态码',
     responseDuration: '耗时',
+    responseSize: '大小',
     responseHeaders: '响应头',
     responseBody: '响应体',
     lastRunResult: '最近结果',

@@ -178,13 +178,9 @@
                     </template>
                     <div class="api-scenario-management__run-result" data-testid="api-scenario-workbench-run-result">
                       <ApiRunResultPanel
-                        v-if="runResult"
                         :result="runResult"
                         :scenario-steps="editingScenarioForm?.steps || []"
                       />
-                      <div v-else class="api-scenario-management__editor-placeholder">
-                        {{ t.apiAutomation.scenarioRunResultEmpty }}
-                      </div>
                     </div>
                   </a-tab-pane>
                   <a-tab-pane key="settings" :title="t.apiAutomation.requestTabSettings">

@@ -492,14 +492,7 @@
                     class="api-automation-shell__response-shell"
                     data-testid="api-definition-response-shell"
                   >
-                    <header class="api-automation-shell__response-header">
-                      <strong>{{ t.apiAutomation.responseShellTitle }}</strong>
-                      <span>{{ definitionRunResult?.result || t.apiAutomation.responseShellEmpty }}</span>
-                    </header>
-                    <ApiRunResultPanel v-if="definitionRunResult" :result="definitionRunResult" />
-                    <div v-else class="api-automation-shell__response-empty">
-                      {{ t.apiAutomation.responseShellHint }}
-                    </div>
+                    <ApiRunResultPanel :result="definitionRunResult" />
                   </aside>
                 </div>
               </section>

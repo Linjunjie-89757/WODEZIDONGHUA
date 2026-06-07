@@ -473,6 +473,9 @@ async function assertScenarioWorkbenchVisualShell() {
   await page.getByTestId('api-scenario-workbench-history').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-result-tab').click();
   await page.getByTestId('api-scenario-workbench-run-result').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-panel').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-header').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-workbench-run-result').getByTestId('api-run-result-content-panel').waitFor({ timeout: 15000 });
 
   const scenarioOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
 
@@ -539,6 +542,9 @@ async function debugDefinition() {
   );
   await page.getByTestId('api-debug-send').click();
   await page.getByTestId('api-definition-response-shell').getByTestId('api-run-result-panel').waitFor({ timeout: 20000 });
+  await page.getByTestId('api-definition-response-shell').getByTestId('api-run-result-header').waitFor({ timeout: 20000 });
+  await page.getByTestId('api-definition-response-shell').getByTestId('api-run-result-metrics').waitFor({ timeout: 20000 });
+  await page.getByTestId('api-definition-response-shell').getByTestId('api-run-result-content-panel').waitFor({ timeout: 20000 });
   await page.getByTestId('api-run-result-status').waitFor({ timeout: 20000 });
   await page.getByTestId('api-run-result-response-body').waitFor({ timeout: 20000 });
   await page.getByTestId('api-run-result-assertion-tab').click();
