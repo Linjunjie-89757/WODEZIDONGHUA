@@ -1,4 +1,5 @@
 import type {
+  ApiAuthConfig,
   ApiAssertionConfig,
   ApiDefinitionDetail,
   ApiDefinitionFormValues,
@@ -14,6 +15,39 @@ const supportedAssertionTypes = new Set([
   'RESPONSE_BODY',
   'RESPONSE_TIME'
 ]);
+
+function emptyAuthCredential() {
+  return {
+    userName: '',
+    password: ''
+  };
+}
+
+function createDefaultAuthConfig(): ApiAuthConfig {
+  return {
+    authType: 'NONE',
+    basicAuth: emptyAuthCredential(),
+    digestAuth: emptyAuthCredential()
+  };
+}
+
+function normalizeAuthConfig(authConfig?: Partial<ApiAuthConfig> | null): ApiAuthConfig {
+  const authType = authConfig?.authType === 'BASIC' || authConfig?.authType === 'DIGEST'
+    ? authConfig.authType
+    : 'NONE';
+
+  return {
+    authType,
+    basicAuth: {
+      ...emptyAuthCredential(),
+      ...(authConfig?.basicAuth || {})
+    },
+    digestAuth: {
+      ...emptyAuthCredential(),
+      ...(authConfig?.digestAuth || {})
+    }
+  };
+}
 
 function enabledPair(key: string, value: string): ApiKeyValue[] {
   const trimmedKey = key.trim();
@@ -45,11 +79,7 @@ export function createDefaultRequestConfig(): ApiRequestConfig {
       formItems: [],
       contentType: 'application/json'
     },
-    authConfig: {
-      authType: 'NONE',
-      basicAuth: null,
-      digestAuth: null
-    }
+    authConfig: createDefaultAuthConfig()
   };
 }
 
@@ -84,6 +114,7 @@ export function createDefaultDefinitionForm(): ApiDefinitionFormValues {
     headerKey: '',
     headerValue: '',
     rawBody: '',
+    authConfig: createDefaultAuthConfig(),
     assertions: [],
     preProcessors: [],
     postProcessors: []
@@ -106,6 +137,7 @@ export function createDefinitionEditForm(detail: ApiDefinitionDetail): ApiDefini
     headerKey: firstHeader?.key || '',
     headerValue: firstHeader?.value || '',
     rawBody: detail.requestConfig.body?.rawText || '',
+    authConfig: normalizeAuthConfig(detail.requestConfig.authConfig),
     assertions: normalizeAssertions(detail.assertions),
     preProcessors: normalizeProcessors(detail.preProcessors),
     postProcessors: normalizeProcessors(detail.postProcessors)
@@ -125,7 +157,8 @@ export function toRequestConfig(form: ApiDefinitionFormValues): ApiRequestConfig
       rawText: form.rawBody,
       formItems: [],
       contentType: 'application/json'
-    }
+    },
+    authConfig: normalizeAuthConfig(form.authConfig)
   };
 }
 

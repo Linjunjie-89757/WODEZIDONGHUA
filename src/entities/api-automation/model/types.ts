@@ -306,6 +306,7 @@ export interface ApiDefinitionFormValues {
   headerKey: string;
   headerValue: string;
   rawBody: string;
+  authConfig: ApiAuthConfig;
   assertions: ApiAssertionConfig[];
   preProcessors: ApiProcessorConfig[];
   postProcessors: ApiProcessorConfig[];

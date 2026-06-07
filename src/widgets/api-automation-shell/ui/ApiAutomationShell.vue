@@ -104,10 +104,27 @@
                   <section class="api-automation-shell__request-pane">
                     <div class="api-automation-shell__command-row" data-testid="api-definition-command-row">
                       <div class="api-automation-shell__url-compose">
-                        <span class="api-automation-shell__method-select">
+                        <a-select
+                          v-if="definitionEditorForm"
+                          v-model="definitionEditorForm.method"
+                          class="api-automation-shell__method-select"
+                          data-testid="api-definition-inline-method-select"
+                        >
+                          <a-option v-for="method in requestMethods" :key="method" :value="method">
+                            {{ method }}
+                          </a-option>
+                        </a-select>
+                        <span v-else class="api-automation-shell__method-select">
                           {{ selectedDefinition?.method || '-' }}
                         </span>
-                        <span class="api-automation-shell__url-input">
+                        <a-input
+                          v-if="definitionEditorForm"
+                          v-model="definitionEditorForm.path"
+                          class="api-automation-shell__url-input"
+                          data-testid="api-definition-inline-path-input"
+                          :placeholder="t.apiAutomation.fieldPathPlaceholder"
+                        />
+                        <span v-else class="api-automation-shell__url-input">
                           {{ selectedDefinition?.path || t.apiAutomation.requestEditorEmptyPath }}
                         </span>
                       </div>
@@ -122,10 +139,19 @@
                       </AppButton>
                       <AppButton
                         :disabled="!selectedDefinitionId"
+                        :loading="saving"
                         data-testid="api-definition-command-edit"
-                        @click="selectedDefinitionId && openEditDialog(selectedDefinitionId)"
+                        @click="handleSaveInlineDefinition"
                       >
                         {{ t.apiAutomation.save }}
+                      </AppButton>
+                      <AppButton
+                        :disabled="!selectedDefinitionId"
+                        type="text"
+                        data-testid="api-definition-command-dialog-edit"
+                        @click="selectedDefinitionId && openEditDialog(selectedDefinitionId)"
+                      >
+                        {{ t.apiAutomation.edit }}
                       </AppButton>
                     </div>
 
@@ -133,58 +159,200 @@
                       <template #title>{{ debugErrorMessage }}</template>
                     </a-alert>
 
+                    <a-spin :loading="definitionDetailLoading">
+                    <a-empty
+                      v-if="!definitionEditorForm"
+                      :description="t.apiAutomation.requestEditorEmptyPath"
+                    />
                     <a-tabs
+                      v-else
                       v-model:active-key="activeRequestContentTab"
                       class="api-automation-shell__request-tabs"
                       data-testid="api-definition-content-tabs"
                     >
                       <a-tab-pane key="headers" :title="t.apiAutomation.requestTabHeaders">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>{{ t.apiAutomation.requestTabHeaders }}</strong>
-                          <p>{{ t.apiAutomation.requestTabShellHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface api-automation-shell__kv-editor"
+                          data-testid="api-definition-headers-editor"
+                        >
+                          <header class="api-automation-shell__surface-header">
+                            <strong>{{ t.apiAutomation.requestTabHeaders }}</strong>
+                            <span>{{ t.apiAutomation.requestEditorSingleRowHint }}</span>
+                          </header>
+                          <div class="api-automation-shell__kv-header">
+                            <span>{{ t.apiAutomation.fieldHeaderKey }}</span>
+                            <span>{{ t.apiAutomation.fieldHeaderValue }}</span>
+                          </div>
+                          <div class="api-automation-shell__kv-row">
+                            <a-input
+                              v-model="definitionEditorForm.headerKey"
+                              data-testid="api-definition-inline-header-key-input"
+                            />
+                            <a-input
+                              v-model="definitionEditorForm.headerValue"
+                              data-testid="api-definition-inline-header-value-input"
+                            />
+                          </div>
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="body" :title="t.apiAutomation.requestTabBody">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>{{ t.apiAutomation.requestTabBody }}</strong>
-                          <p>{{ t.apiAutomation.requestTabShellHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface"
+                          data-testid="api-definition-body-editor"
+                        >
+                          <header class="api-automation-shell__surface-header">
+                            <strong>{{ t.apiAutomation.fieldRawBody }}</strong>
+                            <span>{{ t.apiAutomation.requestEditorRawBodyMode }}</span>
+                          </header>
+                          <a-textarea
+                            v-model="definitionEditorForm.rawBody"
+                            data-testid="api-definition-inline-body-input"
+                            :auto-size="{ minRows: 8, maxRows: 14 }"
+                            :placeholder="t.apiAutomation.fieldRawBodyPlaceholder"
+                          />
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="params" title="Params">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>Params</strong>
-                          <p>{{ t.apiAutomation.requestTabShellHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface api-automation-shell__kv-editor"
+                          data-testid="api-definition-params-editor"
+                        >
+                          <header class="api-automation-shell__surface-header">
+                            <strong>Params</strong>
+                            <span>{{ t.apiAutomation.requestEditorSingleRowHint }}</span>
+                          </header>
+                          <div class="api-automation-shell__kv-header">
+                            <span>{{ t.apiAutomation.fieldQueryKey }}</span>
+                            <span>{{ t.apiAutomation.fieldQueryValue }}</span>
+                          </div>
+                          <div class="api-automation-shell__kv-row">
+                            <a-input
+                              v-model="definitionEditorForm.queryKey"
+                              data-testid="api-definition-inline-query-key-input"
+                            />
+                            <a-input
+                              v-model="definitionEditorForm.queryValue"
+                              data-testid="api-definition-inline-query-value-input"
+                            />
+                          </div>
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="auth" title="Auth">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>Auth</strong>
-                          <p>{{ t.apiAutomation.requestTabShellHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface api-automation-shell__auth-editor"
+                          data-testid="api-definition-auth-editor"
+                        >
+                          <header class="api-automation-shell__surface-header">
+                            <strong>{{ t.apiAutomation.authMode }}</strong>
+                            <span>{{ t.apiAutomation.authModeHint }}</span>
+                          </header>
+                          <a-radio-group
+                            v-model="definitionEditorForm.authConfig.authType"
+                            type="button"
+                            data-testid="api-definition-auth-type"
+                          >
+                            <a-radio value="NONE">No Auth</a-radio>
+                            <a-radio value="BASIC">Basic Auth</a-radio>
+                            <a-radio value="DIGEST">Digest Auth</a-radio>
+                          </a-radio-group>
+                          <div
+                            v-if="definitionEditorForm.authConfig.authType === 'BASIC'"
+                            class="api-automation-shell__auth-fields"
+                          >
+                            <a-input
+                              v-model="definitionEditorForm.authConfig.basicAuth.userName"
+                              data-testid="api-definition-auth-basic-username"
+                              placeholder="username"
+                            />
+                            <a-input-password
+                              v-model="definitionEditorForm.authConfig.basicAuth.password"
+                              data-testid="api-definition-auth-basic-password"
+                              placeholder="password"
+                            />
+                          </div>
+                          <div
+                            v-else-if="definitionEditorForm.authConfig.authType === 'DIGEST'"
+                            class="api-automation-shell__auth-fields"
+                          >
+                            <a-input
+                              v-model="definitionEditorForm.authConfig.digestAuth.userName"
+                              data-testid="api-definition-auth-digest-username"
+                              placeholder="username"
+                            />
+                            <a-input-password
+                              v-model="definitionEditorForm.authConfig.digestAuth.password"
+                              data-testid="api-definition-auth-digest-password"
+                              placeholder="password"
+                            />
+                          </div>
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="pre" :title="t.apiAutomation.requestTabPre">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>{{ t.apiAutomation.requestTabPre }}</strong>
-                          <p>{{ t.apiAutomation.requestTabShellHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface"
+                          data-testid="api-definition-pre-editor"
+                        >
+                          <ApiDefinitionProcessorEditor
+                            v-model:pre-processors="definitionEditorForm.preProcessors"
+                            v-model:post-processors="emptyPostProcessors"
+                          />
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="post" :title="t.apiAutomation.requestTabPost">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>{{ t.apiAutomation.requestTabPost }}</strong>
-                          <p>{{ t.apiAutomation.requestTabShellHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface"
+                          data-testid="api-definition-post-editor"
+                        >
+                          <ApiDefinitionProcessorEditor
+                            v-model:pre-processors="emptyPreProcessors"
+                            v-model:post-processors="definitionEditorForm.postProcessors"
+                          />
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="tests" :title="t.apiAutomation.requestTabTests">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>{{ t.apiAutomation.requestTabTests }}</strong>
-                          <p>{{ t.apiAutomation.requestTabShellHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface"
+                          data-testid="api-definition-tests-editor"
+                        >
+                          <ApiDefinitionAssertionEditor v-model="definitionEditorForm.assertions" />
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="settings" :title="t.apiAutomation.requestTabSettings">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>{{ t.apiAutomation.requestTabSettings }}</strong>
-                          <p>{{ t.apiAutomation.requestTabSettingsHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface api-automation-shell__settings-editor"
+                          data-testid="api-definition-settings-editor"
+                        >
+                          <a-grid :cols="{ xs: 1, md: 2 }" :col-gap="12" :row-gap="10">
+                            <a-grid-item>
+                              <a-form-item :label="t.apiAutomation.fieldName">
+                                <a-input v-model="definitionEditorForm.name" />
+                              </a-form-item>
+                            </a-grid-item>
+                            <a-grid-item>
+                              <a-form-item :label="t.apiAutomation.fieldDirectory">
+                                <a-input v-model="definitionEditorForm.directoryName" />
+                              </a-form-item>
+                            </a-grid-item>
+                            <a-grid-item>
+                              <a-form-item :label="t.apiAutomation.fieldTimeout">
+                                <a-input-number
+                                  v-model="definitionEditorForm.timeoutMs"
+                                  data-testid="api-definition-inline-timeout-input"
+                                  :min="1000"
+                                  :step="1000"
+                                />
+                              </a-form-item>
+                            </a-grid-item>
+                            <a-grid-item :span="2">
+                              <a-form-item :label="t.apiAutomation.fieldDescription">
+                                <a-textarea
+                                  v-model="definitionEditorForm.description"
+                                  :auto-size="{ minRows: 2, maxRows: 4 }"
+                                />
+                              </a-form-item>
+                            </a-grid-item>
+                          </a-grid>
+                        </section>
                       </a-tab-pane>
                       <a-tab-pane key="cases" :title="t.apiAutomation.workbenchTabCases">
                         <div class="api-automation-shell__tab-placeholder">
@@ -193,6 +361,7 @@
                         </div>
                       </a-tab-pane>
                     </a-tabs>
+                    </a-spin>
                   </section>
 
                   <aside class="api-automation-shell__response-shell" data-testid="api-definition-response-shell">
@@ -245,12 +414,22 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 
-import type { ApiRunResponse } from '@entities/api-automation';
+import {
+  apiAutomationApi,
+  createDefinitionEditForm,
+  type ApiDefinitionFormValues,
+  type ApiProcessorConfig,
+  type ApiRunResponse
+} from '@entities/api-automation';
+import { useWorkspaceStore } from '@entities/workspace';
 import { useApiDefinitionDebug } from '@features/api-definition-debug';
-import { ApiDefinitionDialog } from '@features/api-definition-save';
+import { ApiDefinitionAssertionEditor } from '@features/api-definition-assertions';
+import { ApiDefinitionProcessorEditor } from '@features/api-definition-processors';
+import { ApiDefinitionDialog, useApiDefinitionSave } from '@features/api-definition-save';
 import { t } from '@shared/i18n';
+import { feedback } from '@shared/lib/feedback';
 import { AppButton, AppLoadingState, AppSection } from '@shared/ui';
 import { ApiCaseManagement } from '@widgets/api-case-management';
 import { ApiRunResultPanel } from '@widgets/api-run-result-panel';
@@ -276,16 +455,31 @@ const {
   selectDefinition
 } = useApiAutomationShell();
 
+const workspaceStore = useWorkspaceStore();
 const { debugging, result, errorMessage: debugErrorMessage, debugDefinition } = useApiDefinitionDebug();
+const { saving, saveDefinition } = useApiDefinitionSave();
 const dialogMode = ref<'create' | 'edit'>('create');
 const activeWorkbenchTab = ref('definitions');
 const activeRequestContentTab = ref('headers');
 const editingDefinitionId = ref<number | null>(null);
 const definitionRunResult = ref<ApiRunResponse | null>(null);
+const definitionDetailLoading = ref(false);
+const definitionEditorForm = ref<ApiDefinitionFormValues | null>(null);
+const emptyPreProcessors = ref<ApiProcessorConfig[]>([]);
+const emptyPostProcessors = ref<ApiProcessorConfig[]>([]);
+const requestMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'] as const;
 const definitionDialogRef = ref<{
   openCreate: () => void;
   openEdit: () => void | Promise<void>;
 } | null>(null);
+
+watch(
+  selectedDefinitionId,
+  (id) => {
+    void loadDefinitionDetail(id);
+  },
+  { immediate: true }
+);
 
 async function openCreateDialog() {
   dialogMode.value = 'create';
@@ -299,6 +493,44 @@ async function openEditDialog(id: number) {
   editingDefinitionId.value = id;
   await nextTick();
   await definitionDialogRef.value?.openEdit();
+}
+
+async function loadDefinitionDetail(id?: number | null) {
+  definitionEditorForm.value = null;
+  definitionRunResult.value = null;
+
+  if (!id) {
+    return;
+  }
+
+  definitionDetailLoading.value = true;
+
+  try {
+    const detail = await apiAutomationApi.getDefinitionDetail(
+      id,
+      workspaceStore.currentWorkspace.code
+    );
+    definitionEditorForm.value = createDefinitionEditForm(detail);
+  } catch {
+    feedback.error(t.apiAutomation.detailLoadFailed);
+  } finally {
+    definitionDetailLoading.value = false;
+  }
+}
+
+async function handleSaveInlineDefinition() {
+  if (!selectedDefinitionId.value || !definitionEditorForm.value) {
+    return;
+  }
+
+  const succeed = await saveDefinition(definitionEditorForm.value, selectedDefinitionId.value);
+
+  if (!succeed) {
+    return;
+  }
+
+  await loadReadonly();
+  await loadDefinitionDetail(selectedDefinitionId.value);
 }
 
 async function handleDebugDefinition() {
@@ -542,7 +774,7 @@ async function handleDebugDefinition() {
 
 .api-automation-shell__command-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 8px;
   align-items: center;
   min-width: 0;
@@ -575,12 +807,29 @@ async function handleDebugDefinition() {
   font-weight: 650;
 }
 
+.api-automation-shell__method-select :deep(.arco-select-view-single) {
+  min-height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: #f8fafc;
+  color: rgb(var(--primary-7));
+  font-weight: 650;
+}
+
 .api-automation-shell__url-input {
   overflow: hidden;
   color: var(--app-color-text);
   padding: 0 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.api-automation-shell__url-input :deep(.arco-input-wrapper) {
+  min-height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+  padding-left: 10px;
 }
 
 .api-automation-shell__request-tabs :deep(.arco-tabs-nav) {
@@ -623,6 +872,83 @@ async function handleDebugDefinition() {
   margin: 0;
   font-size: 12px;
   line-height: 1.6;
+}
+
+.api-automation-shell__editor-surface {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  min-height: 220px;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #ffffff;
+  padding: 10px;
+}
+
+.api-automation-shell__surface-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  border-bottom: 1px solid var(--app-color-border);
+  padding-bottom: 8px;
+}
+
+.api-automation-shell__surface-header strong {
+  color: var(--app-color-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.api-automation-shell__surface-header span {
+  overflow: hidden;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-automation-shell__kv-editor {
+  align-content: start;
+}
+
+.api-automation-shell__kv-header,
+.api-automation-shell__kv-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.8fr) minmax(180px, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.api-automation-shell__kv-header {
+  min-height: 30px;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #f8fafc;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+.api-automation-shell__auth-editor {
+  align-content: start;
+}
+
+.api-automation-shell__auth-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  gap: 8px;
+  min-width: 0;
+}
+
+.api-automation-shell__settings-editor :deep(.arco-form-item) {
+  margin-bottom: 0;
+}
+
+.api-automation-shell__editor-surface :deep(.api-processor-editor__header) {
+  display: none;
 }
 
 .api-automation-shell__response-shell {
@@ -700,6 +1026,12 @@ async function handleDebugDefinition() {
 
 @media (max-width: 720px) {
   .api-automation-shell__context {
+    grid-template-columns: 1fr;
+  }
+
+  .api-automation-shell__kv-header,
+  .api-automation-shell__kv-row,
+  .api-automation-shell__auth-fields {
     grid-template-columns: 1fr;
   }
 }

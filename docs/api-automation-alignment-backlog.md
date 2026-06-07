@@ -2,7 +2,7 @@
 
 Date: 2026-06-07
 
-This file tracks known follow-up work after API Automation page alignment Phase 3C, so later phases do not depend on chat history.
+This file tracks known follow-up work after API Automation page alignment Phase 3E, so later phases do not depend on chat history.
 
 ## Current State
 
@@ -10,6 +10,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3B: API definition request editor shell is complete.
 - Phase 3C: scenario editor workbench shell is complete.
 - Phase 3D: scenario property panel thickening, run result tab, and latest-run history tab are complete.
+- Phase 3E: API definition request editor tab thickening is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -60,12 +61,14 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 
 ## API Definition Request Editor Backlog
 
-- Request editor content tabs are shell-level only for several areas.
-- Existing definition edit dialog still owns full edit behavior.
-- Command-row save action does not perform full inline save.
+- Request editor content tabs now have basic editable surfaces for headers, params, body, auth, pre, post, tests, and settings.
+- Existing definition edit dialog remains as the fallback full edit path.
+- Command-row save now performs inline update through the confirmed definition update contract.
+- Headers and params still support only the current single key/value form model.
+- Cases tab is still a pointer to the workbench cases tab, not a full embedded case manager.
 - Curl import is not implemented.
 - AI generation is not implemented.
-- Request headers/body/params/auth/pre/post/tests/settings/cases need later in-place editor thickening.
+- Multi-row params/headers, richer body mode switching, and cases-tab embedding need later in-place editor thickening.
 
 ## Validation And Tooling Backlog
 
@@ -81,12 +84,11 @@ This file tracks known follow-up work after API Automation page alignment Phase 
    - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3d.md`.
 
 2. Phase 3E: API definition request editor thickening.
-   - Add in-place headers/body/params/auth editor behavior where it can reuse existing contract safely.
-   - Keep old edit dialog as fallback until inline save is fully verified.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3e.md`.
 
 3. Phase 3F: visual precision pass.
    - Compare against `reference/old-auto`.
-   - Tune density, spacing, list rows, dialogs, drawers, and command bars.
+   - Tune density, spacing, list rows, request editor tables, dialogs, drawers, and command bars.
    - Keep the clean Feature-Sliced Lite structure while aligning the old project's tuned visual feel.
 
 4. Build optimization phase.

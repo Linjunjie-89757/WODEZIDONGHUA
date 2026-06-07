@@ -10,6 +10,7 @@ const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
 const definitionName = `smoke-api-definition-${stamp}`;
 const editedDefinitionName = `${definitionName}-edited`;
 const screenshotPath = `output/playwright/api-automation-phase3b-${stamp}.png`;
+const detailScreenshotPath = `output/playwright/api-automation-phase3e-editor-${stamp}.png`;
 const smokeRequestUrl = 'http://localhost:8080/api/auth/me';
 
 const browser = await chromium.launch({ headless: true });
@@ -76,10 +77,31 @@ async function assertRequestEditorShell() {
   await page.getByTestId('api-definition-command-row').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-content-tabs').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-response-shell').waitFor({ timeout: 15000 });
+  await assertRequestEditorPhase3E();
+}
+
+async function assertRequestEditorPhase3E() {
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求头' }).click();
+  await page.getByTestId('api-definition-headers-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-inline-header-key-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '请求体' }).click();
+  await page.getByTestId('api-definition-body-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-inline-body-input').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: 'Params' }).click();
+  await page.getByTestId('api-definition-params-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-inline-query-key-input').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: 'Auth' }).click();
+  await page.getByTestId('api-definition-auth-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-auth-type').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '前置处理' }).click();
+  await page.getByTestId('api-definition-pre-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '后置处理' }).click();
+  await page.getByTestId('api-definition-post-editor').waitFor({ timeout: 15000 });
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '断言' }).click();
+  await page.getByTestId('api-definition-tests-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab-title').filter({ hasText: '设置' }).click();
+  await page.getByTestId('api-definition-settings-editor').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-definition-inline-timeout-input').waitFor({ timeout: 15000 });
 }
 
 async function clickVisibleModalPrimaryButton() {
@@ -194,7 +216,15 @@ async function debugDefinition() {
 
   await row.getByTestId('api-definition-debug').click();
   await assertRequestEditorShell();
-  await page.getByTestId('api-definition-command-row').getByText(smokeRequestUrl).waitFor({ timeout: 15000 });
+  await page.waitForFunction(
+    (expectedPath) => {
+      const wrapper = document.querySelector('[data-testid="api-definition-inline-path-input"]');
+      const input = wrapper?.querySelector('input');
+      return input?.value === expectedPath;
+    },
+    smokeRequestUrl,
+    { timeout: 15000 }
+  );
   await page.getByTestId('api-debug-send').click();
   await page.getByTestId('api-definition-response-shell').getByTestId('api-run-result-panel').waitFor({ timeout: 20000 });
   await page.getByTestId('api-run-result-status').waitFor({ timeout: 20000 });
@@ -205,6 +235,7 @@ async function debugDefinition() {
     const panel = document.querySelector('[data-testid="api-run-result-assertion-results"]');
     return panel ? panel.querySelectorAll('.api-run-result-panel__item').length >= 4 : false;
   }, { timeout: 20000 });
+  await page.screenshot({ path: detailScreenshotPath, fullPage: true });
 }
 
 async function deleteDefinition() {
@@ -291,6 +322,7 @@ try {
       definitionName,
       editedDefinitionName,
       screenshotPath,
+      detailScreenshotPath,
       consoleMessages,
       pageErrors,
       requests
@@ -308,6 +340,7 @@ try {
       definitionName,
       editedDefinitionName,
       screenshotPath,
+      detailScreenshotPath,
       error: error instanceof Error ? error.message : String(error),
       consoleMessages,
       pageErrors,
