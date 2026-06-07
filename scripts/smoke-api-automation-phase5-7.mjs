@@ -254,7 +254,11 @@ async function selectDefinition() {
 
 async function openCasesWorkbench() {
   await openWorkbenchTab('用例');
-  await page.getByTestId('api-case-management').waitFor({ timeout: 15000 });
+  await casesWorkbench().getByTestId('api-case-management').waitFor({ timeout: 15000 });
+}
+
+function casesWorkbench() {
+  return page.getByTestId('api-automation-cases-tab');
 }
 
 async function openScenarioListTabAndWaitForRow(name) {
@@ -264,15 +268,17 @@ async function openScenarioListTabAndWaitForRow(name) {
 }
 
 async function createCase() {
-  await page.getByTestId('api-case-create').click();
+  const casesPanel = casesWorkbench();
+  await casesPanel.getByTestId('api-case-create').click();
   await inputByTestId('api-case-name-input').fill(caseName);
   await inputByTestId('api-case-path-input').fill(smokeRequestUrl);
   await clickVisibleModalPrimaryButton();
-  await page.getByText(caseName).waitFor({ timeout: 15000 });
+  await casesPanel.getByText(caseName).waitFor({ timeout: 15000 });
 }
 
 async function runCaseIfAvailable() {
-  const row = page.getByTestId('api-case-row').filter({ hasText: caseName }).first();
+  const casesPanel = casesWorkbench();
+  const row = casesPanel.getByTestId('api-case-row').filter({ hasText: caseName }).first();
   const runResponsePromise = page.waitForResponse((response) =>
     response.url().includes('/api/automation/api/cases/') &&
     response.url().includes('/run') &&
@@ -284,10 +290,11 @@ async function runCaseIfAvailable() {
   await row.getByTestId('api-case-run').click();
   await runResponsePromise;
   await row.locator('.api-case-management__row-main').click();
-  await page.getByTestId('api-case-run-result').waitFor({ timeout: 25000 });
-  await page.getByTestId('api-case-run-result').getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
-  await page.getByTestId('api-case-run-result').getByTestId('api-run-result-status').waitFor({ timeout: 25000 });
-  await page.getByTestId('api-case-run-result').getByTestId('api-run-result-response-body').waitFor({ timeout: 25000 });
+  const runResult = page.getByTestId('api-case-run-result');
+  await runResult.waitFor({ timeout: 25000 });
+  await runResult.getByTestId('api-run-result-panel').waitFor({ timeout: 25000 });
+  await runResult.getByTestId('api-run-result-status').waitFor({ timeout: 25000 });
+  await runResult.getByTestId('api-run-result-response-body').waitFor({ timeout: 25000 });
   await closeVisibleDrawer();
 }
 

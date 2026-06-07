@@ -100,7 +100,12 @@
                   </button>
                 </div>
 
-                <div class="api-automation-shell__request-shell">
+                <div
+                  :class="[
+                    'api-automation-shell__request-shell',
+                    { 'api-automation-shell__request-shell--wide': activeRequestContentTab === 'cases' }
+                  ]"
+                >
                   <section class="api-automation-shell__request-pane">
                     <div class="api-automation-shell__command-row" data-testid="api-definition-command-row">
                       <div class="api-automation-shell__url-compose">
@@ -177,22 +182,38 @@
                         >
                           <header class="api-automation-shell__surface-header">
                             <strong>{{ t.apiAutomation.requestTabHeaders }}</strong>
-                            <span>{{ t.apiAutomation.requestEditorSingleRowHint }}</span>
+                            <span>{{ t.apiAutomation.requestEditorMultiRowHint }}</span>
                           </header>
-                          <div class="api-automation-shell__kv-header">
+                          <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--header">
+                            <span>{{ t.apiAutomation.enabled }}</span>
                             <span>{{ t.apiAutomation.fieldHeaderKey }}</span>
                             <span>{{ t.apiAutomation.fieldHeaderValue }}</span>
+                            <span>{{ t.apiAutomation.fieldDescription }}</span>
+                            <span></span>
                           </div>
-                          <div class="api-automation-shell__kv-row">
+                          <div
+                            v-for="(row, index) in definitionEditorForm.headers"
+                            :key="`header-${index}`"
+                            class="api-automation-shell__kv-table-row api-automation-shell__kv-table-row--header"
+                            data-testid="api-definition-header-row"
+                          >
+                            <a-switch v-model="row.enabled" size="small" />
                             <a-input
-                              v-model="definitionEditorForm.headerKey"
+                              v-model="row.key"
                               data-testid="api-definition-inline-header-key-input"
                             />
                             <a-input
-                              v-model="definitionEditorForm.headerValue"
+                              v-model="row.value"
                               data-testid="api-definition-inline-header-value-input"
                             />
+                            <a-input v-model="row.description" />
+                            <AppButton type="text" status="danger" @click="removeKeyValueRow(definitionEditorForm.headers, index)">
+                              {{ t.common.delete }}
+                            </AppButton>
                           </div>
+                          <AppButton type="text" data-testid="api-definition-header-add-row" @click="addKeyValueRow(definitionEditorForm.headers)">
+                            {{ t.apiAutomation.addRow }}
+                          </AppButton>
                         </section>
                       </a-tab-pane>
                       <a-tab-pane key="body" :title="t.apiAutomation.requestTabBody">
@@ -204,12 +225,80 @@
                             <strong>{{ t.apiAutomation.fieldRawBody }}</strong>
                             <span>{{ t.apiAutomation.requestEditorRawBodyMode }}</span>
                           </header>
+                          <div class="api-automation-shell__body-mode-row">
+                            <button
+                              type="button"
+                              :class="[
+                                'api-automation-shell__body-mode',
+                                { 'api-automation-shell__body-mode--active': definitionEditorForm.bodyType === 'RAW' }
+                              ]"
+                              data-testid="api-definition-body-mode-raw"
+                              @click="definitionEditorForm.bodyType = 'RAW'"
+                            >
+                              raw
+                            </button>
+                            <button
+                              type="button"
+                              :class="[
+                                'api-automation-shell__body-mode',
+                                { 'api-automation-shell__body-mode--active': definitionEditorForm.bodyType === 'FORM_URLENCODED' }
+                              ]"
+                              data-testid="api-definition-body-mode-form"
+                              @click="definitionEditorForm.bodyType = 'FORM_URLENCODED'"
+                            >
+                              x-www-form-urlencoded
+                            </button>
+                            <button
+                              type="button"
+                              :class="[
+                                'api-automation-shell__body-mode',
+                                { 'api-automation-shell__body-mode--active': definitionEditorForm.bodyType === 'NONE' }
+                              ]"
+                              data-testid="api-definition-body-mode-none"
+                              @click="definitionEditorForm.bodyType = 'NONE'"
+                            >
+                              none
+                            </button>
+                          </div>
                           <a-textarea
+                            v-if="definitionEditorForm.bodyType === 'RAW'"
                             v-model="definitionEditorForm.rawBody"
                             data-testid="api-definition-inline-body-input"
                             :auto-size="{ minRows: 8, maxRows: 14 }"
                             :placeholder="t.apiAutomation.fieldRawBodyPlaceholder"
                           />
+                          <div
+                            v-else-if="definitionEditorForm.bodyType === 'FORM_URLENCODED'"
+                            class="api-automation-shell__kv-editor"
+                          >
+                            <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--body">
+                              <span>{{ t.apiAutomation.enabled }}</span>
+                              <span>{{ t.apiAutomation.fieldQueryKey }}</span>
+                              <span>{{ t.apiAutomation.fieldQueryValue }}</span>
+                              <span>{{ t.apiAutomation.fieldDescription }}</span>
+                              <span></span>
+                            </div>
+                            <div
+                              v-for="(row, index) in definitionEditorForm.bodyFormItems"
+                              :key="`body-form-${index}`"
+                              class="api-automation-shell__kv-table-row api-automation-shell__kv-table-row--body"
+                              data-testid="api-definition-body-form-row"
+                            >
+                              <a-switch v-model="row.enabled" size="small" />
+                              <a-input v-model="row.key" />
+                              <a-input v-model="row.value" />
+                              <a-input v-model="row.description" />
+                              <AppButton type="text" status="danger" @click="removeKeyValueRow(definitionEditorForm.bodyFormItems, index)">
+                                {{ t.common.delete }}
+                              </AppButton>
+                            </div>
+                            <AppButton type="text" data-testid="api-definition-body-form-add-row" @click="addKeyValueRow(definitionEditorForm.bodyFormItems)">
+                              {{ t.apiAutomation.addRow }}
+                            </AppButton>
+                          </div>
+                          <div v-else class="api-automation-shell__compact-empty">
+                            {{ t.apiAutomation.bodyNoneHint }}
+                          </div>
                         </section>
                       </a-tab-pane>
                       <a-tab-pane key="params" title="Params">
@@ -219,22 +308,38 @@
                         >
                           <header class="api-automation-shell__surface-header">
                             <strong>Params</strong>
-                            <span>{{ t.apiAutomation.requestEditorSingleRowHint }}</span>
+                            <span>{{ t.apiAutomation.requestEditorMultiRowHint }}</span>
                           </header>
-                          <div class="api-automation-shell__kv-header">
+                          <div class="api-automation-shell__kv-table-header api-automation-shell__kv-table-header--query">
+                            <span>{{ t.apiAutomation.enabled }}</span>
                             <span>{{ t.apiAutomation.fieldQueryKey }}</span>
                             <span>{{ t.apiAutomation.fieldQueryValue }}</span>
+                            <span>{{ t.apiAutomation.fieldDescription }}</span>
+                            <span></span>
                           </div>
-                          <div class="api-automation-shell__kv-row">
+                          <div
+                            v-for="(row, index) in definitionEditorForm.queryParams"
+                            :key="`query-${index}`"
+                            class="api-automation-shell__kv-table-row api-automation-shell__kv-table-row--query"
+                            data-testid="api-definition-query-row"
+                          >
+                            <a-switch v-model="row.enabled" size="small" />
                             <a-input
-                              v-model="definitionEditorForm.queryKey"
+                              v-model="row.key"
                               data-testid="api-definition-inline-query-key-input"
                             />
                             <a-input
-                              v-model="definitionEditorForm.queryValue"
+                              v-model="row.value"
                               data-testid="api-definition-inline-query-value-input"
                             />
+                            <a-input v-model="row.description" />
+                            <AppButton type="text" status="danger" @click="removeKeyValueRow(definitionEditorForm.queryParams, index)">
+                              {{ t.common.delete }}
+                            </AppButton>
                           </div>
+                          <AppButton type="text" data-testid="api-definition-query-add-row" @click="addKeyValueRow(definitionEditorForm.queryParams)">
+                            {{ t.apiAutomation.addRow }}
+                          </AppButton>
                         </section>
                       </a-tab-pane>
                       <a-tab-pane key="auth" title="Auth">
@@ -355,16 +460,27 @@
                         </section>
                       </a-tab-pane>
                       <a-tab-pane key="cases" :title="t.apiAutomation.workbenchTabCases">
-                        <div class="api-automation-shell__tab-placeholder">
-                          <strong>{{ t.apiAutomation.workbenchTabCases }}</strong>
-                          <p>{{ t.apiAutomation.requestTabCasesHint }}</p>
-                        </div>
+                        <section
+                          class="api-automation-shell__editor-surface api-automation-shell__cases-editor"
+                          data-testid="api-definition-cases-editor"
+                        >
+                          <ApiCaseManagement
+                            :definition-id="selectedDefinitionId"
+                            :selected-definition-name="selectedDefinition?.name || ''"
+                            :environment-id="selectedEnvironmentId"
+                            :variable-set-id="selectedVariableSetId"
+                          />
+                        </section>
                       </a-tab-pane>
                     </a-tabs>
                     </a-spin>
                   </section>
 
-                  <aside class="api-automation-shell__response-shell" data-testid="api-definition-response-shell">
+                  <aside
+                    v-if="activeRequestContentTab !== 'cases'"
+                    class="api-automation-shell__response-shell"
+                    data-testid="api-definition-response-shell"
+                  >
                     <header class="api-automation-shell__response-header">
                       <strong>{{ t.apiAutomation.responseShellTitle }}</strong>
                       <span>{{ definitionRunResult?.result || t.apiAutomation.responseShellEmpty }}</span>
@@ -420,6 +536,7 @@ import {
   apiAutomationApi,
   createDefinitionEditForm,
   type ApiDefinitionFormValues,
+  type ApiKeyValue,
   type ApiProcessorConfig,
   type ApiRunResponse
 } from '@entities/api-automation';
@@ -531,6 +648,23 @@ async function handleSaveInlineDefinition() {
 
   await loadReadonly();
   await loadDefinitionDetail(selectedDefinitionId.value);
+}
+
+function addKeyValueRow(rows: ApiKeyValue[]) {
+  rows.push({
+    key: '',
+    value: '',
+    description: '',
+    enabled: true
+  });
+}
+
+function removeKeyValueRow(rows: ApiKeyValue[], index: number) {
+  rows.splice(index, 1);
+
+  if (!rows.length) {
+    addKeyValueRow(rows);
+  }
 }
 
 async function handleDebugDefinition() {
@@ -759,6 +893,10 @@ async function handleDebugDefinition() {
   min-height: 0;
 }
 
+.api-automation-shell__request-shell--wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .api-automation-shell__request-pane,
 .api-automation-shell__response-shell {
   display: grid;
@@ -911,6 +1049,7 @@ async function handleDebugDefinition() {
 
 .api-automation-shell__kv-editor {
   align-content: start;
+  overflow-x: auto;
 }
 
 .api-automation-shell__kv-header,
@@ -932,6 +1071,81 @@ async function handleDebugDefinition() {
   padding: 0 8px;
 }
 
+.api-automation-shell__kv-table-header,
+.api-automation-shell__kv-table-row {
+  display: grid;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  border-bottom: 1px solid var(--app-color-border);
+  padding: 6px 8px;
+}
+
+.api-automation-shell__kv-table-header {
+  min-height: 32px;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm) var(--app-radius-sm) 0 0;
+  background: #f8fafc;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.api-automation-shell__kv-table-row {
+  border-right: 1px solid var(--app-color-border);
+  border-left: 1px solid var(--app-color-border);
+  background: #ffffff;
+}
+
+.api-automation-shell__kv-table-row:hover {
+  background: #fbfdff;
+}
+
+.api-automation-shell__kv-table-row--header,
+.api-automation-shell__kv-table-header--header,
+.api-automation-shell__kv-table-row--query,
+.api-automation-shell__kv-table-header--query,
+.api-automation-shell__kv-table-row--body,
+.api-automation-shell__kv-table-header--body {
+  grid-template-columns: 54px minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 0.8fr) 58px;
+}
+
+.api-automation-shell__body-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.api-automation-shell__body-mode {
+  min-height: 28px;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #ffffff;
+  color: var(--app-color-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.api-automation-shell__body-mode--active {
+  border-color: rgb(var(--primary-6));
+  background: rgba(var(--primary-6), 0.08);
+  color: rgb(var(--primary-7));
+  font-weight: 650;
+}
+
+.api-automation-shell__compact-empty {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  border: 1px dashed var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  background: #fbfcfe;
+  color: var(--app-color-text-muted);
+  font-size: 13px;
+}
+
 .api-automation-shell__auth-editor {
   align-content: start;
 }
@@ -949,6 +1163,19 @@ async function handleDebugDefinition() {
 
 .api-automation-shell__editor-surface :deep(.api-processor-editor__header) {
   display: none;
+}
+
+.api-automation-shell__cases-editor {
+  min-height: 360px;
+}
+
+.api-automation-shell__cases-editor :deep(.api-case-management__header) {
+  padding-bottom: 8px;
+}
+
+.api-automation-shell__cases-editor :deep(.api-case-management__list-head),
+.api-automation-shell__cases-editor :deep(.api-case-management__row) {
+  min-height: 34px;
 }
 
 .api-automation-shell__response-shell {

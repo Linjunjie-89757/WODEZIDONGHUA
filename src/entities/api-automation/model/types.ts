@@ -303,9 +303,13 @@ export interface ApiDefinitionFormValues {
   timeoutMs: number;
   queryKey: string;
   queryValue: string;
+  queryParams: ApiKeyValue[];
   headerKey: string;
   headerValue: string;
+  headers: ApiKeyValue[];
+  bodyType: string;
   rawBody: string;
+  bodyFormItems: ApiKeyValue[];
   authConfig: ApiAuthConfig;
   assertions: ApiAssertionConfig[];
   preProcessors: ApiProcessorConfig[];

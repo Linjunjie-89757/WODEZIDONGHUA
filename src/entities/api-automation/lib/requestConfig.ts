@@ -65,6 +65,38 @@ function enabledPair(key: string, value: string): ApiKeyValue[] {
   ];
 }
 
+function emptyKeyValue(): ApiKeyValue {
+  return {
+    key: '',
+    value: '',
+    description: '',
+    enabled: true
+  };
+}
+
+function normalizeKeyValues(items: ApiKeyValue[] | undefined): ApiKeyValue[] {
+  const normalized = (items || [])
+    .map((item) => ({
+      ...emptyKeyValue(),
+      ...item,
+      enabled: item.enabled !== false
+    }))
+    .filter((item) => item.key.trim());
+
+  return normalized;
+}
+
+function editorRows(items: ApiKeyValue[] | undefined): ApiKeyValue[] {
+  const normalized = (items || [])
+    .map((item) => ({
+      ...emptyKeyValue(),
+      ...item,
+      enabled: item.enabled !== false
+    }));
+
+  return normalized.length ? normalized : [emptyKeyValue()];
+}
+
 export function createDefaultRequestConfig(): ApiRequestConfig {
   return {
     method: 'GET',
@@ -111,9 +143,13 @@ export function createDefaultDefinitionForm(): ApiDefinitionFormValues {
     timeoutMs: 10000,
     queryKey: '',
     queryValue: '',
+    queryParams: [emptyKeyValue()],
     headerKey: '',
     headerValue: '',
+    headers: [emptyKeyValue()],
+    bodyType: 'RAW',
     rawBody: '',
+    bodyFormItems: [emptyKeyValue()],
     authConfig: createDefaultAuthConfig(),
     assertions: [],
     preProcessors: [],
@@ -134,9 +170,13 @@ export function createDefinitionEditForm(detail: ApiDefinitionDetail): ApiDefini
     timeoutMs: detail.requestConfig.timeoutMs || 10000,
     queryKey: firstQuery?.key || '',
     queryValue: firstQuery?.value || '',
+    queryParams: editorRows(detail.requestConfig.queryParams),
     headerKey: firstHeader?.key || '',
     headerValue: firstHeader?.value || '',
+    headers: editorRows(detail.requestConfig.headers),
+    bodyType: detail.requestConfig.body?.type || 'RAW',
     rawBody: detail.requestConfig.body?.rawText || '',
+    bodyFormItems: editorRows(detail.requestConfig.body?.formItems),
     authConfig: normalizeAuthConfig(detail.requestConfig.authConfig),
     assertions: normalizeAssertions(detail.assertions),
     preProcessors: normalizeProcessors(detail.preProcessors),
@@ -150,13 +190,19 @@ export function toRequestConfig(form: ApiDefinitionFormValues): ApiRequestConfig
     method: form.method,
     path: form.path.trim(),
     timeoutMs: Number(form.timeoutMs) || 10000,
-    queryParams: enabledPair(form.queryKey, form.queryValue),
-    headers: enabledPair(form.headerKey, form.headerValue),
+    queryParams: normalizeKeyValues(form.queryParams).length
+      ? normalizeKeyValues(form.queryParams)
+      : enabledPair(form.queryKey, form.queryValue),
+    headers: normalizeKeyValues(form.headers).length
+      ? normalizeKeyValues(form.headers)
+      : enabledPair(form.headerKey, form.headerValue),
     body: {
-      type: 'RAW',
+      type: form.bodyType || 'RAW',
       rawText: form.rawBody,
-      formItems: [],
-      contentType: 'application/json'
+      formItems: normalizeKeyValues(form.bodyFormItems),
+      contentType: form.bodyType === 'FORM_URLENCODED'
+        ? 'application/x-www-form-urlencoded'
+        : 'application/json'
     },
     authConfig: normalizeAuthConfig(form.authConfig)
   };
