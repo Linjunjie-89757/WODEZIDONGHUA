@@ -36,9 +36,11 @@ async function login(page) {
   }
 
   await page.waitForURL('**/case-center', { timeout: 15000 });
-  await page.getByRole('heading', { name: '用例中心总览' }).waitFor({ timeout: 15000 });
-  await page.getByRole('heading', { name: '目录结构' }).waitFor({ timeout: 15000 });
-  await page.getByRole('heading', { name: '用例列表' }).waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: '用例管理' }).waitFor({ timeout: 15000 });
+  await page.getByText('用例分类').waitFor({ timeout: 15000 });
+  await page.getByPlaceholder('搜索用例编号、名称...').waitFor({ timeout: 15000 });
+  await page.getByRole('columnheader', { name: '编号' }).waitFor({ timeout: 15000 });
+  await page.getByRole('columnheader', { name: '操作' }).waitFor({ timeout: 15000 });
 }
 
 try {

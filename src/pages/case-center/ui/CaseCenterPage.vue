@@ -1,11 +1,18 @@
 <template>
-  <AppPage :title="t.pages.caseCenterTitle" :description="t.pages.caseCenterDescription">
+  <section class="case-center-page">
     <CaseCenterReadonly />
-  </AppPage>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { t } from '@shared/i18n';
-import { AppPage } from '@shared/ui';
 import { CaseCenterReadonly } from '@widgets/case-center-readonly';
 </script>
+
+<style scoped>
+.case-center-page {
+  display: flex;
+  min-width: 0;
+  min-height: calc(100vh - 56px);
+  background: #f5f6f8;
+}
+</style>
