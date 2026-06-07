@@ -20,6 +20,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3L: overall closure audit is complete.
 - Phase 3M: shared response result panel old-project shell alignment is complete.
 - Phase 3N: case drawer and case management old-project experience alignment is complete.
+- Phase 3O: scenario rail/list/step inspector precision alignment is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -43,11 +44,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 
 - Scenario creation still uses the existing dialog.
 - Scenario editing now uses the workbench, but the editor is still a shell-level alignment.
-- Scenario module rail renders, but old-project parity still needs:
-  - search/tool row density;
-  - current-node selection treatment;
-  - smaller row height;
-  - less empty vertical card space.
+- Scenario module rail now has a compact create/search tool row, directory title row, all-scenarios node, module row counts, selected visual treatment, and denser row height.
 - Right property panel currently covers:
   - scenario name;
   - status;
@@ -55,12 +52,12 @@ This file tracks known follow-up work after API Automation page alignment Phase 
   - environment and variable set;
   - step statistics;
   - latest run result;
+  - selected-step summary inspector;
   - save;
   - run.
 - Right property panel still needs later expansion for:
   - fail-on-error / continue strategy if supported by contract;
   - timeout and execution settings if supported by contract;
-  - selected step metadata;
   - selected step quick actions.
 - Scenario history is now available in the editor workbench as latest-run step results.
 - Scenario run result is now available in the editor workbench through the shared result panel.
@@ -73,7 +70,8 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Sorting uses up/down buttons; drag sorting is not implemented.
 - Advanced controller nested-rule expansion is not implemented.
 - Step group visual treatment can be closer to old project.
-- Selected-step property editing is not separated into a right-side inspector yet.
+- Selected-step metadata is now separated into a right-side read-only inspector.
+- Selected-step property editing is not implemented.
 - Step config drawers for custom/system/script steps are not yet visually aligned to the old `scenario-step-config-*` drawer shell.
 
 ## API Definition Request Editor Backlog
@@ -126,6 +124,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
    - Align scenario module rail and scenario list table density.
    - Improve step tree inline affordances and evaluate selected-step inspector as a separate UI shell.
    - Do not add drag sorting unless separately scoped.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3o.md`.
 
 4. Phase 3P: dialog/drawer consistency pass.
    - Normalize create/edit dialog sizing, drawer title/footer rhythm, and dense form rows across API Automation.

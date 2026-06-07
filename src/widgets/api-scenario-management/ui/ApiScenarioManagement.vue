@@ -26,16 +26,50 @@
 
     <a-grid :cols="{ xs: 1, lg: 3 }" :col-gap="12" :row-gap="12">
       <a-grid-item>
-        <section class="api-scenario-management__panel api-scenario-management__module-pane">
-          <h4>{{ t.apiAutomation.scenarioModules }}</h4>
-          <div v-if="!modules.length" class="api-scenario-management__empty">
-            {{ t.apiAutomation.scenarioModuleEmpty }}
+        <section
+          class="api-scenario-management__panel api-scenario-management__module-pane"
+          data-testid="api-scenario-module-rail"
+        >
+          <div class="api-scenario-management__module-tools">
+            <AppButton type="primary" data-testid="api-scenario-rail-create" @click="openCreateDialog">
+              {{ t.apiAutomation.scenarioCreate }}
+            </AppButton>
+            <a-input
+              v-model="moduleKeyword"
+              allow-clear
+              data-testid="api-scenario-module-search"
+              :placeholder="t.apiAutomation.scenarioModuleSearchPlaceholder"
+            />
           </div>
-          <div v-else class="api-scenario-management__modules" data-testid="api-scenario-modules">
-            <article v-for="module in modules" :key="module.id">
+          <div class="api-scenario-management__module-title">
+            <h4>{{ t.apiAutomation.scenarioModules }}</h4>
+            <span>{{ scenarios.length }}</span>
+          </div>
+          <div class="api-scenario-management__modules" data-testid="api-scenario-modules">
+            <button
+              type="button"
+              class="api-scenario-management__module-row api-scenario-management__module-row--active"
+              data-testid="api-scenario-module-row"
+            >
+              <span class="api-scenario-management__module-folder"></span>
+              <strong>{{ t.apiAutomation.scenarioModuleAll }}</strong>
+              <small>{{ scenarios.length }}</small>
+            </button>
+            <button
+              v-for="module in filteredModules"
+              :key="module.id"
+              type="button"
+              class="api-scenario-management__module-row"
+              data-testid="api-scenario-module-row"
+            >
+              <span class="api-scenario-management__module-folder"></span>
               <strong>{{ module.name }}</strong>
-              <small>{{ module.fullPath }}</small>
-            </article>
+              <small>{{ module.scenarioCount ?? 0 }}</small>
+              <em>{{ module.fullPath }}</em>
+            </button>
+            <div v-if="modules.length && !filteredModules.length" class="api-scenario-management__empty">
+              {{ t.apiAutomation.scenarioModuleEmpty }}
+            </div>
           </div>
         </section>
       </a-grid-item>
@@ -74,32 +108,45 @@
           <div v-if="activeEditorTab === 'list'" class="api-scenario-management__list-workspace">
             <section class="api-scenario-management__panel">
               <div class="api-scenario-management__list-toolbar">
-                <h4>{{ t.apiAutomation.scenarioList }}</h4>
-                <span>{{ scenarios.length }}</span>
+                <div>
+                  <h4>{{ t.apiAutomation.scenarioList }}</h4>
+                  <span>{{ t.apiAutomation.scenarioListTotal.replace('{count}', String(scenarios.length)) }}</span>
+                </div>
+                <div class="api-scenario-management__list-filters">
+                  <a-input
+                    v-model="scenarioKeyword"
+                    allow-clear
+                    data-testid="api-scenario-list-search"
+                    :placeholder="t.apiAutomation.scenarioListSearchPlaceholder"
+                  />
+                </div>
               </div>
               <AppLoadingState v-if="loading" />
-              <div v-else-if="!scenarios.length" class="api-scenario-management__empty">
+              <div v-else-if="!filteredScenarios.length" class="api-scenario-management__empty">
                 {{ t.apiAutomation.scenarioEmpty }}
               </div>
               <div v-else class="api-scenario-management__list" data-testid="api-scenario-list">
                 <div class="api-scenario-management__list-head">
+                  <span>{{ t.apiAutomation.scenarioId }}</span>
                   <span>{{ t.apiAutomation.scenarioName }}</span>
                   <span>{{ t.apiAutomation.fieldStatus }}</span>
                   <span>{{ t.apiAutomation.lastRunResult }}</span>
                   <span></span>
                 </div>
                 <article
-                  v-for="scenario in scenarios"
+                  v-for="scenario in filteredScenarios"
                   :key="scenario.id"
                   class="api-scenario-management__row"
                   data-testid="api-scenario-row"
                   @click="selectScenario(scenario.id)"
                 >
+                  <span class="api-scenario-management__row-id">#{{ 100000 + scenario.id }}</span>
                   <button type="button" class="api-scenario-management__row-main" @click.stop="selectScenario(scenario.id)">
                     <strong>{{ scenario.name }}</strong>
+                    <small>{{ scenario.moduleName || t.apiAutomation.scenarioModuleAll }}</small>
                   </button>
-                  <small>{{ scenario.status || '-' }}</small>
-                  <small>{{ scenario.lastRunResult || '-' }}</small>
+                  <small class="api-scenario-management__status">{{ scenarioStatusLabel(scenario.status) }}</small>
+                  <small class="api-scenario-management__result">{{ scenario.lastRunResult || '-' }}</small>
                   <div class="api-scenario-management__row-actions" @click.stop>
                     <ApiScenarioRunButton
                       :scenario-id="scenario.id"
@@ -131,6 +178,8 @@
                       v-model="editingScenarioForm.steps"
                       :definitions="definitions()"
                       :cases="cases"
+                      :selected-step-key="selectedStepKey"
+                      @select-step="setSelectedStep"
                     />
                   </a-tab-pane>
                   <a-tab-pane key="params" :title="t.apiAutomation.scenarioParams">
@@ -278,6 +327,38 @@
                   </div>
                 </section>
 
+                <section
+                  class="api-scenario-management__property-section api-scenario-management__step-inspector"
+                  data-testid="api-scenario-selected-step-inspector"
+                >
+                  <h5>{{ t.apiAutomation.scenarioSelectedStepInspector }}</h5>
+                  <div v-if="selectedStep" class="api-scenario-management__inspector-grid">
+                    <span>
+                      {{ t.apiAutomation.scenarioInspectorName }}
+                      <strong>{{ selectedStep.name || selectedStep.stepName || '-' }}</strong>
+                    </span>
+                    <span>
+                      {{ t.apiAutomation.scenarioInspectorType }}
+                      <strong>{{ scenarioStepTypeLabel(selectedStep.stepType) }}</strong>
+                    </span>
+                    <span>
+                      {{ t.apiAutomation.scenarioInspectorEnabled }}
+                      <strong>{{ selectedStep.enabled === false ? t.apiAutomation.scenarioStatusDisabled : t.apiAutomation.scenarioStatusActive }}</strong>
+                    </span>
+                    <span>
+                      {{ t.apiAutomation.scenarioInspectorResource }}
+                      <strong>{{ selectedStepResource }}</strong>
+                    </span>
+                    <span>
+                      {{ t.apiAutomation.scenarioInspectorRequest }}
+                      <strong>{{ selectedStepRequestSummary }}</strong>
+                    </span>
+                  </div>
+                  <div v-else class="api-scenario-management__inspector-empty">
+                    {{ t.apiAutomation.scenarioSelectedStepEmpty }}
+                  </div>
+                </section>
+
                 <div class="api-scenario-management__property-actions" data-testid="api-scenario-property-actions">
                   <AppButton
                     type="primary"
@@ -407,10 +488,42 @@ const activeEditorTab = ref<'list' | 'editor'>('list');
 const activeScenarioDetailTab = ref('steps');
 const editorLoading = ref(false);
 const editingScenarioForm = ref<ApiScenarioFormValues | null>(null);
+const moduleKeyword = ref('');
+const scenarioKeyword = ref('');
+const selectedStep = ref<ApiScenarioStep | null>(null);
+const selectedStepKey = ref<string | null>(null);
 const scenarioDialogRef = ref<{
   openCreate: () => void;
   openEdit: () => void | Promise<void>;
 } | null>(null);
+
+const filteredModules = computed(() => {
+  const keyword = moduleKeyword.value.trim().toLowerCase();
+
+  if (!keyword) {
+    return modules.value;
+  }
+
+  return modules.value.filter((module) =>
+    [module.name, module.fullPath]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(keyword))
+  );
+});
+
+const filteredScenarios = computed(() => {
+  const keyword = scenarioKeyword.value.trim().toLowerCase();
+
+  if (!keyword) {
+    return scenarios.value;
+  }
+
+  return scenarios.value.filter((scenario) =>
+    [scenario.name, scenario.moduleName, scenario.status, scenario.lastRunResult, String(scenario.id)]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(keyword))
+  );
+});
 
 const selectedScenarioItem = computed<ApiScenarioItem | null>(
   () => scenarios.value.find((item) => item.id === editingScenarioId.value) || null
@@ -451,6 +564,42 @@ const scenarioStepStats = computed(() => {
   return stats;
 });
 
+const selectedStepResource = computed(() => {
+  const step = selectedStep.value;
+
+  if (!step) {
+    return '-';
+  }
+
+  if (step.definitionName) {
+    return step.definitionName;
+  }
+
+  if (step.caseName) {
+    return step.caseName;
+  }
+
+  if (step.resource) {
+    return step.resource;
+  }
+
+  if (step.resourceType || step.resourceId) {
+    return [step.resourceType, step.resourceId].filter(Boolean).join(' #');
+  }
+
+  return '-';
+});
+
+const selectedStepRequestSummary = computed(() => {
+  const requestConfig = selectedStep.value?.requestConfig;
+
+  if (!requestConfig) {
+    return '-';
+  }
+
+  return `${requestConfig.method || 'GET'} ${requestConfig.path || '-'}`;
+});
+
 async function openCreateDialog() {
   dialogMode.value = 'create';
   editingScenarioId.value = null;
@@ -463,6 +612,8 @@ async function openEditorWorkspace(id: number) {
   activeEditorTab.value = 'editor';
   activeScenarioDetailTab.value = 'steps';
   editorLoading.value = true;
+  selectedStep.value = null;
+  selectedStepKey.value = null;
 
   try {
     const detail = await apiAutomationApi.getScenarioDetail(id, workspaceStore.currentWorkspace.code);
@@ -490,9 +641,49 @@ function handleWorkbenchRunSuccess(result: ApiRunResponse) {
   activeScenarioDetailTab.value = 'result';
 }
 
+function setSelectedStep(step: ApiScenarioStep, key: string) {
+  selectedStep.value = step;
+  selectedStepKey.value = key;
+}
+
+function scenarioStatusLabel(status?: string | null) {
+  if (status === 'ACTIVE') {
+    return t.apiAutomation.scenarioStatusActive;
+  }
+
+  if (status === 'DISABLED') {
+    return t.apiAutomation.scenarioStatusDisabled;
+  }
+
+  return status || '-';
+}
+
+function scenarioStepTypeLabel(type: string) {
+  const labels: Record<string, string> = {
+    API: t.apiAutomation.scenarioStepDefinition,
+    API_CASE: t.apiAutomation.scenarioStepCase,
+    CUSTOM_REQUEST: t.apiAutomation.scenarioStepCustom,
+    CONSTANT_TIMER: t.apiAutomation.scenarioStepWait,
+    SCRIPT: t.apiAutomation.scenarioStepScript,
+    ONCE_ONLY_CONTROLLER: t.apiAutomation.scenarioStepOnceOnly,
+    IF_CONTROLLER: t.apiAutomation.scenarioStepIf,
+    LOOP_CONTROLLER: t.apiAutomation.scenarioStepLoop,
+    GROUP: t.apiAutomation.scenarioStepGroup
+  };
+
+  return labels[type] || type;
+}
+
 watch(selectedScenarioDetail, (value) => {
   detailVisible.value = !!value;
 });
+
+watch(() => editingScenarioForm.value?.steps, (steps) => {
+  if (!selectedStep.value && steps?.length) {
+    selectedStep.value = steps[0];
+    selectedStepKey.value = `/0-${steps[0].id || steps[0].stepType || 'step'}`;
+  }
+}, { immediate: true });
 
 const ScenarioStepNode = defineComponent({
   name: 'ScenarioStepNode',
@@ -594,7 +785,7 @@ const ScenarioStepNode = defineComponent({
 }
 
 .api-scenario-management__panel,
-.api-scenario-management__modules article,
+.api-scenario-management__module-row,
 .api-scenario-management__step {
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm);
@@ -607,7 +798,38 @@ const ScenarioStepNode = defineComponent({
 }
 
 .api-scenario-management__module-pane {
+  align-content: start;
+  gap: 0;
   min-height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+
+.api-scenario-management__module-tools {
+  display: grid;
+  gap: 8px;
+  border-bottom: 1px solid var(--app-color-border);
+  padding: 12px;
+}
+
+.api-scenario-management__module-tools :deep(.arco-input-wrapper) {
+  min-height: 34px;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.api-scenario-management__module-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+.api-scenario-management__module-title span {
+  color: var(--app-color-text-muted);
+  font-size: 12px;
 }
 
 .api-scenario-management__workbench {
@@ -680,11 +902,30 @@ const ScenarioStepNode = defineComponent({
   align-items: center;
   justify-content: space-between;
   gap: var(--app-spacing-sm);
+  min-height: 52px;
+  border-bottom: 1px solid var(--app-color-border);
+  padding: 8px 12px;
 }
 
-.api-scenario-management__list-toolbar span {
+.api-scenario-management__list-toolbar div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.api-scenario-management__list-toolbar span,
+.api-scenario-management__list-toolbar small {
   color: var(--app-color-text-muted);
   font-size: 12px;
+}
+
+.api-scenario-management__list-filters {
+  width: min(260px, 42vw);
+}
+
+.api-scenario-management__list-filters :deep(.arco-input-wrapper) {
+  min-height: 32px;
+  border-radius: 7px;
 }
 
 .api-scenario-management__editor-workspace {
@@ -843,6 +1084,51 @@ const ScenarioStepNode = defineComponent({
   white-space: nowrap;
 }
 
+.api-scenario-management__step-inspector {
+  background: #ffffff;
+}
+
+.api-scenario-management__inspector-grid {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.api-scenario-management__inspector-grid span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  border: 1px solid var(--app-color-border);
+  border-radius: 6px;
+  background: #fbfcfe;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  padding: 7px 8px;
+}
+
+.api-scenario-management__inspector-grid strong {
+  overflow: hidden;
+  color: var(--app-color-text);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-scenario-management__inspector-empty {
+  min-height: 52px;
+  align-content: center;
+  border: 1px dashed var(--app-color-border);
+  border-radius: 6px;
+  background: #fbfcfe;
+  color: var(--app-color-text-muted);
+  display: grid;
+  font-size: 12px;
+  justify-items: center;
+  padding: 10px;
+  text-align: center;
+}
+
 .api-scenario-management__property-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -917,37 +1203,43 @@ const ScenarioStepNode = defineComponent({
 .api-scenario-management__list {
   gap: 0;
   overflow: hidden;
-  border: 1px solid var(--app-color-border);
-  border-radius: var(--app-radius-sm);
+  border: 0;
+  border-radius: 0;
 }
 
 .api-scenario-management__list-head,
 .api-scenario-management__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px 120px auto;
-  gap: var(--app-spacing-sm);
+  grid-template-columns: 96px minmax(180px, 1fr) 96px 118px auto;
+  gap: 10px;
   align-items: center;
   min-width: 0;
 }
 
 .api-scenario-management__list-head {
-  background: #f8fafc;
+  background: #ffffff;
   color: var(--app-color-text-muted);
   font-size: 12px;
   font-weight: 600;
-  min-height: 40px;
-  padding: 7px 10px;
+  min-height: 42px;
+  padding: 7px 12px;
 }
 
 .api-scenario-management__row {
   border-top: 1px solid var(--app-color-border);
   background: var(--app-color-surface);
-  min-height: 46px;
-  padding: 8px 10px;
+  min-height: 48px;
+  padding: 7px 12px;
 }
 
 .api-scenario-management__row:hover {
-  background: #fbfdff;
+  background: rgba(239, 246, 255, 0.42);
+}
+
+.api-scenario-management__row-id {
+  color: rgb(var(--primary-6));
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .api-scenario-management__row-main {
@@ -965,6 +1257,82 @@ const ScenarioStepNode = defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.api-scenario-management__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 44px;
+  height: 22px;
+  border-radius: 4px;
+  background: #e8efff;
+  color: #3867d6;
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+.api-scenario-management__result {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-scenario-management__module-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  min-height: 32px;
+  border-color: transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--app-color-text);
+  cursor: pointer;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.api-scenario-management__module-row:hover {
+  background: #f3f4f6;
+}
+
+.api-scenario-management__module-row--active {
+  background: #eff6ff;
+  color: rgb(var(--primary-6));
+}
+
+.api-scenario-management__module-row strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-scenario-management__module-row small {
+  color: inherit;
+  font-size: 12px;
+}
+
+.api-scenario-management__module-row em {
+  grid-column: 2 / -1;
+  overflow: hidden;
+  color: var(--app-color-text-muted);
+  font-size: 11px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-scenario-management__module-folder {
+  width: 14px;
+  height: 11px;
+  border: 1px solid #9ca3af;
+  border-radius: 2px;
+  background: #f8fafc;
 }
 
 .api-scenario-management__step {
@@ -1062,6 +1430,10 @@ const ScenarioStepNode = defineComponent({
   .api-scenario-management__history-head,
   .api-scenario-management__history-row {
     grid-template-columns: 1fr;
+  }
+
+  .api-scenario-management__list-filters {
+    width: 100%;
   }
 }
 </style>

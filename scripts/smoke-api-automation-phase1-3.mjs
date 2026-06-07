@@ -458,6 +458,10 @@ async function assertScenarioWorkbenchVisualShell() {
     response.status() < 300
   );
   await page.getByTestId('api-scenario-workbench').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-module-rail').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-module-search').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-module-row').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-list-search').locator('input, textarea').first().fill(scenarioName);
   await page.getByText(scenarioName).waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-row').filter({ hasText: scenarioName }).first().getByTestId('api-scenario-edit').click();
   await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
@@ -466,8 +470,11 @@ async function assertScenarioWorkbenchVisualShell() {
   await page.getByTestId('api-scenario-property-panel').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-property-run-context').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-property-step-stats').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-selected-step-inspector').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-property-actions').waitFor({ timeout: 15000 });
   await scenarioWorkspace.getByTestId('api-scenario-step-row').first().waitFor({ timeout: 15000 });
+  await scenarioWorkspace.getByTestId('api-scenario-step-row').first().click();
+  await page.getByTestId('api-scenario-selected-step-inspector').getByText('请求摘要').waitFor({ timeout: 15000 });
   await scenarioWorkspace.locator('[data-testid="api-scenario-step-row"][data-step-type="ONCE_ONLY_CONTROLLER"]').first().waitFor({ timeout: 15000 });
   await scenarioWorkspace.locator('[data-testid="api-scenario-step-row"][data-step-type="CONSTANT_TIMER"]').first().waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-history-tab').click();

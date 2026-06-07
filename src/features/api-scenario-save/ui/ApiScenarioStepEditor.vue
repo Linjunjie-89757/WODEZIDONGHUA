@@ -47,6 +47,8 @@
       data-testid="api-scenario-step-row"
       :data-depth="depth"
       :data-step-type="displayStepType(step)"
+      :data-selected="stepKey(step, index) === selectedStepKey"
+      @click.stop="selectStep(step, index)"
     >
       <div class="api-scenario-step-editor__head">
         <span class="api-scenario-step-editor__order">{{ index + 1 }}</span>
@@ -201,7 +203,10 @@
           :definitions="definitions"
           :cases="cases"
           :depth="depth + 1"
+          :parent-key="stepKey(step, index)"
+          :selected-step-key="selectedStepKey"
           @update:model-value="(value) => patchStep(index, { children: value })"
+          @select-step="(selectedStep, key) => emit('select-step', selectedStep, key)"
         />
       </section>
     </article>
@@ -236,16 +241,21 @@ const props = withDefaults(
     definitions?: ApiDefinitionItem[];
     cases?: ApiDefinitionCaseItem[];
     depth?: number;
+    parentKey?: string;
+    selectedStepKey?: string | null;
   }>(),
   {
     definitions: () => [],
     cases: () => [],
-    depth: 0
+    depth: 0,
+    parentKey: '',
+    selectedStepKey: null
   }
 );
 
 const emit = defineEmits<{
   'update:modelValue': [value: ApiScenarioStep[]];
+  'select-step': [step: ApiScenarioStep, key: string];
 }>();
 
 const requestMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
@@ -253,6 +263,15 @@ const steps = computed(() => props.modelValue);
 
 function updateSteps(nextSteps: ApiScenarioStep[]) {
   emit('update:modelValue', nextSteps);
+}
+
+function stepKey(step: ApiScenarioStep, index: number) {
+  const identity = step.id || step.stepType || 'step';
+  return `${props.parentKey}/${index}-${identity}`;
+}
+
+function selectStep(step: ApiScenarioStep, index: number) {
+  emit('select-step', step, stepKey(step, index));
 }
 
 function patchStep(index: number, patch: Partial<ApiScenarioStep>) {
@@ -514,6 +533,13 @@ function isChildContainerType(type: ApiScenarioStepType) {
   z-index: 1;
   border-color: #bfdbfe;
   background: #fbfdff;
+}
+
+.api-scenario-step-editor__row[data-selected='true'] {
+  z-index: 2;
+  border-color: #60a5fa;
+  background: #f8fbff;
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.22);
 }
 
 .api-scenario-step-editor__row::before {

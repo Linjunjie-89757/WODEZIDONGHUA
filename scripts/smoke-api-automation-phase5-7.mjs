@@ -357,9 +357,12 @@ async function editScenarioAndVerifySteps() {
   await page.getByTestId('api-scenario-property-panel').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-property-run-context').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-property-step-stats').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-selected-step-inspector').waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-workbench-name-input').locator('input, textarea').first().waitFor({ timeout: 15000 });
   await page.getByTestId('api-scenario-step-editor').first().waitFor({ timeout: 15000 });
   await scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"]').first().waitFor({ timeout: 15000 });
+  await scenarioEditorStepRows('[data-step-type="CUSTOM_REQUEST"]').first().click();
+  await page.getByTestId('api-scenario-selected-step-inspector').getByText('请求摘要').waitFor({ timeout: 15000 });
   await scenarioEditorStepRows('[data-step-type="API"]').first().waitFor({ timeout: 15000 });
   await scenarioEditorStepRows('[data-step-type="API_CASE"]').first().waitFor({ timeout: 15000 });
   await scenarioEditorStepRows('[data-step-type="GROUP"]').first().waitFor({ timeout: 15000 });
