@@ -8,6 +8,7 @@ export {
   createCustomRequestStep,
   createDefaultScenarioForm,
   createGroupStep,
+  createOnceOnlyStep,
   createReferenceCaseStep,
   createReferenceDefinitionStep,
   createScriptStep,

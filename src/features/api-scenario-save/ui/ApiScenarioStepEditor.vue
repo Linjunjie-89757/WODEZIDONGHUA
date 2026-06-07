@@ -18,6 +18,9 @@
         <AppButton type="text" data-testid="api-scenario-add-script-step" @click="addStep('SCRIPT')">
           {{ t.apiAutomation.scenarioAddScriptStep }}
         </AppButton>
+        <AppButton type="text" data-testid="api-scenario-add-once-step" @click="addStep('ONCE_ONLY_CONTROLLER')">
+          {{ t.apiAutomation.scenarioAddOnceOnlyStep }}
+        </AppButton>
         <AppButton type="text" data-testid="api-scenario-add-group-step" @click="addStep('GROUP')">
           {{ t.apiAutomation.scenarioAddGroupStep }}
         </AppButton>
@@ -47,6 +50,7 @@
           <a-option value="CUSTOM_REQUEST">{{ t.apiAutomation.scenarioStepCustom }}</a-option>
           <a-option value="CONSTANT_TIMER">{{ t.apiAutomation.scenarioStepWait }}</a-option>
           <a-option value="SCRIPT">{{ t.apiAutomation.scenarioStepScript }}</a-option>
+          <a-option value="ONCE_ONLY_CONTROLLER">{{ t.apiAutomation.scenarioStepOnceOnly }}</a-option>
           <a-option value="GROUP">{{ t.apiAutomation.scenarioStepGroup }}</a-option>
         </a-select>
         <a-input
@@ -146,7 +150,7 @@
         </a-grid-item>
       </a-grid>
 
-      <section v-if="isGroupStep(step)" class="api-scenario-step-editor__children">
+      <section v-if="isChildContainerStep(step)" class="api-scenario-step-editor__children">
         <header>
           <strong>{{ t.apiAutomation.scenarioNestedSteps }}</strong>
           <div>
@@ -180,6 +184,7 @@ import {
   createCustomRequestStep,
   createDefaultRequestConfig,
   createGroupStep,
+  createOnceOnlyStep,
   createReferenceCaseStep,
   createReferenceDefinitionStep,
   createScriptStep,
@@ -254,12 +259,13 @@ function moveStep(index: number, direction: -1 | 1) {
 function changeStepType(index: number, type: ApiScenarioStepType) {
   const current = props.modelValue[index];
   const template = createStep(type);
+  const shouldKeepChildren = type === 'GROUP' || type === 'ONCE_ONLY_CONTROLLER';
   const next = {
     ...template,
     id: current.id,
     name: type === 'GROUP' ? t.apiAutomation.scenarioStepGroup : current.name || template.name,
     stepName: type === 'GROUP' ? t.apiAutomation.scenarioStepGroup : current.stepName || current.name || template.name,
-    children: type === 'GROUP' ? current.children || [] : []
+    children: shouldKeepChildren ? current.children || [] : []
   };
 
   patchStep(index, next);
@@ -352,6 +358,10 @@ function createStep(type: ApiScenarioStepType) {
     return createScriptStep();
   }
 
+  if (type === 'ONCE_ONLY_CONTROLLER') {
+    return createOnceOnlyStep();
+  }
+
   return createCustomRequestStep();
 }
 
@@ -366,6 +376,10 @@ function isGroupStep(step: ApiScenarioStep) {
 
 function displayStepType(step: ApiScenarioStep) {
   return isGroupStep(step) ? 'GROUP' : step.stepType;
+}
+
+function isChildContainerStep(step: ApiScenarioStep) {
+  return isGroupStep(step) || step.stepType === 'ONCE_ONLY_CONTROLLER';
 }
 </script>
 

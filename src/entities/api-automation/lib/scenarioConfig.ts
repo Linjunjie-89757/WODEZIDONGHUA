@@ -60,6 +60,23 @@ export function createScriptStep(): ApiScenarioStep {
   };
 }
 
+export function createOnceOnlyStep(): ApiScenarioStep {
+  return {
+    id: stepId('once'),
+    name: 'Once-only Controller',
+    stepName: 'Once-only Controller',
+    stepType: 'ONCE_ONLY_CONTROLLER',
+    enabled: true,
+    resourceId: null,
+    resourceType: null,
+    requestConfig: null,
+    assertions: [],
+    preProcessors: [],
+    postProcessors: [],
+    children: []
+  };
+}
+
 export function createReferenceDefinitionStep(): ApiScenarioStep {
   return {
     id: stepId('definition'),
@@ -224,6 +241,24 @@ export function normalizeScenarioSteps(steps: ApiScenarioStep[]): ApiScenarioSte
       };
     }
 
+    if (base.stepType === 'ONCE_ONLY_CONTROLLER') {
+      return {
+        ...base,
+        stepType: 'ONCE_ONLY_CONTROLLER',
+        resource: null,
+        resourceId: null,
+        resourceType: null,
+        definitionId: null,
+        definitionName: null,
+        caseId: null,
+        caseName: null,
+        requestConfig: null,
+        assertions: [],
+        preProcessors: [],
+        postProcessors: []
+      };
+    }
+
     return {
       ...base,
       stepType: 'CUSTOM_REQUEST',
@@ -246,7 +281,8 @@ function fallbackStepName(step: ApiScenarioStep) {
     CUSTOM_REQUEST: 'Custom Request',
     GROUP: 'Step Group',
     CONSTANT_TIMER: 'Constant Timer',
-    SCRIPT: 'Script'
+    SCRIPT: 'Script',
+    ONCE_ONLY_CONTROLLER: 'Once-only Controller'
   };
 
   return names[step.stepType] || 'Scenario Step';
@@ -292,6 +328,16 @@ function toSaveScenarioStepPayload(step: ApiScenarioStep): ApiScenarioStepPayloa
     payload.resourceType = null;
     payload.requestConfig = null;
     payload.script = (payload.script || '').trim();
+  }
+
+  if (payload.stepType === 'ONCE_ONLY_CONTROLLER') {
+    payload.resource = null;
+    payload.resourceId = null;
+    payload.resourceType = null;
+    payload.requestConfig = null;
+    payload.assertions = [];
+    payload.preProcessors = [];
+    payload.postProcessors = [];
   }
 
   return payload;
