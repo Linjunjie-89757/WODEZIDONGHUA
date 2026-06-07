@@ -2,7 +2,7 @@
 
 Date: 2026-06-07
 
-This file tracks known follow-up work after API Automation page alignment Phase 3J, so later phases do not depend on chat history.
+This file tracks known follow-up work after API Automation page alignment Phase 3L, so later phases do not depend on chat history.
 
 ## Current State
 
@@ -17,6 +17,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3I: request parameter table component extraction is complete.
 - Phase 3J: request editor detail visual alignment is complete.
 - Phase 3K: scenario editor visual detail alignment is complete.
+- Phase 3L: overall closure audit is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -24,19 +25,27 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 
 - Pixel-level old project reproduction is not complete.
 - Current alignment is structural and workflow-level, not exact spacing/color/component parity.
-- Need a later visual precision phase for:
-  - top information architecture;
-  - scenario editor pixel-level parity;
-  - dialog sizing outside the batch-add drawer;
-  - toolbar button hierarchy;
-  - non-parameter table/list row height;
-  - empty/loading/error states;
-  - mobile and narrow viewport behavior.
+- The current API Automation module is close at the structure/workflow level:
+  - three main workbench tabs are present;
+  - API definition request editor has a left rail, request editor, content tabs, and response shell;
+  - cases are embedded in the request editor and available in the workbench cases tab;
+  - scenario editor has list/editor tabs, step tree, right property panel, run result, and history shells.
+- The remaining gap is mostly old-project component parity:
+  - response panels still need the old `ms-like-response-shell` header/metrics/tabs/content hierarchy;
+  - case management still needs the old `ApiCaseDrawer`-like detail/run-history/change-history drawer experience;
+  - scenario list/module rail still has a larger empty-card feel than the old table/tree workbench;
+  - dialogs and drawers still need consistent old-project sizing, title bars, footers, and control density;
+  - mobile and narrow viewport behavior is smoke-checked for overflow only, not visually tuned.
 
 ## Scenario Workbench Backlog
 
 - Scenario creation still uses the existing dialog.
 - Scenario editing now uses the workbench, but the editor is still a shell-level alignment.
+- Scenario module rail renders, but old-project parity still needs:
+  - search/tool row density;
+  - current-node selection treatment;
+  - smaller row height;
+  - less empty vertical card space.
 - Right property panel currently covers:
   - scenario name;
   - status;
@@ -63,6 +72,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Advanced controller nested-rule expansion is not implemented.
 - Step group visual treatment can be closer to old project.
 - Selected-step property editing is not separated into a right-side inspector yet.
+- Step config drawers for custom/system/script steps are not yet visually aligned to the old `scenario-step-config-*` drawer shell.
 
 ## API Definition Request Editor Backlog
 
@@ -81,6 +91,45 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Embedded cases reuse the existing case management widget and are closer in density, but not yet old-project exact.
 - Parameter table rendering is now centralized in `ApiRequestParamTable.vue`.
 - Parameter table columns, row density, tool strip, and batch drawer are closer to the old project workbench style.
+
+## Phase 3L Closure Audit Matrix
+
+| Area | Current New Frontend State | Old Project Signal | Gap Type | Suggested Phase |
+| --- | --- | --- | --- | --- |
+| API definition workbench | Structure is aligned: rail, list, editor tab, command row, request content tabs, response shell. | `ms-like-layout`, `ms-like-sidebar`, `ms-like-main`, `ms-like-tab-strip`, `ms-like-request-row`. | Visual | Phase 3M for response shell, Phase 3O for top IA/list rail polish. |
+| Request parameters | Advanced parameter table, batch add, enable/disable, clear empty rows are implemented. | `ms-like-param-table-grid`, drag handle cells, stable 44px-ish row density. | Interaction | Later optional phase for drag handle shell or real drag sorting. |
+| Response panel | Shared `ApiRunResultPanel` displays summary, tabs, response, assertions, processors, steps, raw result. | `ms-like-response-shell` with header, metrics, response tabs, content panel, and richer empty state. | Visual | Phase 3M. |
+| Cases tab | Existing case management widget is embedded and denser than before. | Old project uses table density plus `ApiCaseDrawer` with detail/run history/change history tabs and response shell. | Visual + Interaction | Phase 3N. |
+| Scenario list/module rail | Scenario workbench shell exists; right property panel and step editor are refined. | `scenario-editor-tab-strip`, `ms-scenario-table`, `scenario-module-pane`, `scenario-property-card`. | Visual | Phase 3O. |
+| Scenario steps | Step tree is compact with order marker, type rail, hover actions, nested indentation. | `scenario-step-tree`, `scenario-step-node`, hover-only actions, inline edit affordances. | Visual + Interaction | Phase 3O, then optional selected-step inspector phase. |
+| Scenario run/history | Latest run result and history shells are in workbench tabs. | Old project has richer response shells for scenario step/system/custom/script result panels. | Visual + Contract | Phase 3M for result shell; persistent history only after confirmed contract. |
+| Dialogs/drawers | Batch drawer has been tuned; create/edit dialogs and case/scenario drawers are mixed. | Old project drawer/dialog bodies use fixed title bars, footer rhythm, and dense request sections. | Visual | Later Phase 3P. |
+| Narrow viewport | Existing smoke checks document-level horizontal overflow. | Old project has responsive overrides around `ms-like-layout`, sidebar, request row, scenario config body. | Visual | Later responsive audit phase. |
+
+## Phase 3L Recommended Follow-Up Order
+
+1. Phase 3M: response shell parity.
+   - Align `ApiRunResultPanel` with the old `ms-like-response-shell` hierarchy.
+   - Scope: header, metrics, tabs, empty state, body/content panel density.
+   - Do not change run contracts.
+
+2. Phase 3N: case drawer and case management parity.
+   - Align API case list/detail/run-history/change-history surfaces with old `ApiCaseDrawer`.
+   - Scope: drawer shell, view tabs, history list/detail split, response shell reuse.
+   - Only use confirmed existing case contracts.
+
+3. Phase 3O: scenario rail/list/step inspector polish.
+   - Align scenario module rail and scenario list table density.
+   - Improve step tree inline affordances and evaluate selected-step inspector as a separate UI shell.
+   - Do not add drag sorting unless separately scoped.
+
+4. Phase 3P: dialog/drawer consistency pass.
+   - Normalize create/edit dialog sizing, drawer title/footer rhythm, and dense form rows across API Automation.
+   - Keep this separate from response/case/scenario work.
+
+5. Phase 3Q: narrow viewport visual audit.
+   - Go beyond document overflow checks and inspect desktop-narrow/mobile layouts.
+   - Decide whether API Automation should be responsive or intentionally desktop-first with controlled horizontal scroll.
 
 ## Phase 3K Scenario Editor Alignment Notes
 
@@ -105,6 +154,11 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Initial unauthenticated `GET /api/auth/me` returns `401` during smoke before login; this is expected, but logs should continue to make that clear.
 - Screenshot comparison is still manual by screenshot paths, not automated pixel diff.
 - Old project visual comparison is not automated.
+- Phase 3L did not add page implementation. It uses existing latest screenshots:
+  - `output/playwright/api-automation-phase3b-20260607125353.png`;
+  - `output/playwright/api-automation-phase3h-editor-20260607125353.png`;
+  - `output/playwright/api-automation-phase3k-scenario-20260607125353.png`;
+  - `output/playwright/api-scenario-if-loop-20260607125534.png`.
 
 ## Suggested Next Phases
 
@@ -132,7 +186,10 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 8. Phase 3K: scenario editor visual detail alignment.
    - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3k.md`.
 
-9. Build optimization phase.
+9. Phase 3L: overall closure audit.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3l.md`.
+
+10. Build optimization phase.
    - Split vendor chunks or manual chunks.
    - Keep this separate from page alignment work.
 
