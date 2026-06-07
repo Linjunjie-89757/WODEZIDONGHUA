@@ -16,6 +16,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Phase 3H: request editor batch add and parameter table interaction closure is complete.
 - Phase 3I: request parameter table component extraction is complete.
 - Phase 3J: request editor detail visual alignment is complete.
+- Phase 3K: scenario editor visual detail alignment is complete.
 - Old project reference files are available under `reference/old-auto` for local comparison only.
 - `reference/` is intentionally untracked and should not be committed.
 
@@ -25,7 +26,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Current alignment is structural and workflow-level, not exact spacing/color/component parity.
 - Need a later visual precision phase for:
   - top information architecture;
-  - scenario editor density;
+  - scenario editor pixel-level parity;
   - dialog sizing outside the batch-add drawer;
   - toolbar button hierarchy;
   - non-parameter table/list row height;
@@ -57,7 +58,7 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 ## Step Editor Backlog
 
 - Step editing supports existing basic and advanced controller phases, but visual precision is not final.
-- Step hierarchy is functional, but not yet old-project exact.
+- Step hierarchy is now closer to the old project tree density with step order, type color rail, hover actions, and nested indentation, but not yet pixel-level exact.
 - Sorting uses up/down buttons; drag sorting is not implemented.
 - Advanced controller nested-rule expansion is not implemented.
 - Step group visual treatment can be closer to old project.
@@ -80,6 +81,22 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 - Embedded cases reuse the existing case management widget and are closer in density, but not yet old-project exact.
 - Parameter table rendering is now centralized in `ApiRequestParamTable.vue`.
 - Parameter table columns, row density, tool strip, and batch drawer are closer to the old project workbench style.
+
+## Phase 3K Scenario Editor Alignment Notes
+
+- Scenario workbench editor tab now uses a tighter old-project-like shell:
+  - flat editor tab strip;
+  - zero-padding main editor area;
+  - compact detail tabs;
+  - right inspector-style property panel with header, grouped fields, stats, and action footer.
+- Scenario step editor now uses:
+  - compact 48px rows;
+  - left step order marker;
+  - colored step-type rail;
+  - hover/focus action visibility;
+  - tighter nested-step indentation.
+- Latest-run history table now uses tighter columns and row height.
+- Scenario detail drawer step tree uses matching type badges and color rail so detail/read-only view does not drift away from editor styling.
 
 ## Validation And Tooling Backlog
 
@@ -112,7 +129,10 @@ This file tracks known follow-up work after API Automation page alignment Phase 
 7. Phase 3J: request editor detail visual alignment.
    - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3j.md`.
 
-8. Build optimization phase.
+8. Phase 3K: scenario editor visual detail alignment.
+   - Complete. See `docs/smoke/2026-06-07-api-automation-page-alignment-phase3k.md`.
+
+9. Build optimization phase.
    - Split vendor chunks or manual chunks.
    - Keep this separate from page alignment work.
 

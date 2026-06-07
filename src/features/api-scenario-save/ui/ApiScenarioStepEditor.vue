@@ -40,12 +40,16 @@
     <article
       v-for="(step, index) in steps"
       :key="step.id || index"
-      class="api-scenario-step-editor__row"
+      :class="[
+        'api-scenario-step-editor__row',
+        `api-scenario-step-editor__row--${displayStepType(step).toLowerCase().replaceAll('_', '-')}`
+      ]"
       data-testid="api-scenario-step-row"
       :data-depth="depth"
       :data-step-type="displayStepType(step)"
     >
       <div class="api-scenario-step-editor__head">
+        <span class="api-scenario-step-editor__order">{{ index + 1 }}</span>
         <a-select
           :model-value="displayStepType(step)"
           data-testid="api-scenario-step-type-select"
@@ -90,7 +94,7 @@
         </div>
       </div>
 
-      <a-grid :cols="{ xs: 1, md: 2 }" :col-gap="12" :row-gap="12">
+      <a-grid class="api-scenario-step-editor__config-grid" :cols="{ xs: 1, md: 2 }" :col-gap="10" :row-gap="8">
         <a-grid-item v-if="step.stepType === 'API'">
           <a-select
             :model-value="step.definitionId || undefined"
@@ -450,7 +454,7 @@ function isChildContainerType(type: ApiScenarioStepType) {
 .api-scenario-step-editor__row,
 .api-scenario-step-editor__children {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -474,30 +478,82 @@ function isChildContainerType(type: ApiScenarioStepType) {
 }
 
 .api-scenario-step-editor__toolbar {
+  min-height: 42px;
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm);
-  background: #f8fafc;
-  padding: 7px 9px;
+  background: #f9fafb;
+  padding: 6px 10px;
 }
 
 .api-scenario-step-editor__toolbar h3 {
   margin: 0;
-  font-size: 14px;
+  color: var(--app-color-text-muted);
+  font-size: 13px;
   font-weight: 650;
 }
 
 .api-scenario-step-editor__row,
 .api-scenario-step-editor__empty {
   border: 1px solid var(--app-color-border);
-  border-radius: var(--app-radius-sm);
+  border-radius: 0;
   background: var(--app-color-surface);
-  padding: 8px;
+  padding: 0;
+}
+
+.api-scenario-step-editor__row {
+  position: relative;
+  overflow: hidden;
+  border-color: #f0f1f4;
+}
+
+.api-scenario-step-editor__row + .api-scenario-step-editor__row {
+  margin-top: -1px;
+}
+
+.api-scenario-step-editor__row:hover {
+  z-index: 1;
+  border-color: #bfdbfe;
+  background: #fbfdff;
+}
+
+.api-scenario-step-editor__row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: #93c5fd;
+}
+
+.api-scenario-step-editor__row--if-controller::before {
+  background: #ec4899;
+}
+
+.api-scenario-step-editor__row--loop-controller::before,
+.api-scenario-step-editor__row--once-only-controller::before {
+  background: #f97316;
+}
+
+.api-scenario-step-editor__row--constant-timer::before {
+  background: #f59e0b;
+}
+
+.api-scenario-step-editor__row--script::before {
+  background: #14b8a6;
+}
+
+.api-scenario-step-editor__row--group::before {
+  background: #64748b;
 }
 
 .api-scenario-step-editor__head {
   display: grid;
-  grid-template-columns: 150px minmax(160px, 1fr) auto;
+  grid-template-columns: 28px 138px minmax(160px, 1fr) auto;
   align-items: center;
+  min-height: 48px;
+  gap: 8px;
+  padding: 7px 10px 7px 12px;
 }
 
 .api-scenario-step-editor__row[data-depth='1'] {
@@ -510,20 +566,40 @@ function isChildContainerType(type: ApiScenarioStepType) {
 }
 
 .api-scenario-step-editor__children {
-  border-left: 2px solid rgba(var(--primary-6), 0.28);
-  margin-left: 6px;
-  padding: 6px 0 0 10px;
+  position: relative;
+  border-left: 2px solid rgba(var(--primary-6), 0.22);
+  margin: 0 10px 10px 24px;
+  padding: 8px 0 0 10px;
 }
 
 .api-scenario-step-editor__children > header {
+  min-height: 30px;
   color: var(--app-color-text-muted);
   font-size: 12px;
+}
+
+.api-scenario-step-editor__order {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.api-scenario-step-editor__config-grid {
+  padding: 0 10px 10px 40px;
 }
 
 .api-scenario-step-editor :deep(.arco-select-view-single),
 .api-scenario-step-editor :deep(.arco-input-wrapper),
 .api-scenario-step-editor :deep(.arco-input-number) {
   min-height: 30px;
+  border-radius: 6px;
 }
 
 .api-scenario-step-editor__actions :deep(.arco-btn),
@@ -533,8 +609,25 @@ function isChildContainerType(type: ApiScenarioStepType) {
   padding: 0 6px;
 }
 
+.api-scenario-step-editor__actions {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.api-scenario-step-editor__row:hover .api-scenario-step-editor__actions,
+.api-scenario-step-editor__row:focus-within .api-scenario-step-editor__actions {
+  opacity: 1;
+}
+
 .api-scenario-step-editor__empty {
+  min-height: 38px;
+  align-content: center;
+  border-style: dashed;
+  border-color: #93c5fd;
+  background: #fbfdff;
   color: var(--app-color-text-muted);
+  padding: 10px;
+  text-align: center;
 }
 
 @media (max-width: 860px) {
@@ -543,6 +636,14 @@ function isChildContainerType(type: ApiScenarioStepType) {
   .api-scenario-step-editor__children header {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .api-scenario-step-editor__actions {
+    opacity: 1;
+  }
+
+  .api-scenario-step-editor__config-grid {
+    padding-left: 10px;
   }
 }
 </style>

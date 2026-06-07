@@ -10,8 +10,10 @@ const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
 const definitionName = `smoke-api-definition-${stamp}`;
 const editedDefinitionName = `${definitionName}-edited`;
 const caseName = `smoke-api-case-${stamp}`;
+const scenarioName = `smoke-api-scenario-visual-${stamp}`;
 const screenshotPath = `output/playwright/api-automation-phase3b-${stamp}.png`;
 const detailScreenshotPath = `output/playwright/api-automation-phase3h-editor-${stamp}.png`;
+const scenarioScreenshotPath = `output/playwright/api-automation-phase3k-scenario-${stamp}.png`;
 const smokeRequestUrl = 'http://localhost:8080/api/auth/me';
 
 const browser = await chromium.launch({ headless: true });
@@ -74,6 +76,14 @@ function inputByTestId(testId) {
 
 async function clickRequestContentTab(index) {
   await page.getByTestId('api-definition-content-tabs').locator('.arco-tabs-tab').nth(index).click();
+}
+
+async function openWorkbenchTab(label) {
+  await page
+    .getByTestId('api-automation-workbench-tabs')
+    .locator('> .arco-tabs-nav .arco-tabs-tab-title')
+    .filter({ hasText: label })
+    .click();
 }
 
 async function assertRequestEditorShell() {
@@ -308,6 +318,17 @@ async function cleanupSmokeCasesByApi() {
   }
 }
 
+async function cleanupSmokeScenariosByApi() {
+  const payload = await apiFetch('/automation/api/scenarios');
+  const scenarios = pageItems(payload).filter((item) =>
+    String(item.name || '').startsWith('smoke-api-scenario-visual-')
+  );
+
+  for (const item of scenarios) {
+    await apiFetch(`/automation/api/scenarios/${item.id}`, { method: 'DELETE' }).catch(() => undefined);
+  }
+}
+
 async function fillDefinitionForm(name, path) {
   await inputByTestId('api-definition-name-input').fill(name);
   await page.getByTestId('api-definition-method-select').click();
@@ -353,6 +374,115 @@ async function createDefinition() {
   await fillAssertionConfig();
   await clickVisibleModalPrimaryButton();
   await page.getByText(definitionName).waitFor({ timeout: 15000 });
+}
+
+async function createVisualScenarioByApi() {
+  const response = await apiFetch('/automation/api/scenarios', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Workspace-Code': 'account-open'
+    },
+    body: JSON.stringify({
+      workspaceCode: 'account-open',
+      name: scenarioName,
+      description: 'Phase 3K visual alignment smoke scenario',
+      status: 'ACTIVE',
+      environmentId: null,
+      variableSetId: null,
+      scenarioVariables: [],
+      scenarioAssertions: [],
+      steps: [
+        {
+          id: `visual-step-${stamp}`,
+          stepName: 'Phase 3K custom request',
+          stepType: 'CUSTOM_REQUEST',
+          resourceType: 'CUSTOM',
+          resourceId: null,
+          resource: smokeRequestUrl,
+          enabled: true,
+          requestConfig: {
+            method: 'GET',
+            path: smokeRequestUrl,
+            queryParams: [],
+            headers: [],
+            body: {
+              type: 'NONE',
+              raw: '',
+              formItems: []
+            }
+          },
+          children: []
+        },
+        {
+          id: `visual-once-${stamp}`,
+          stepName: 'Phase 3K controller group',
+          stepType: 'ONCE_ONLY_CONTROLLER',
+          resourceType: null,
+          resourceId: null,
+          enabled: true,
+          requestConfig: null,
+          children: [
+            {
+              id: `visual-wait-${stamp}`,
+              stepName: 'Phase 3K wait',
+              stepType: 'CONSTANT_TIMER',
+              resourceType: null,
+              resourceId: null,
+              enabled: true,
+              delayMs: 10,
+              requestConfig: null,
+              children: []
+            }
+          ]
+        }
+      ]
+    })
+  });
+
+  const created = response?.data || response;
+  return created?.id || null;
+}
+
+async function assertScenarioWorkbenchVisualShell() {
+  await cleanupSmokeScenariosByApi();
+  await createVisualScenarioByApi();
+  await openWorkbenchTab('场景');
+  await page.getByTestId('api-scenario-management').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-retry').click();
+  await page.waitForResponse((response) =>
+    response.url().includes('/api/automation/api/scenarios') &&
+    response.request().method() === 'GET' &&
+    response.status() >= 200 &&
+    response.status() < 300
+  );
+  await page.getByTestId('api-scenario-workbench').waitFor({ timeout: 15000 });
+  await page.getByText(scenarioName).waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-row').filter({ hasText: scenarioName }).first().getByTestId('api-scenario-edit').click();
+  await page.getByTestId('api-scenario-editor-workspace').waitFor({ timeout: 15000 });
+  const scenarioWorkspace = page.getByTestId('api-scenario-editor-workspace');
+  await scenarioWorkspace.getByTestId('api-scenario-step-editor').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-property-panel').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-property-run-context').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-property-step-stats').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-property-actions').waitFor({ timeout: 15000 });
+  await scenarioWorkspace.getByTestId('api-scenario-step-row').first().waitFor({ timeout: 15000 });
+  await scenarioWorkspace.locator('[data-testid="api-scenario-step-row"][data-step-type="ONCE_ONLY_CONTROLLER"]').first().waitFor({ timeout: 15000 });
+  await scenarioWorkspace.locator('[data-testid="api-scenario-step-row"][data-step-type="CONSTANT_TIMER"]').first().waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-history-tab').click();
+  await page.getByTestId('api-scenario-workbench-history').waitFor({ timeout: 15000 });
+  await page.getByTestId('api-scenario-result-tab').click();
+  await page.getByTestId('api-scenario-workbench-run-result').waitFor({ timeout: 15000 });
+
+  const scenarioOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+
+  if (scenarioOverflow) {
+    throw new Error('API automation scenario workbench has horizontal overflow.');
+  }
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: scenarioScreenshotPath, fullPage: true });
+  await cleanupSmokeScenariosByApi();
 }
 
 async function editDefinition() {
@@ -435,6 +565,8 @@ async function debugDefinition() {
 }
 
 async function deleteDefinition() {
+  await openWorkbenchTab('接口');
+  await page.getByTestId('api-definition-list').waitFor({ timeout: 15000 });
   const row = page.locator('[data-testid="api-definition-row"]').filter({ hasText: editedDefinitionName }).first();
 
   await row.getByTestId('api-definition-delete').click();
@@ -458,6 +590,7 @@ try {
   await createDefinition();
   await editDefinition();
   await debugDefinition();
+  await assertScenarioWorkbenchVisualShell();
   await deleteCreatedCase();
   await deleteDefinition();
 
@@ -524,6 +657,7 @@ try {
       editedDefinitionName,
       screenshotPath,
       detailScreenshotPath,
+      scenarioScreenshotPath,
       consoleMessages,
       pageErrors,
       requests
@@ -542,6 +676,7 @@ try {
       editedDefinitionName,
       screenshotPath,
       detailScreenshotPath,
+      scenarioScreenshotPath,
       error: error instanceof Error ? error.message : String(error),
       consoleMessages,
       pageErrors,

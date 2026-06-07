@@ -198,7 +198,10 @@
 
             <aside class="api-scenario-management__property-panel" data-testid="api-scenario-property-panel">
               <header>
-                <strong>{{ t.apiAutomation.scenarioPropertyPanel }}</strong>
+                <div>
+                  <strong>{{ t.apiAutomation.scenarioPropertyPanel }}</strong>
+                  <small>{{ editingScenarioForm?.name || t.apiAutomation.scenarioEditTitle }}</small>
+                </div>
                 <span>{{ editingScenarioId || '-' }}</span>
               </header>
               <template v-if="editingScenarioForm">
@@ -279,7 +282,7 @@
                   </div>
                 </section>
 
-                <div class="api-scenario-management__property-actions">
+                <div class="api-scenario-management__property-actions" data-testid="api-scenario-property-actions">
                   <AppButton
                     type="primary"
                     :loading="saving"
@@ -520,10 +523,10 @@ const ScenarioStepNode = defineComponent({
     }
 
     return () =>
-      h('article', { class: 'api-scenario-management__step' }, [
+      h('article', { class: ['api-scenario-management__step', `api-scenario-management__step--${String(stepProps.step.stepType || 'unknown').toLowerCase().replaceAll('_', '-')}`] }, [
         h('div', { class: 'api-scenario-management__step-main' }, [
-          h('strong', stepProps.step.name || typeLabel(stepProps.step.stepType)),
-          h('small', typeLabel(stepProps.step.stepType))
+          h('span', { class: 'api-scenario-management__step-type' }, typeLabel(stepProps.step.stepType)),
+          h('strong', stepProps.step.name || typeLabel(stepProps.step.stepType))
         ]),
         stepProps.step.children?.length
           ? h(
@@ -625,7 +628,7 @@ const ScenarioStepNode = defineComponent({
   align-items: center;
   min-width: 0;
   border-bottom: 1px solid var(--app-color-border);
-  background: #f8fafc;
+  background: #f9fafb;
 }
 
 .api-scenario-management__editor-tab,
@@ -633,7 +636,7 @@ const ScenarioStepNode = defineComponent({
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 38px;
+  height: 36px;
   min-width: 0;
   border: 0;
   border-right: 1px solid var(--app-color-border);
@@ -641,7 +644,7 @@ const ScenarioStepNode = defineComponent({
   color: var(--app-color-text-muted);
   cursor: pointer;
   font-size: 13px;
-  padding: 0 12px;
+  padding: 0 11px;
 }
 
 .api-scenario-management__editor-tab {
@@ -673,7 +676,7 @@ const ScenarioStepNode = defineComponent({
 
 .api-scenario-management__list-workspace {
   min-width: 0;
-  padding: 10px;
+  padding: 8px;
 }
 
 .api-scenario-management__list-toolbar {
@@ -690,29 +693,41 @@ const ScenarioStepNode = defineComponent({
 
 .api-scenario-management__editor-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   min-width: 0;
   min-height: 620px;
+  background: #ffffff;
 }
 
 .api-scenario-management__editor-main {
   min-width: 0;
   border-right: 1px solid var(--app-color-border);
-  padding: 10px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .api-scenario-management__detail-tabs :deep(.arco-tabs-nav) {
   margin: 0;
+  padding: 0 12px;
+  background: #f9fafb;
 }
 
 .api-scenario-management__detail-tabs :deep(.arco-tabs-tab) {
-  height: 36px;
+  height: 40px;
   margin: 0;
-  padding: 0 12px;
+  padding: 0 10px;
+  color: var(--app-color-text-muted);
+  font-size: 13px;
+}
+
+.api-scenario-management__detail-tabs :deep(.arco-tabs-tab-active) {
+  color: var(--app-color-text);
+  font-weight: 650;
 }
 
 .api-scenario-management__detail-tabs :deep(.arco-tabs-content) {
-  padding-top: 10px;
+  padding: 10px 12px 12px;
+  background: #ffffff;
 }
 
 .api-scenario-management__editor-placeholder {
@@ -732,18 +747,19 @@ const ScenarioStepNode = defineComponent({
 .api-scenario-management__property-panel {
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 0;
   min-width: 0;
-  background: #fbfcfe;
-  padding: 12px;
+  background: #f9fafb;
+  overflow-y: auto;
+  padding: 0;
 }
 
 .api-scenario-management__property-section {
   display: grid;
-  gap: 8px;
+  gap: 9px;
   min-width: 0;
   border-bottom: 1px solid var(--app-color-border);
-  padding-bottom: 10px;
+  padding: 12px;
 }
 
 .api-scenario-management__property-section h5 {
@@ -755,11 +771,18 @@ const ScenarioStepNode = defineComponent({
 
 .api-scenario-management__property-panel header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
   border-bottom: 1px solid var(--app-color-border);
-  padding-bottom: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.api-scenario-management__property-panel header div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
 }
 
 .api-scenario-management__property-panel header strong {
@@ -767,10 +790,27 @@ const ScenarioStepNode = defineComponent({
   font-size: 14px;
 }
 
+.api-scenario-management__property-panel header small {
+  overflow: hidden;
+  color: var(--app-color-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .api-scenario-management__property-panel header span,
 .api-scenario-management__property-panel label span {
   color: var(--app-color-text-muted);
   font-size: 12px;
+}
+
+.api-scenario-management__property-panel :deep(.arco-input-wrapper),
+.api-scenario-management__property-panel :deep(.arco-select-view-single),
+.api-scenario-management__property-panel :deep(.arco-textarea-wrapper) {
+  min-height: 32px;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
 .api-scenario-management__property-panel label {
@@ -782,7 +822,7 @@ const ScenarioStepNode = defineComponent({
 .api-scenario-management__stat-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -795,7 +835,7 @@ const ScenarioStepNode = defineComponent({
   background: #ffffff;
   color: var(--app-color-text-muted);
   font-size: 12px;
-  padding: 7px 8px;
+  padding: 6px 8px;
 }
 
 .api-scenario-management__stat-grid strong {
@@ -811,6 +851,9 @@ const ScenarioStepNode = defineComponent({
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  border-top: 1px solid var(--app-color-border);
+  background: #ffffff;
+  padding: 12px;
 }
 
 .api-scenario-management__run-result,
@@ -831,7 +874,7 @@ const ScenarioStepNode = defineComponent({
 .api-scenario-management__history-head,
 .api-scenario-management__history-row {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 110px 110px;
+  grid-template-columns: 48px minmax(0, 1fr) 104px 104px;
   gap: 8px;
   align-items: center;
   min-width: 0;
@@ -850,6 +893,7 @@ const ScenarioStepNode = defineComponent({
   background: #ffffff;
   color: var(--app-color-text-muted);
   font-size: 12px;
+  min-height: 44px;
 }
 
 .api-scenario-management__history-row strong {
@@ -895,13 +939,19 @@ const ScenarioStepNode = defineComponent({
   color: var(--app-color-text-muted);
   font-size: 12px;
   font-weight: 600;
+  min-height: 40px;
   padding: 7px 10px;
 }
 
 .api-scenario-management__row {
   border-top: 1px solid var(--app-color-border);
   background: var(--app-color-surface);
+  min-height: 46px;
   padding: 8px 10px;
+}
+
+.api-scenario-management__row:hover {
+  background: #fbfdff;
 }
 
 .api-scenario-management__row-main {
@@ -922,15 +972,48 @@ const ScenarioStepNode = defineComponent({
 }
 
 .api-scenario-management__step {
+  position: relative;
   display: grid;
   gap: 6px;
-  padding: 8px 10px;
+  overflow: hidden;
+  padding: 8px 10px 8px 13px;
+}
+
+.api-scenario-management__step::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: #93c5fd;
+}
+
+.api-scenario-management__step--if-controller::before {
+  background: #ec4899;
+}
+
+.api-scenario-management__step--loop-controller::before,
+.api-scenario-management__step--once-only-controller::before {
+  background: #f97316;
+}
+
+.api-scenario-management__step--constant-timer::before {
+  background: #f59e0b;
+}
+
+.api-scenario-management__step--script::before {
+  background: #14b8a6;
+}
+
+.api-scenario-management__step--group::before {
+  background: #64748b;
 }
 
 .api-scenario-management__step-main {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--app-spacing-sm);
   min-width: 0;
 }
@@ -939,6 +1022,20 @@ const ScenarioStepNode = defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.api-scenario-management__step-type {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 22px;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: rgb(var(--primary-6));
+  font-size: 12px;
+  line-height: 20px;
+  padding: 0 7px;
 }
 
 .api-scenario-management__step-children {
